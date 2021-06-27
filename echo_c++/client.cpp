@@ -4,13 +4,22 @@
 #include <brpc/channel.h>
 #include "echo.pb.h"
 
+#include "util/sys_helper.h"
+#include "util/base64.h"
 
 
-DEFINE_string(attachment, "", "Carry this along with requests");
-DEFINE_string(protocol, "baidu_std", "Protocol type. Defined in src/brpc/options.proto");
-DEFINE_string(connection_type, "", "Connection type. Available values: single, pooled, short");
+#include <nlohmann/json.hpp>
+
+
+
+
+DEFINE_string(service_name, "test-register", "default service name");
+DEFINE_string(service_port, "9527", "default service port");
+
+
+DEFINE_string(etcd_addr, "172.26.15.113:2379", "default address of etcd");
 DEFINE_int32(timeout_ms, 100, "RPC timeout in milliseconds");
-DEFINE_int32(max_retry, 3, "Max retries(not including the first RPC)"); 
+DEFINE_int32(max_retry, 1, "Max retries(not including the first RPC)"); 
 DEFINE_int32(interval_ms, 1000, "Milliseconds between consecutive requests");
 
 int main(int argc, char* argv[]) {
@@ -20,35 +29,38 @@ int main(int argc, char* argv[]) {
     // A Channel represents a communication line to a Server. Notice that 
     // Channel is thread-safe and can be shared by all threads in your program.
     brpc::Channel channel;
-    static const char* ip = "172.30.146.135";
-    const uint32_t port = 2379;
-    const std::string url = "http://" + std::string(ip) + ":" + std::to_string(port);
+    const std::string url = "http://" + FLAGS_etcd_addr;
     const std::string interface = "/v3/kv/range";
     
     brpc::ChannelOptions options;
     options.protocol = brpc::PROTOCOL_HTTP;  // or brpc::PROTOCOL_H2
     if (channel.Init(url.c_str() /*any url*/, &options) != 0) {
         LOG(ERROR) << "Fail to initialize channel";
-        return;
+        return 1;
     }
 
     brpc::Controller cntl;
     cntl.http_request().uri() = url + interface;  // 设置为待访问的URL
     cntl.http_request().set_method(brpc::HTTP_METHOD_POST);
-    cntl.request_attachment().append("{\"key\":\"Zm9v\"}");
+    nlohmann::json addr;
+    
+    addr["key"] = sys::base64_encode(FLAGS_service_name);
+    char ip[16];
+    if (0 == sys::get_local_ip("eth0", ip)) {
+        addr["value"] = sys::base64_encode(std::string(ip) + ":" + FLAGS_service_port);
+    }
+    cntl.request_attachment().append(addr.dump());
     
     LOG(INFO) << "uri:" << cntl.http_request().uri() << " " << cntl.request_attachment().to_string();
     channel.CallMethod(NULL, &cntl, NULL, NULL, NULL/*done*/);
     if (cntl.Failed()) {
         LOG(ERROR) << "ErrorText:" << cntl.ErrorText() << cntl.remote_side();
-        return;
+        return 2;
     }
 
     auto buf = cntl.response_attachment();
     LOG(INFO) << buf.to_string();
-    return;
 
-    LOG(INFO) << "EchoClient is going to quit";
     return 0;
 }
 

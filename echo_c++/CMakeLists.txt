@@ -117,6 +117,14 @@ if(NOT TARGET spdlog)
 endif()
 
 
+# for 3rd libraries
+find_package(nlohmann_json 3.2.0 REQUIRED)
+
+# for self libraries
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
+file(GLOB utilfiles ${CMAKE_CURRENT_SOURCE_DIR}/../util/*.cpp)
+add_library(util ${utilfiles})
+
 set(DYNAMIC_LIB
     ${CMAKE_THREAD_LIBS_INIT}
     ${GFLAGS_LIBRARY}
@@ -143,8 +151,9 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         "-Wl,-U,_ProfilerStop")
 endif()
 
+
 add_executable(echo_client client.cpp ${PROTO_SRC} ${PROTO_HEADER})
 add_executable(echo_server server.cpp ${PROTO_SRC} ${PROTO_HEADER})
 
-target_link_libraries(echo_client ${BRPC_LIB} ${DYNAMIC_LIB})
+target_link_libraries(echo_client ${BRPC_LIB} ${DYNAMIC_LIB} nlohmann_json::nlohmann_json util)
 target_link_libraries(echo_server ${BRPC_LIB} ${DYNAMIC_LIB} spdlog::spdlog)
