@@ -152,8 +152,8 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 endif()
 
 
-add_executable(echo_client client.cpp ${PROTO_SRC} ${PROTO_HEADER})
-add_executable(echo_server server.cpp ${PROTO_SRC} ${PROTO_HEADER})
+add_executable(echo_client client.cpp etcd_client.cpp ${PROTO_SRC} ${PROTO_HEADER})
+add_executable(echo_server server.cpp etcd_client.cpp ${PROTO_SRC} ${PROTO_HEADER})
 
 target_link_libraries(echo_client ${BRPC_LIB} ${DYNAMIC_LIB} nlohmann_json::nlohmann_json util)
-target_link_libraries(echo_server ${BRPC_LIB} ${DYNAMIC_LIB} spdlog::spdlog)
+target_link_libraries(echo_server ${BRPC_LIB} ${DYNAMIC_LIB} nlohmann_json::nlohmann_json util)
