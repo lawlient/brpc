@@ -21,6 +21,9 @@
 #include <butil/logging.h>
 #include <brpc/server.h>
 #include "echo.pb.h"
+#include <string>
+
+#include "xlog.h"
 
 DEFINE_bool(echo_attachment, true, "Echo attachment as well");
 DEFINE_int32(port, 8000, "TCP Port of this server");
@@ -29,6 +32,8 @@ DEFINE_int32(idle_timeout_s, -1, "Connection will be closed if there is no "
 DEFINE_int32(logoff_ms, 2000, "Maximum duration of server's LOGOFF state "
              "(waiting for client to close connection before server stops)");
 
+static const std::string g_logger = "basic_logger";
+static std::string g_log_file_name = "/data/log/";
 // Your implementation of example::EchoService
 // Notice that implementing brpc::Describable grants the ability to put
 // additional information in /status.
@@ -51,14 +56,19 @@ public:
         // The purpose of following logs is to help you to understand
         // how clients interact with servers more intuitively. You should 
         // remove these logs in performance-sensitive servers.
-        LOG(INFO) << "Received request[log_id=" << cntl->log_id() 
+        std::ostringstream oss;
+        oss << "Received request[log_id=" << cntl->log_id() 
                   << "] from " << cntl->remote_side() 
                   << " to " << cntl->local_side()
                   << ": " << request->message()
                   << " (attached=" << cntl->request_attachment() << ")";
 
+        LOG(INFO) << oss.str();
+
         // Fill response.
-        response->set_message(request->message());
+        auto origin = request->message();
+        for (auto& c : origin) c = std::toupper(c);
+        response->set_message(origin);
 
         // You can compress the response by setting Controller, but be aware
         // that compression may be costly, evaluate before turning on.
@@ -73,9 +83,24 @@ public:
 };
 }  // namespace example
 
+void init_spdlog() {
+    try {
+        auto logger = spdlog::basic_logger_mt(g_logger, g_log_file_name);
+        spdlog::set_default_logger(logger);
+        spdlog::flush_every(std::chrono::seconds(1));
+    }
+    catch (const spdlog::spdlog_ex &ex) {
+        std::cout << "Log init failed: " << ex.what() << std::endl;
+        exit(1);
+    }
+}
+
 int main(int argc, char* argv[]) {
     // Parse gflags. We recommend you to use gflags as well.
     GFLAGS_NS::ParseCommandLineFlags(&argc, &argv, true);
+    g_log_file_name += std::string(argv[0]) + ".log";
+    /// init_spdlog();
+    initXlog(g_log_file_name);
 
     // Generally you only need one Server.
     brpc::Server server;
@@ -86,8 +111,7 @@ int main(int argc, char* argv[]) {
     // Add the service into server. Notice the second parameter, because the
     // service is put on stack, we don't want server to delete it, otherwise
     // use brpc::SERVER_OWNS_SERVICE.
-    if (server.AddService(&echo_service_impl, 
-                          brpc::SERVER_DOESNT_OWN_SERVICE) != 0) {
+    if (server.AddService(&echo_service_impl, brpc::SERVER_DOESNT_OWN_SERVICE) != 0) {
         LOG(ERROR) << "Fail to add service";
         return -1;
     }
