@@ -1,0 +1,10 @@
+syntax="proto3";
+package basis.text_config;
+
+
+
+
+message {
+    string name         =   1;
+    uint16 port         =   2;
+};
