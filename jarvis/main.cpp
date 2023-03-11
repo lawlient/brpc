@@ -23,6 +23,7 @@
 #include "jarvis.h"
 #include "mysql.h"
 
+#include <config/config.h>
 
 #include <butil/logging.h>
 #include <brpc/server.h>
@@ -44,11 +45,18 @@ int main(int argc, char* argv[]) {
     // Parse gflags. We recommend you to use gflags as well.
     GFLAGS_NS::ParseCommandLineFlags(&argc, &argv, true);
 
+    auto* cfg = basis::text_config::TextConfig::GetInstance();
+    if (!cfg->Init()) {
+        LOG(ERROR) << "init server config fail";
+        return false;
+    }
+    const auto& mysql_config = cfg->cfg().mysql();
+
     MysqlOption mysql_option;
-    mysql_option.url    = "wsl:3306";
-    mysql_option.user   = "root";
-    mysql_option.passwd = "xja";
-    mysql_option.schema = "X";
+    mysql_option.url    = mysql_config.url();
+    mysql_option.user   = mysql_config.user();
+    mysql_option.passwd = mysql_config.passwd();
+    mysql_option.schema = mysql_config.schema();
     mysql_instance = std::make_shared<MysqlWrapper>(mysql_option);
 
     // Generally you only need one Server.

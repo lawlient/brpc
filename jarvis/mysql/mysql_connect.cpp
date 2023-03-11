@@ -1,5 +1,6 @@
 #include "mysql.h"
 
+#include <brpc/server.h>
 #include <gflags/gflags.h>
 
 
@@ -11,8 +12,10 @@ MysqlWrapper::MysqlWrapper(const MysqlOption& option) : m_option(option)
 { 
     m_driver = get_driver_instance();
     /* Create a connection */
+    LOG(INFO) << "url:" << option.url << " user:" << option.user;
     m_conn = m_driver->connect(option.url, option.user, option.passwd);
     if (!m_conn) {
+        LOG(ERROR) << "url:" << option.url << " user:" << option.user;
         m_initialized = false;
         return;
     }

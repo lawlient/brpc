@@ -18,6 +18,10 @@
 cmake_minimum_required(VERSION 3.22)
 project(jarvis CXX)
 
+set(COMMON ${CMAKE_CURRENT_LIST_DIR}/../common)
+include(${COMMON}/common.cmake)
+include_directories(${COMMON})
+
 option(LINK_SO "Whether examples are linked dynamically" OFF)
 
 execute_process(
@@ -31,8 +35,14 @@ set(install_prefix "/data/services/jarvis/bin")
 
 include(FindThreads)
 include(FindProtobuf)
-protobuf_generate_cpp(TABLE_SRC TABLE_HEADER ./proto/table.proto)
-protobuf_generate_cpp(JARVIS_SRC JARVIS_HEADER ./proto/jarvis.proto)
+
+file(GLOB protobuf_files
+    "${CMAKE_CURRENT_SOURCE_DIR}/proto/*.proto"
+    "${COMMON}/proto/*.proto"
+)
+protobuf_generate_cpp(PB_SRCS PB_HDRS ${protobuf_files})
+
+
 #include PROTO_HEADER
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 message(STATUS "This is BINARY dir " ${CMAKE_CURRENT_BINARY_DIR})
@@ -152,7 +162,7 @@ aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src SRC)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/mysql)
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/mysql MYSQLSRC)
 
-add_executable(${bin} main.cpp ${TABLE_SRC} ${TABLE_HEADER} ${JARVIS_SRC} ${PROTJARVISO_HEADER} ${SRC} ${MYSQLSRC})
+add_executable(${bin} main.cpp ${PB_SRCS} ${PB_HDRS} ${TABLE_SRC} ${TABLE_HEADER} ${JARVIS_SRC} ${PROTJARVISO_HEADER} ${SRC} ${MYSQLSRC} ${COMMON_SRC})
 
 target_link_libraries(${bin} ${MYSQL} ${BRPC_LIB} ${DYNAMIC_LIB})
 

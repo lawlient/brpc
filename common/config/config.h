@@ -1,26 +1,34 @@
 #pragma once
 
-namespace basis {
+#include "text_config.pb.h"
 
-#define CFG TextConfig::GetInstance();
+
+#include <google/protobuf/message.h>
+
+
+namespace basis {
+namespace text_config {
+
+
 
 
 class TextConfig {
 public:
     static TextConfig* GetInstance();
-    bool Init() const;
+    bool Init();
+
+    const Config& cfg() const;
 
 private:
     TextConfig() = default;
 
 private:
-
-
-
+    std::shared_ptr<Config> m_cfg;
 };
 
 
 
 
 
+} // namespace text_config
 } // namespace basis

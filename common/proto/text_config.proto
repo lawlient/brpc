@@ -1,0 +1,17 @@
+syntax="proto3";
+package basis.text_config;
+
+
+
+message MysqlConfig {
+    string url      = 1;
+    string user     = 3;
+    string passwd   = 4;
+    string schema   = 5;
+}
+
+message Config {
+    string name         =   1;
+    uint32 port         =   2;
+    MysqlConfig mysql   =   3;
+};
