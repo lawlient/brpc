@@ -23,6 +23,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         openssl \
         htop \
         tmux \
+        gdb \
         vim \
         less \
         ca-certificates
@@ -43,7 +44,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libsnappy-dev && \
         apt-get clean -y
 
-RUN git clone --depth=1 https://github.com/apache/brpc.git
-RUN cd brpc && sh config_brpc.sh --headers=/usr/include --libs=/usr/lib && \
+RUN git clone --depth=1 https://github.com/apache/brpc.git && \
+    cd brpc && sh config_brpc.sh --headers=/usr/include --libs=/usr/lib && \
     mkdir build && cd build && cmake .. && make -j$(nprocs) && make install && \
-    cd ../ && rm build/ -rf
+    cd ../../ && rm brpc/ -rf

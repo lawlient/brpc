@@ -24,4 +24,5 @@ message financial_response {
 service Jarvis {
     rpc TestQuery(HttpRequest) returns (HttpResponse);
     rpc AppendFinancialRecord(financial_request) returns (financial_response);
+    rpc DeleteFinancialRecord(financial_request) returns (financial_response);
 }

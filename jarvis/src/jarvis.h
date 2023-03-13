@@ -25,6 +25,11 @@ public:
                        const ::jarvis::financial_request* request,
                        ::jarvis::financial_response* response,
                        ::google::protobuf::Closure* done) override;
+
+    virtual void DeleteFinancialRecord(::google::protobuf::RpcController* controller,
+                       const ::jarvis::financial_request* request,
+                       ::jarvis::financial_response* response,
+                       ::google::protobuf::Closure* done) override;
 };
 
 

@@ -53,17 +53,20 @@ int MysqlWrapper::Parse(sql::ResultSet *res, google::protobuf::Message* msg, std
     assert(descriptor);
     assert(reflection);
 
+    try {
+
+
     while (res->next()) {
     for (int i = 0; i < descriptor->field_count(); i++) {
         const auto* field = descriptor->field(i);
         const auto& fname = field->name();
         switch(field->type()) {
-            case FieldDescriptor::Type::TYPE_DOUBLE:
+            case FieldDescriptor::Type::TYPE_DOUBLE:{ reflection->SetDouble(msg, field, res->getDouble(fname));  break; }
             case FieldDescriptor::Type::TYPE_FLOAT:  { reflection->SetFloat(msg, field, res->getDouble(fname));  break; }
-            case FieldDescriptor::Type::TYPE_INT64: 
-            case FieldDescriptor::Type::TYPE_UINT64:
-            case FieldDescriptor::Type::TYPE_INT32:
-            case FieldDescriptor::Type::TYPE_FIXED64:
+            case FieldDescriptor::Type::TYPE_INT64: { reflection->SetInt64(msg, field, res->getInt(fname));  break; }
+            case FieldDescriptor::Type::TYPE_UINT64: { reflection->SetUInt64(msg, field, res->getInt(fname));  break; }
+            case FieldDescriptor::Type::TYPE_INT32: { reflection->SetInt32(msg, field, res->getInt(fname));  break; }
+            case FieldDescriptor::Type::TYPE_FIXED64: { reflection->SetUInt32(msg, field, res->getInt(fname));  break; }
             case FieldDescriptor::Type::TYPE_FIXED32: { reflection->SetInt32(msg, field, res->getInt(fname)); break; }
             case FieldDescriptor::Type::TYPE_STRING:  { reflection->SetString(msg, field, res->getString(fname)); break; }
             default: break;
@@ -72,6 +75,9 @@ int MysqlWrapper::Parse(sql::ResultSet *res, google::protobuf::Message* msg, std
     google::protobuf::Message* nmsg = msg->New();
     nmsg->CopyFrom(*msg);
     msgs.emplace_back(nmsg);
+    }
+    } catch(std::exception& e) {
+        LOG(ERROR) << "what: " << e.what();
     }
     return 0;
 }

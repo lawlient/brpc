@@ -23,6 +23,7 @@
 #include "jarvis.h"
 #include "mysql.h"
 
+#include <log/asynclog.h>
 #include <config/config.h>
 
 #include <butil/logging.h>
@@ -50,6 +51,10 @@ int main(int argc, char* argv[]) {
         LOG(ERROR) << "init server config fail";
         return false;
     }
+
+    auto alog = basis::asynclog::AsyncLog::GetInstance();
+    if (alog) alog->Init();
+
     const auto& mysql_config = cfg->cfg().mysql();
 
     MysqlOption mysql_option;

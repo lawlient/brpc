@@ -1,5 +1,7 @@
 #include "mysql.h"
 
+#include <butil/logging.h>
+
 #include <sstream>
 
 
@@ -26,7 +28,7 @@ sql::ResultSet *MysqlWrapper::SelectAll(const google::protobuf::Message &meta,
     if (!orderby.empty()) cmd << " order by " << orderby;
     if (!groupby.empty()) cmd << " group by " << groupby;
     if (!limit.empty())   cmd << " limit " << limit;
-    // printf("%s\n", cmd.str().c_str());
+    LOG(INFO) << "cmd: " << cmd.str();
 
     std::unique_ptr<sql::Statement> stmt(m_conn->createStatement());
     return stmt->executeQuery(cmd.str());

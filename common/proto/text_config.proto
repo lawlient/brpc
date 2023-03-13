@@ -10,8 +10,16 @@ message MysqlConfig {
     string schema   = 5;
 }
 
+message LogConfig {
+    string prefix   = 1;
+    uint32 id       = 2;
+    uint32 max      = 3;
+    uint32 level    = 4;
+}
+
 message Config {
     string name         =   1;
     uint32 port         =   2;
     MysqlConfig mysql   =   3;
+    LogConfig log       =   4;
 };

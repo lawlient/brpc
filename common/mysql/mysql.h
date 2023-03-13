@@ -1,6 +1,7 @@
 #pragma once
 
 
+#include <butil/logging.h>
 #include <google/protobuf/message.h>
 /*
  *   Include directly the different
