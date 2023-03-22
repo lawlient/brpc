@@ -1,29 +1,13 @@
-# brpc services
+# Services
+
+The repository stores codes those build my services.
+
+It will not be official for a long time. 
+
+And it will be updated continuously until publish successfully.
 
 
-## Build Image
+## Modules
 
-You should build all services with Docker.
-
-```
-docker build -f Dockerfile -t brpc .
-
-docker run -itd --name brpc -v/data:/data brpc
-
-docker exec -it brpc bash
-```
-
-I will keep updating Dockerfile for services' rely on.
-
-
-## Build Service
-
-```
-cd echo_c++
-mkdir build
-cd build
-cmake .. 
-make
-```
-
-
+- [brpc](brpc/)
+- [log_agent](log_agent/)

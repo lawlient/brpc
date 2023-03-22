@@ -1,0 +1,33 @@
+syntax="proto3";
+package jarvis;
+
+
+
+message time_table {
+    int32  id      =   1;
+    string date    =   2;
+    double i       =   3;
+    double s       =   4;
+    double r       =   5;
+    double b       =   6;
+    double t       =   7;
+}
+
+message financial_users {
+    int32 uid               = 1;
+    string name             = 2;
+    string create_time      = 3;
+    string update_time      = 4;
+}
+
+message financial_records {
+    int32 id            = 1;
+    string when         = 2;
+    int32 payer         = 3;
+    int32 payee         = 4;
+    double amount       = 5;
+    int32  clasify      = 6;
+    string comments     = 7;
+    string create_time  = 8;
+    string update_time  = 9;
+}

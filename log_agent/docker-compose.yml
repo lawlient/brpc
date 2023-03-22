@@ -1,0 +1,15 @@
+# yaml config
+
+version: '3'
+services:
+    log_agent:
+        container_name: "log_agent"
+        build: .
+        volumes:
+            - "/data/:/data"
+            - "/var/:/var"
+            - "/etc/localtime:/etc/localtime:ro"
+        ipc: "shareable"
+        working_dir: /data/services/log_agent/
+        entrypoint: log_agent
+        tty: true

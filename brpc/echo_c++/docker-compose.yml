@@ -1,0 +1,13 @@
+# yaml 配置
+
+version: '3'
+services:
+    echo:
+        container_name: "echo"
+        image: "brpc:latest"
+        ports: 
+            - "808:8000"
+        volumes:
+            - "/etc/localtime:/etc/localtime:ro"
+            - "/data:/data"
+        tty: true

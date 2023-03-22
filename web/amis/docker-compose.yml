@@ -1,0 +1,14 @@
+# yaml config
+
+version: '3'
+services:
+    jarvis_ui:
+        container_name: "jarvis_ui"
+        build: .
+        volumes:
+            - "/data/:/data"
+            - "/var/:/var"
+            - "/etc/localtime:/etc/localtime:ro"
+        entrypoint: serve .
+        working_dir: '/amis/node_modules/amis/sdk'
+        tty: true

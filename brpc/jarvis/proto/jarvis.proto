@@ -1,0 +1,45 @@
+syntax="proto3";
+package jarvis;
+
+import "table.proto";
+
+option cc_generic_services = true;
+
+message HttpRequest { };
+message HttpResponse { };
+
+
+message financial_users_request {
+    financial_users user    = 1;
+}
+
+message financial_users_response {
+    enum rcode {
+        ok = 0;
+        dberr = 1;
+    }
+    rcode code     =  1;
+    repeated financial_users users = 2;
+}
+
+message financial_request {
+    financial_records record = 1;
+};
+message financial_response {
+    enum rcode {
+        ok = 0;
+        dberr = 1;
+    }
+    rcode code     =  1;
+    repeated financial_records records = 2;
+};
+
+
+service Jarvis {
+    rpc TestQuery(HttpRequest) returns (HttpResponse);
+    rpc AddFinancialUser(financial_users_request) returns (financial_users_response);
+    rpc DelFinancialUser(financial_users_request) returns (financial_users_response);
+    rpc AppendFinancialRecord(financial_request) returns (financial_response);
+    rpc DeleteFinancialRecord(financial_request) returns (financial_response);
+    rpc UpdateFinancialRecord(financial_request) returns (financial_response);
+}
