@@ -36,170 +36,356 @@ body,
                 let amis = amisRequire('amis/embed');
                 // 通过替换下面这个配置来生成不同页面
                 let amisJSON = {
-                    type: 'page',
-                    title: '财务记录',
-                    body: [
+                    type: 'tabs',
+                    mode: 'vertical',
+                    activeKey: 'record manager',
+                    tabs: [
                         {
-                            type: 'crud',
-                            className: 'm-t-sm',
-                            headerToolbar: [
+                            type: 'page',
+                            title: '用户管理',
+                            hash: 'user manager',
+                            body: [
                                 {
-                                    label: '添加',
-                                    type: 'button',
-                                    actionType: 'dialog',
-                                    level: 'primary',
-                                    dialog: {
-                                        title: '添加交易记录',
-                                        body: {
-                                            type: 'form',
-                                            api: {
-                                                method: 'post',
-                                                url:'http://wsl:827/Jarvis/AppendFinancialRecord',
-                                                data: {
-                                                    record: {
-                                                        '&': "$$"
-                                                    }
-                                                }
-                                            },
-                                            body: [
-                                                {
-                                                    type: 'input-datetime',
-                                                    name: 'when',
-                                                    label: '时间',
-                                                    format: "YYYY-MM-DD HH:mm:ss"
-                                                },
-                                                {
-                                                    type: 'input-number',
-                                                    name: 'payer',
-                                                    label: '付款人'
-                                                },
-                                                {
-                                                    type: 'input-number',
-                                                    name: 'payee',
-                                                    label: '收款人'
-                                                },
-                                                {
-                                                    type: 'input-number',
-                                                    name: 'amount',
-                                                    label: '金额'
-                                                },
-                                                {
-                                                    type: 'input-number',
-                                                    name: 'clasify',
-                                                    label: '类别'
-                                                },
-                                                {
-                                                    type: 'input-text',
-                                                    name: 'comments',
-                                                    label: '备注'
-                                                }
-                                            ]
-                                        }
-                                    }
-                                },
-                                "export-excel",
-                                "export-csv"
-                            ],
-                            api: {
-                                method: 'post',
-                                url:'http://wsl:827/Jarvis/TestQuery',
-                                responseData: {
-                                    '&': '$$'
-                                }
-                            },
-                            columns: [
-                                { name: 'id', label: 'ID' },
-                                { name: 'when', label: '时间' },
-                                { name: 'payer', label: '付款人' },
-                                { name: 'payee', label: '收款人' },
-                                { name: 'amount', label: '金额' },
-                                { name: 'clasify', label: '分类' },
-                                { name: 'comments', label: '备注' },
-                                { name: 'create_time', label: '创建时间' },
-                                { name: 'update_time', label: '修改时间' },
-                                {
-                                    type: 'operation',
-                                    label: '操作',
-                                    buttons: [
+                                    type: 'crud',
+                                    className: 'm-t-sm',
+                                    headerToolbar: [
                                         {
+                                            label: '添加用户',
                                             type: 'button',
-                                            label: '编辑',
-                                            level: 'primary',
                                             actionType: 'dialog',
+                                            level: 'primary',
                                             dialog: {
-                                                title: '编辑',
-                                                body: [
-                                                    {
-                                                        type: 'form',
-                                                        api: {
-                                                            method: 'post',
-                                                            url: 'http://wsl:827/Jarvis/UpdateFinancialRecord',
-                                                            data: {
-                                                                record: {
-                                                                    id: '${id}',
-                                                                    '&': '$$'
-                                                                }
+                                                title: '添加用户',
+                                                body: {
+                                                    type: 'form',
+                                                    api: {
+                                                        method: 'post',
+                                                        url:'http://wsl:827/Jarvis/AddFinancialUser',
+                                                        data: {
+                                                            user: {
+                                                                '&': "$$"
                                                             }
+                                                        }
+                                                    },
+                                                    body: [
+                                                        {
+                                                            type: 'input-number',
+                                                            name: 'uid',
+                                                            label: '用户ID'
                                                         },
+                                                        {
+                                                            type: 'input-text',
+                                                            name: 'name',
+                                                            label: '姓名'
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        },
+                                        "export-excel",
+                                        "export-csv"
+                                    ],
+                                    api: {
+                                        method: 'get',
+                                        url:'http://wsl:827/Jarvis/GetFinancialUser',
+                                        responseData: {
+                                            '&': '$$'
+                                        }
+                                    },
+                                    columns: [
+                                        { name: 'uid', label: 'UID', sortable: true },
+                                        { name: 'name', label: '姓名' },
+                                        { name: 'create_time', label: '添加时间' },
+                                        { name: 'update_time', label: '更新时间' },
+                                        {
+                                            type: 'operation',
+                                            label: '操作',
+                                            buttons: [
+                                                {
+                                                    type: 'button',
+                                                    label: '编辑',
+                                                    level: 'primary',
+                                                    actionType: 'dialog',
+                                                    dialog: {
+                                                        title: '编辑',
                                                         body: [
                                                             {
-                                                                type: 'input-datetime',
-                                                                name: 'when',
-                                                                label: '时间',
-                                                                format: "YYYY-MM-DD HH:mm:ss"
-                                                            },
-                                                            {
-                                                                type: 'input-number',
-                                                                name: 'payer',
-                                                                label: '付款人'
-                                                            },
-                                                            {
-                                                                type: 'input-number',
-                                                                name: 'payee',
-                                                                label: '收款人'
-                                                            },
-                                                            {
-                                                                type: 'input-number',
-                                                                name: 'amount',
-                                                                label: '金额'
-                                                            },
-                                                            {
-                                                                type: 'input-number',
-                                                                name: 'clasify',
-                                                                label: '类别'
-                                                            },
-                                                            {
-                                                                type: 'input-text',
-                                                                name: 'comments',
-                                                                label: '备注'
+                                                                type: 'form',
+                                                                api: {
+                                                                    method: 'post',
+                                                                    url: 'http://wsl:827/Jarvis/UpdFinancialUser',
+                                                                    data: {
+                                                                        user: {
+                                                                            uid: '${uid}',
+                                                                            '&': '$$'
+                                                                        }
+                                                                    }
+                                                                },
+                                                                body: [
+                                                                    {
+                                                                        type: 'input-text',
+                                                                        name: 'name',
+                                                                        label: '姓名'
+                                                                    }
+                                                                ]
                                                             }
                                                         ]
                                                     }
-                                                ]
-                                            }
-                                        },
-                                        {
-                                            type: 'button',
-                                            label: "删除",
-                                            actionType: 'ajax',
-                                            level: 'secondary',
-                                            confirmText: "Data will lost, are you sure?",
-                                            api: {
-                                                method: 'post',
-                                                url: 'http://wsl:827/Jarvis/DeleteFinancialRecord',
-                                                data: {
-                                                    record: {
-                                                        id: '${id}'
+                                                },
+                                                {
+                                                    type: 'button',
+                                                    label: "删除",
+                                                    actionType: 'ajax',
+                                                    level: 'secondary',
+                                                    confirmText: "Data will lost, are you sure?",
+                                                    api: {
+                                                        method: 'post',
+                                                        url: 'http://wsl:827/Jarvis/DelFinancialUser',
+                                                        data: {
+                                                            user: {
+                                                                uid: '${uid}'
+                                                            }
+                                                        }
                                                     }
                                                 }
-                                            }
+                                            ]
                                         }
                                     ]
                                 }
                             ]
+                        },
+                        {
+                            type: 'page',
+                            title: '财务记录',
+                            hash: 'record manager',
+                            body: [
+                                {
+                                    type: 'crud',
+                                    className: 'm-t-sm',
+                                    headerToolbar: [
+                                        {
+                                            label: '添加',
+                                            type: 'button',
+                                            actionType: 'dialog',
+                                            level: 'primary',
+                                            dialog: {
+                                                title: '添加交易记录',
+                                                body: {
+                                                    type: 'form',
+                                                    api: {
+                                                        method: 'post',
+                                                        url:'http://wsl:827/Jarvis/AppendFinancialRecord',
+                                                        data: {
+                                                            record: {
+                                                                '&': "$$"
+                                                            }
+                                                        }
+                                                    },
+                                                    body: [
+                                                        {
+                                                            type: 'input-datetime',
+                                                            name: 'when',
+                                                            label: '时间',
+                                                            format: "YYYY-MM-DD HH:mm:ss"
+                                                        },
+                                                        {
+                                                            type: 'select',
+                                                            name: 'payer',
+                                                            label: '付款人',
+                                                            source: 'http://wsl:827/Jarvis/GetFinancialUser?OptionsFormat=OPTIONS',
+                                                            clearable: true,
+                                                            searchable: true
+                                                        },
+                                                        {
+                                                            type: 'select',
+                                                            name: 'payee',
+                                                            label: '收款人',
+                                                            source: 'http://wsl:827/Jarvis/GetFinancialUser?OptionsFormat=OPTIONS',
+                                                            clearable: true,
+                                                            searchable: true
+
+                                                        },
+                                                        {
+                                                            type: 'input-number',
+                                                            name: 'amount',
+                                                            label: '金额',
+                                                            precision: 2,
+                                                            step: 0.01
+                                                        },
+                                                        {
+                                                            type: 'select',
+                                                            name: 'clasify',
+                                                            label: '类别',
+                                                            options: [
+                                                                { label: "生活费", value: 0 },
+                                                                { label: "房租", value: 1 },
+                                                                { label: "水电", value: 2 },
+                                                                { label: "餐饮", value: 3 },
+                                                                { label: "红包", value: 4 },
+                                                                { label: "充值缴费", value: 5 },
+                                                                { label: "购物", value: 6 },
+                                                                { label: "出行", value: 7 }
+                                                            ]
+                                                        },
+                                                        {
+                                                            type: 'input-text',
+                                                            name: 'comments',
+                                                            label: '备注'
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        },
+                                        "export-excel",
+                                        "export-csv"
+                                    ],
+                                    api: {
+                                        method: 'get',
+                                        url:'http://wsl:827/Jarvis/GetFinancialRecord',
+                                        responseData: {
+                                            '&': '$$'
+                                        }
+                                    },
+                                    columns: [
+                                        { name: 'id', label: 'ID' },
+                                        { name: 'when', label: '时间' },
+                                        { 
+                                            name: 'payer',
+                                            label: '付款人',
+                                            type: 'mapping',
+                                            source: 'http://wsl:827/Jarvis/GetFinancialUser?OptionsFormat=MAPPING'
+                                        },
+                                        {
+                                            name: 'payee',
+                                            label: '收款人',
+                                            type: 'mapping',
+                                            source: 'http://wsl:827/Jarvis/GetFinancialUser?OptionsFormat=MAPPING'
+                                        },
+                                        { name: 'amount', label: '金额' },
+                                        { 
+                                            name: 'clasify',
+                                            label: '分类',
+                                            type: 'static-mapping',
+                                            map: {
+                                                0: "生活费",
+                                                1: "房租",
+                                                2: "水电",
+                                                3: "餐饮",
+                                                4: "红包",
+                                                5: "充值缴费",
+                                                6: "购物",
+                                                7: "出行"
+                                            }
+                                        },
+                                        { name: 'comments', label: '备注' },
+                                        { name: 'create_time', label: '创建时间' },
+                                        { name: 'update_time', label: '修改时间' },
+                                        {
+                                            type: 'operation',
+                                            label: '操作',
+                                            buttons: [
+                                                {
+                                                    type: 'button',
+                                                    label: '编辑',
+                                                    level: 'primary',
+                                                    actionType: 'dialog',
+                                                    dialog: {
+                                                        title: '编辑',
+                                                        body: [
+                                                            {
+                                                                type: 'form',
+                                                                api: {
+                                                                    method: 'post',
+                                                                    url: 'http://wsl:827/Jarvis/UpdateFinancialRecord',
+                                                                    data: {
+                                                                        record: {
+                                                                            id: '${id}',
+                                                                            '&': '$$'
+                                                                        }
+                                                                    }
+                                                                },
+                                                                body: [
+                                                                    {
+                                                                        type: 'input-datetime',
+                                                                        name: 'when',
+                                                                        label: '时间',
+                                                                        format: "YYYY-MM-DD HH:mm:ss"
+                                                                    },
+                                                                    {
+                                                                        type: 'select',
+                                                                        name: 'payer',
+                                                                        label: '付款人',
+                                                                        source: 'http://wsl:827/Jarvis/GetFinancialUser?OptionsFormat=OPTIONS',
+                                                                        clearable: true,
+                                                                        searchable: true
+                                                                    },
+                                                                    {
+                                                                        type: 'select',
+                                                                        name: 'payee',
+                                                                        label: '收款人',
+                                                                        source: 'http://wsl:827/Jarvis/GetFinancialUser?OptionsFormat=OPTIONS',
+                                                                        clearable: true,
+                                                                        searchable: true
+
+                                                                    },
+                                                                    {
+                                                                        type: 'input-number',
+                                                                        name: 'amount',
+                                                                        label: '金额',
+                                                                        precision: 2,
+                                                                        step: 0.01
+                                                                    },
+                                                                    {
+                                                                        type: 'select',
+                                                                        name: 'clasify',
+                                                                        label: '类别',
+                                                                        options: [
+                                                                            { label: "生活费", value: 0 },
+                                                                            { label: "房租", value: 1 },
+                                                                            { label: "水电", value: 2 },
+                                                                            { label: "餐饮", value: 3 },
+                                                                            { label: "红包", value: 4 },
+                                                                            { label: "充值缴费", value: 5 },
+                                                                            { label: "购物", value: 6 },
+                                                                            { label: "出行", value: 7 }
+                                                                        ]
+                                                                    },
+                                                                    {
+                                                                        type: 'input-text',
+                                                                        name: 'comments',
+                                                                        label: '备注'
+                                                                    }
+                                                                ]
+                                                            }
+                                                        ]
+                                                    }
+                                                },
+                                                {
+                                                    type: 'button',
+                                                    label: "删除",
+                                                    actionType: 'ajax',
+                                                    level: 'secondary',
+                                                    confirmText: "Data will lost, are you sure?",
+                                                    api: {
+                                                        method: 'post',
+                                                        url: 'http://wsl:827/Jarvis/DeleteFinancialRecord',
+                                                        data: {
+                                                            record: {
+                                                                id: '${id}'
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+
                         }
-                        
-                    ]
+                    ]                           
                 };
                 let amisScoped = amis.embed('#root', amisJSON);
             })();

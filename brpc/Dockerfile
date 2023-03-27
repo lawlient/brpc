@@ -34,6 +34,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         g++ \
         make \
         cmake \
+        nlohmann-json3-dev \
         libssl-dev \
         libgflags-dev \
         libprotobuf-dev \

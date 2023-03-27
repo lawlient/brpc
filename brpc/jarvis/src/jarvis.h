@@ -21,6 +21,10 @@ public:
                        ::jarvis::HttpResponse* response,
                        ::google::protobuf::Closure* done) override;
 
+    virtual void GetFinancialUser(::google::protobuf::RpcController* controller,
+                       const ::jarvis::HttpRequest* request,
+                       ::jarvis::HttpResponse* response,
+                       ::google::protobuf::Closure* done) override;
 
     virtual void AddFinancialUser(::google::protobuf::RpcController* controller,
                        const ::jarvis::financial_users_request* request,
@@ -30,6 +34,16 @@ public:
     virtual void DelFinancialUser(::google::protobuf::RpcController* controller,
                        const ::jarvis::financial_users_request* request,
                        ::jarvis::financial_users_response* response,
+                       ::google::protobuf::Closure* done) override;
+
+    virtual void UpdFinancialUser(::google::protobuf::RpcController* controller,
+                       const ::jarvis::financial_users_request* request,
+                       ::jarvis::financial_users_response* response,
+                       ::google::protobuf::Closure* done) override;
+
+    virtual void GetFinancialRecord(::google::protobuf::RpcController* controller,
+                       const ::jarvis::HttpRequest* request,
+                       ::jarvis::HttpResponse* response,
                        ::google::protobuf::Closure* done) override;
 
     virtual void AppendFinancialRecord(::google::protobuf::RpcController* controller,

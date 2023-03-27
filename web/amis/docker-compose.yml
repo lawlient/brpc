@@ -9,6 +9,8 @@ services:
             - "/data/:/data"
             - "/var/:/var"
             - "/etc/localtime:/etc/localtime:ro"
+        ports:
+            - '826:3000'
         entrypoint: serve .
         working_dir: '/amis/node_modules/amis/sdk'
         tty: true

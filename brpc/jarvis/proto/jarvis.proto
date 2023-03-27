@@ -8,6 +8,11 @@ option cc_generic_services = true;
 message HttpRequest { };
 message HttpResponse { };
 
+enum HttpResponseDataFormat {
+    AUTO    =   0;
+    OPTIONS =   1;
+    MAPPING =   2;
+}
 
 message financial_users_request {
     financial_users user    = 1;
@@ -37,8 +42,16 @@ message financial_response {
 
 service Jarvis {
     rpc TestQuery(HttpRequest) returns (HttpResponse);
+
+    /* financial users related */
+    rpc GetFinancialUser(HttpRequest) returns (HttpResponse);
     rpc AddFinancialUser(financial_users_request) returns (financial_users_response);
     rpc DelFinancialUser(financial_users_request) returns (financial_users_response);
+    rpc UpdFinancialUser(financial_users_request) returns (financial_users_response);
+
+
+    /* financial records related */
+    rpc GetFinancialRecord(HttpRequest) returns (HttpResponse);
     rpc AppendFinancialRecord(financial_request) returns (financial_response);
     rpc DeleteFinancialRecord(financial_request) returns (financial_response);
     rpc UpdateFinancialRecord(financial_request) returns (financial_response);

@@ -1,6 +1,8 @@
 #include "jarvis.h"
 #include "mysql.h"
 
+#include <nlohmann/json.hpp>
+
 #include <google/protobuf/util/json_util.h>
 
 
@@ -40,7 +42,7 @@ static inline std::string nowstring() {
 void financial_all_users(::jarvis::financial_users_response* response) {
     std::unique_ptr<sql::ResultSet> res;
     jarvis::financial_users users;
-    res.reset(mysql_instance->SelectAll(users, "", "`uid` desc", "", "100"));
+    res.reset(mysql_instance->SelectAll(users, "", "`uid` asc", "", "1000"));
     if (!res) return;
 
     std::vector<google::protobuf::Message*> msgs;
@@ -107,6 +109,69 @@ void JarvisServiceImpl::TestQuery(::google::protobuf::RpcController* controller,
     LOG(INFO) << cntl->response_attachment();
 }
 
+void JarvisServiceImpl::GetFinancialUser(::google::protobuf::RpcController* controller,
+                    const ::jarvis::HttpRequest* request,
+                    ::jarvis::HttpResponse* response,
+                    ::google::protobuf::Closure* done) {
+    brpc::ClosureGuard done_guard(done);
+    common_cntl_set(controller);
+    BLOCK_OPTIONS_REQUEST
+
+    brpc::Controller* cntl = static_cast<brpc::Controller*>(controller);
+    auto uri = cntl->http_request().uri();
+    auto optformat = uri.GetQuery("OptionsFormat");
+    enum HttpResponseDataFormat formatype(HttpResponseDataFormat::AUTO);
+    if (optformat == nullptr) {
+        formatype = HttpResponseDataFormat::AUTO;
+    } else if (!optformat->compare("OPTIONS")) {
+        formatype = HttpResponseDataFormat::OPTIONS;
+    } else if (!optformat->compare("MAPPING")) {
+        formatype = HttpResponseDataFormat::MAPPING;
+    }
+
+    ::jarvis::financial_users_response tmp;
+    financial_all_users(&tmp);
+
+    std::ostringstream oss;
+    switch (formatype) {
+        case HttpResponseDataFormat::OPTIONS: {
+            nlohmann::json res;
+            res["status"] = 0;
+            res["msg"]    = "Success";
+            for (const auto& u : tmp.users()) {
+                nlohmann::json opt;
+                opt["label"] = u.name();
+                opt["value"] = u.uid();
+                res["data"]["options"].push_back(opt);
+            }
+            oss << res.dump();
+            break;
+        }
+        case HttpResponseDataFormat::MAPPING: {
+            nlohmann::json res;
+            res["status"] = 0;
+            res["msg"]    = "Success";
+            for (const auto& u : tmp.users()) {
+                res["data"][std::to_string(u.uid())] = u.name();
+            }
+            oss << res.dump();
+            break;
+        }
+        case HttpResponseDataFormat::AUTO:
+        default: {
+            std::string data;
+            google::protobuf::util::JsonPrintOptions joption;
+            joption.always_print_primitive_fields = true;
+            joption.preserve_proto_field_names = true;
+            google::protobuf::util::MessageToJsonString(tmp, &data, joption);
+            oss << "{\"status\":0, \"msg\":\"Success\", \"data\":" << data << "}";
+        }
+    }
+
+    cntl->response_attachment().append(oss.str());
+    LOG(INFO) << cntl->response_attachment();
+}
+
 void JarvisServiceImpl::AddFinancialUser(::google::protobuf::RpcController* controller,
                     const ::jarvis::financial_users_request* request,
                     ::jarvis::financial_users_response* response,
@@ -138,6 +203,31 @@ void JarvisServiceImpl::AddFinancialUser(::google::protobuf::RpcController* cont
     response->set_code(suc ? financial_users_response_rcode_ok : financial_users_response_rcode_dberr);
 }
 
+void JarvisServiceImpl::UpdFinancialUser(::google::protobuf::RpcController* controller,
+                    const ::jarvis::financial_users_request* request,
+                    ::jarvis::financial_users_response* response,
+                    ::google::protobuf::Closure* done) {
+    brpc::ClosureGuard done_guard(done);
+
+    common_cntl_set(controller);
+    BLOCK_OPTIONS_REQUEST
+
+    const auto& user        = request->user();
+    const auto* descriptor  = user.descriptor();
+    const std::string nows  = nowstring();
+
+    std::ostringstream cmd;
+    cmd << "update " << descriptor->name() << " set ";
+    cmd << "`name` = " << user.name();
+    cmd << "`update_time` = " << nows;
+    cmd << " where `uid` = " << user.uid();
+
+    bool suc = mysql_instance->Execute(cmd.str());
+
+    financial_all_users(response);
+    response->set_code(suc ? financial_users_response_rcode_ok : financial_users_response_rcode_dberr);
+}
+
 void JarvisServiceImpl::DelFinancialUser(::google::protobuf::RpcController* controller,
                     const ::jarvis::financial_users_request* request,
                     ::jarvis::financial_users_response* response,
@@ -157,6 +247,31 @@ void JarvisServiceImpl::DelFinancialUser(::google::protobuf::RpcController* cont
     return;
 }
 
+void JarvisServiceImpl::GetFinancialRecord(::google::protobuf::RpcController* controller,
+                       const ::jarvis::HttpRequest* request,
+                       ::jarvis::HttpResponse* response,
+                       ::google::protobuf::Closure* done)  {
+    brpc::ClosureGuard done_guard(done);
+    common_cntl_set(controller);
+    BLOCK_OPTIONS_REQUEST
+
+    brpc::Controller* cntl = static_cast<brpc::Controller*>(controller);
+
+    ::jarvis::financial_response tmp;
+    financial_all_records(&tmp);
+
+    std::string data;
+    google::protobuf::util::JsonPrintOptions option;
+    option.always_print_primitive_fields = true;
+    option.preserve_proto_field_names = true;
+    google::protobuf::util::MessageToJsonString(tmp, &data, option);
+
+    std::ostringstream oss;
+    oss << "{\"status\":0, \"msg\":\"Success\", \"data\":" << data << "}";
+
+    cntl->response_attachment().append(oss.str());
+    LOG(INFO) << cntl->response_attachment();
+}
 
 void JarvisServiceImpl::AppendFinancialRecord(::google::protobuf::RpcController* controller,
                        const ::jarvis::financial_request* request,

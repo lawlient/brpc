@@ -146,6 +146,10 @@ include_directories(${COMMON}/log)
 include_directories(${COMMON}/thirdparth)
 
 
+## nlohmann-json
+find_package(nlohmann_json 3.2.0 REQUIRED)
+
+
 function (auto_gen_client_code out_path proto_file)
     cmake_parse_arguments(common "no_default_client;gen_pb;" "" "proto_path_list" ${ARGN})
 
