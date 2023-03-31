@@ -6,15 +6,6 @@
 #include <google/protobuf/util/json_util.h>
 
 
-#define BLOCK_OPTIONS_REQUEST   do {                                        \
-    brpc::Controller* cntl = static_cast<brpc::Controller*>(controller);    \
-    auto* method = cntl->method();                                          \
-    if (method && !method->name().compare("OPTIONS")) {                     \
-        LOG(INFO) << "Preflight request , discard it.";                     \
-        return ;                                                            \
-    }                                                                       \
-} while (0);
-
 using namespace google::protobuf;
 
 namespace jarvis {
@@ -22,8 +13,10 @@ namespace jarvis {
 static inline void common_cntl_set(::google::protobuf::RpcController* controller) {
     brpc::Controller* cntl = dynamic_cast<brpc::Controller*>(controller);
     if (cntl) {
+        auto origin_header = cntl->http_request().GetHeader("Origin");
+        std::string origin = origin_header ? *origin_header : "http://wsl:333";
         cntl->set_always_print_primitive_fields(true);
-        cntl->http_response().SetHeader("Access-Control-Allow-Origin", "http://wsl:333");
+        cntl->http_response().SetHeader("Access-Control-Allow-Origin", origin);
         cntl->http_response().SetHeader("Access-Control-Allow-Credentials", "true");
         cntl->http_response().SetHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS");
         cntl->http_response().SetHeader("Access-Control-Allow-Headers", "Origin, Content-Type, X-Auth-Token");
@@ -87,7 +80,6 @@ void JarvisServiceImpl::TestQuery(::google::protobuf::RpcController* controller,
                        ::google::protobuf::Closure* done)  {
     brpc::ClosureGuard done_guard(done);
     common_cntl_set(controller);
-    BLOCK_OPTIONS_REQUEST
 
     brpc::Controller* cntl = static_cast<brpc::Controller*>(controller);
     LOG(INFO) << cntl->request_attachment();
@@ -115,10 +107,9 @@ void JarvisServiceImpl::GetFinancialUser(::google::protobuf::RpcController* cont
                     ::google::protobuf::Closure* done) {
     brpc::ClosureGuard done_guard(done);
     common_cntl_set(controller);
-    BLOCK_OPTIONS_REQUEST
-
     brpc::Controller* cntl = static_cast<brpc::Controller*>(controller);
-    auto uri = cntl->http_request().uri();
+
+    const auto& uri = cntl->http_request().uri();
     auto optformat = uri.GetQuery("OptionsFormat");
     enum HttpResponseDataFormat formatype(HttpResponseDataFormat::AUTO);
     if (optformat == nullptr) {
@@ -178,7 +169,6 @@ void JarvisServiceImpl::AddFinancialUser(::google::protobuf::RpcController* cont
                     ::google::protobuf::Closure* done) {
     brpc::ClosureGuard done_guard(done);
     common_cntl_set(controller);
-    BLOCK_OPTIONS_REQUEST
 
     const auto& user        = request->user();
     const auto* descriptor  = user.descriptor();
@@ -210,7 +200,6 @@ void JarvisServiceImpl::UpdFinancialUser(::google::protobuf::RpcController* cont
     brpc::ClosureGuard done_guard(done);
 
     common_cntl_set(controller);
-    BLOCK_OPTIONS_REQUEST
 
     const auto& user        = request->user();
     const auto* descriptor  = user.descriptor();
@@ -234,7 +223,6 @@ void JarvisServiceImpl::DelFinancialUser(::google::protobuf::RpcController* cont
                     ::google::protobuf::Closure* done) {
     brpc::ClosureGuard done_guard(done);
     common_cntl_set(controller);
-    BLOCK_OPTIONS_REQUEST
 
     const auto& user = request->user();
     std::ostringstream cmd;
@@ -253,7 +241,6 @@ void JarvisServiceImpl::GetFinancialRecord(::google::protobuf::RpcController* co
                        ::google::protobuf::Closure* done)  {
     brpc::ClosureGuard done_guard(done);
     common_cntl_set(controller);
-    BLOCK_OPTIONS_REQUEST
 
     brpc::Controller* cntl = static_cast<brpc::Controller*>(controller);
 
@@ -279,7 +266,6 @@ void JarvisServiceImpl::AppendFinancialRecord(::google::protobuf::RpcController*
                        ::google::protobuf::Closure* done) {
     brpc::ClosureGuard done_guard(done);
     common_cntl_set(controller);
-    BLOCK_OPTIONS_REQUEST
 
     const auto& record = request->record();
     const auto* descriptor = record.descriptor();
@@ -323,7 +309,6 @@ void JarvisServiceImpl::DeleteFinancialRecord(::google::protobuf::RpcController*
                        ::google::protobuf::Closure* done) {
     brpc::ClosureGuard done_guard(done);
     common_cntl_set(controller);
-    BLOCK_OPTIONS_REQUEST
 
     const auto& record = request->record();
     std::ostringstream cmd;
@@ -339,7 +324,6 @@ void JarvisServiceImpl::UpdateFinancialRecord(::google::protobuf::RpcController*
                     ::google::protobuf::Closure* done) {
     brpc::ClosureGuard done_guard(done);
     common_cntl_set(controller);
-    BLOCK_OPTIONS_REQUEST
 
     const auto& record = request->record();
     const auto* descriptor = record.descriptor();
