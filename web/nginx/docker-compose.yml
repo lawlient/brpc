@@ -1,0 +1,20 @@
+# yaml 配置
+
+version: '3'
+services:
+    gateway:
+        container_name: "gateway"
+        build: .
+        ports:
+            - "80:80"
+        networks:
+            - jarvisnet
+        volumes:
+            - "/etc/localtime:/etc/localtime:ro"
+            - "/data:/data"
+        tty: true
+
+networks:
+    jarvisnet:
+        name: jarvis_default
+        external: true

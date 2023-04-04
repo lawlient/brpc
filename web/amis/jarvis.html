@@ -2,7 +2,7 @@
 <html lang="zh">
     <head>
         <meta charset="UTF-8" />
-        <title>amis demo</title>
+        <title>financial</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <meta
             name="viewport"
@@ -23,7 +23,7 @@ body,
     position: relative;
     width: 100%;
     height: 100%;
-    margin: 0;
+    margin: 0 auto;
     padding: 0;
 }
         </style>
@@ -60,7 +60,7 @@ body,
                                                     type: 'form',
                                                     api: {
                                                         method: 'post',
-                                                        url:'http://wsl:827/Jarvis/AddFinancialUser',
+                                                        url:'http://i.xujiuan.net/jarvis/Jarvis/AddFinancialUser',
                                                         data: {
                                                             user: {
                                                                 '&': "$$"
@@ -87,7 +87,7 @@ body,
                                     ],
                                     api: {
                                         method: 'get',
-                                        url:'http://wsl:827/Jarvis/GetFinancialUser',
+                                        url:'http://i.xujiuan.net/jarvis/Jarvis/GetFinancialUser',
                                         responseData: {
                                             '&': '$$'
                                         }
@@ -113,7 +113,7 @@ body,
                                                                 type: 'form',
                                                                 api: {
                                                                     method: 'post',
-                                                                    url: 'http://wsl:827/Jarvis/UpdFinancialUser',
+                                                                    url: 'http://i.xujiuan.net/jarvis/Jarvis/UpdFinancialUser',
                                                                     data: {
                                                                         user: {
                                                                             uid: '${uid}',
@@ -140,7 +140,7 @@ body,
                                                     confirmText: "Data will lost, are you sure?",
                                                     api: {
                                                         method: 'post',
-                                                        url: 'http://wsl:827/Jarvis/DelFinancialUser',
+                                                        url: 'http://i.xujiuan.net/jarvis/Jarvis/DelFinancialUser',
                                                         data: {
                                                             user: {
                                                                 uid: '${uid}'
@@ -174,7 +174,7 @@ body,
                                                     type: 'form',
                                                     api: {
                                                         method: 'post',
-                                                        url:'http://wsl:827/Jarvis/AppendFinancialRecord',
+                                                        url:'http://i.xujiuan.net/jarvis/Jarvis/AppendFinancialRecord',
                                                         data: {
                                                             record: {
                                                                 '&': "$$"
@@ -192,7 +192,7 @@ body,
                                                             type: 'select',
                                                             name: 'payer',
                                                             label: '付款人',
-                                                            source: 'http://wsl:827/Jarvis/GetFinancialUser?OptionsFormat=OPTIONS',
+                                                            source: 'http://i.xujiuan.net/jarvis/Jarvis/GetFinancialUser?OptionsFormat=OPTIONS',
                                                             clearable: true,
                                                             searchable: true
                                                         },
@@ -200,7 +200,7 @@ body,
                                                             type: 'select',
                                                             name: 'payee',
                                                             label: '收款人',
-                                                            source: 'http://wsl:827/Jarvis/GetFinancialUser?OptionsFormat=OPTIONS',
+                                                            source: 'http://i.xujiuan.net/jarvis/Jarvis/GetFinancialUser?OptionsFormat=OPTIONS',
                                                             clearable: true,
                                                             searchable: true
 
@@ -241,7 +241,7 @@ body,
                                     ],
                                     api: {
                                         method: 'get',
-                                        url:'http://wsl:827/Jarvis/GetFinancialRecord',
+                                        url:'http://i.xujiuan.net/jarvis/Jarvis/GetFinancialRecord',
                                         responseData: {
                                             '&': '$$'
                                         }
@@ -253,13 +253,13 @@ body,
                                             name: 'payer',
                                             label: '付款人',
                                             type: 'mapping',
-                                            source: 'http://wsl:827/Jarvis/GetFinancialUser?OptionsFormat=MAPPING'
+                                            source: 'http://i.xujiuan.net/jarvis/Jarvis/GetFinancialUser?OptionsFormat=MAPPING'
                                         },
                                         {
                                             name: 'payee',
                                             label: '收款人',
                                             type: 'mapping',
-                                            source: 'http://wsl:827/Jarvis/GetFinancialUser?OptionsFormat=MAPPING'
+                                            source: 'http://i.xujiuan.net/jarvis/Jarvis/GetFinancialUser?OptionsFormat=MAPPING'
                                         },
                                         { name: 'amount', label: '金额' },
                                         { 
@@ -296,7 +296,7 @@ body,
                                                                 type: 'form',
                                                                 api: {
                                                                     method: 'post',
-                                                                    url: 'http://wsl:827/Jarvis/UpdateFinancialRecord',
+                                                                    url: 'http://i.xujiuan.net/jarvis/Jarvis/UpdateFinancialRecord',
                                                                     data: {
                                                                         record: {
                                                                             id: '${id}',
@@ -315,7 +315,7 @@ body,
                                                                         type: 'select',
                                                                         name: 'payer',
                                                                         label: '付款人',
-                                                                        source: 'http://wsl:827/Jarvis/GetFinancialUser?OptionsFormat=OPTIONS',
+                                                                        source: 'http://i.xujiuan.net/jarvis/Jarvis/GetFinancialUser?OptionsFormat=OPTIONS',
                                                                         clearable: true,
                                                                         searchable: true
                                                                     },
@@ -323,7 +323,7 @@ body,
                                                                         type: 'select',
                                                                         name: 'payee',
                                                                         label: '收款人',
-                                                                        source: 'http://wsl:827/Jarvis/GetFinancialUser?OptionsFormat=OPTIONS',
+                                                                        source: 'http://i.xujiuan.net/jarvis/Jarvis/GetFinancialUser?OptionsFormat=OPTIONS',
                                                                         clearable: true,
                                                                         searchable: true
 
@@ -368,7 +368,7 @@ body,
                                                     confirmText: "Data will lost, are you sure?",
                                                     api: {
                                                         method: 'post',
-                                                        url: 'http://wsl:827/Jarvis/DeleteFinancialRecord',
+                                                        url: 'http://i.xujiuan.net/jarvis/Jarvis/DeleteFinancialRecord',
                                                         data: {
                                                             record: {
                                                                 id: '${id}'
@@ -390,5 +390,6 @@ body,
                 let amisScoped = amis.embed('#root', amisJSON);
             })();
         </script>
+        <p align="center"><a href="http://i.xujiuan.net">Home</a></p>
     </body>
 </html>

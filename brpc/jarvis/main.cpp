@@ -35,12 +35,6 @@
 #include <gflags/gflags.h>
 
 
-DEFINE_string(jarvis_address, "", "jarvis ip:port address, if set flag jarvis_port will be ignored");
-DEFINE_uint32(jarvis_port, 827, "default jarvis port");
-DEFINE_int32(idle_timeout_s, -1, "Connection will be closed if there is no "
-             "read/write operations during the last `idle_timeout_s`");
-
-
 
 int main(int argc, char* argv[]) {
     // Parse gflags. We recommend you to use gflags as well.
@@ -79,17 +73,11 @@ int main(int argc, char* argv[]) {
     }
 
     butil::EndPoint point;
-    if (!FLAGS_jarvis_address.empty()) {
-        if (butil::str2endpoint(FLAGS_jarvis_address.c_str(), &point) < 0) {
-            LOG(ERROR) << "Invalid listen address:" << FLAGS_jarvis_address;
-            return -1;
-        }
-    } else {
-        point = butil::EndPoint(butil::IP_ANY, FLAGS_jarvis_port);
-    }
+    point = butil::EndPoint(butil::IP_ANY, cfg->cfg().port());
+
     // Start the server.
     brpc::ServerOptions options;
-    options.idle_timeout_sec = FLAGS_idle_timeout_s;
+    options.idle_timeout_sec = cfg->cfg().idle_tmo_s() ? cfg->cfg().idle_tmo_s() : -1;
     if (server.Start(point, &options) != 0) {
         LOG(ERROR) << "Fail to start EchoServer";
         return -1;

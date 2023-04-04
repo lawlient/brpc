@@ -9,8 +9,12 @@ services:
             - "/data/:/data"
             - "/var/:/var"
             - "/etc/localtime:/etc/localtime:ro"
-        ports:
-            - '826:3000'
+        networks:
+            - jarvisnet
         entrypoint: serve .
         working_dir: '/amis/node_modules/amis/sdk'
         tty: true
+networks:
+    jarvisnet:
+        name: jarvis_default
+        external: true

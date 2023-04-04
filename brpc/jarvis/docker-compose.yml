@@ -5,22 +5,21 @@ services:
     jarvis:
         container_name: "jarvis"
         image: "brpc:latest"
-        ports:
-            - "827:827"
         volumes:
             - "/etc/localtime:/etc/localtime:ro"
             - "/data:/data"
         ipc: "container:log_agent"
         working_dir: /data/services/jarvis/bin
         entrypoint: ./jarvis
+        expose: 
+            - "827"
         tty: true
         depends_on:
             - jarvis_memory
+
     jarvis_memory:
         container_name: "jarvis_memory"
         image: "mysql:latest"
-        ports:
-            - "3106:3306"
         volumes:
             - "/etc/localtime:/etc/localtime:ro"
             - "/var/lib/mysql/jarvis_memory:/var/lib/mysql"

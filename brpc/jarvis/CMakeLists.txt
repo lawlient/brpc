@@ -8,7 +8,7 @@ include(${COMMON}/common.cmake)
 
 
 set(CMAKE_PREFIX_PATH ${OUTPUT_PATH})
-set(install_prefix "/data/services/jarvis/bin")
+set(install_prefix "/data/services/jarvis/")
 message(STATUS "Install Prefix: " ${install_prefix})
 
 file(GLOB pbfiles
@@ -37,4 +37,5 @@ aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src SRC)
 add_executable(${exe} main.cpp ${SRC})
 target_link_libraries(${exe} commonlibs ${BRPC_LIB} ${DYNAMIC_LIB})
 
-install(TARGETS ${exe} RUNTIME DESTINATION ${install_prefix}/)
+install(TARGETS ${exe} RUNTIME DESTINATION ${install_prefix}/bin)
+install(FILES ${CMAKE_CURRENT_LIST_DIR}/conf/default.conf DESTINATION ${install_prefix}/conf)

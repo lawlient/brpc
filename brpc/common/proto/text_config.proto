@@ -20,6 +20,7 @@ message LogConfig {
 message Config {
     string name         =   1;
     uint32 port         =   2;
-    MysqlConfig mysql   =   3;
-    LogConfig log       =   4;
+    int32  idle_tmo_s   =   3;  // Connection will be closed if there is no read/write operations during me
+    MysqlConfig mysql   =   4;
+    LogConfig log       =   5;
 };
