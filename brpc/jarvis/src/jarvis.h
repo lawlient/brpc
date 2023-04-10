@@ -60,6 +60,12 @@ public:
                        const ::jarvis::financial_request* request,
                        ::jarvis::financial_response* response,
                        ::google::protobuf::Closure* done) override;
+
+    virtual void GetFinancialAsset(::google::protobuf::RpcController* controller,
+                       const ::jarvis::HttpRequest* request,
+                       ::jarvis::HttpResponse* response,
+                       ::google::protobuf::Closure* done) override;
+
 };
 
 

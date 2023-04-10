@@ -28,6 +28,7 @@ public:
     ~MysqlWrapper();
 
     bool Execute(const std::string& cmd);
+    sql::ResultSet *ExecuteQuery(const std::string& cmd);
 
     sql::ResultSet *SelectAll(const google::protobuf::Message &meta,
                               const std::string where,

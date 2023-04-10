@@ -38,7 +38,7 @@ body,
                 let amisJSON = {
                     type: 'service',
                     data : {
-                        hostname: '105daf8c.r6.vip.cpolar.cn',
+                        hostname: '146470dd.r7.vip.cpolar.cn',
                         uri: 'jarvis/Jarvis'
                     },
                     body: {
@@ -231,7 +231,8 @@ body,
                                                                     { label: "红包", value: 4 },
                                                                     { label: "充值缴费", value: 5 },
                                                                     { label: "购物", value: 6 },
-                                                                    { label: "出行", value: 7 }
+                                                                    { label: "出行", value: 7 },
+                                                                    { label: "工资", value: 8 }
                                                                 ]
                                                             },
                                                             {
@@ -246,9 +247,17 @@ body,
                                             "export-excel",
                                             "export-csv"
                                         ],
+                                        footerToolbar: [
+                                            "switch-per-page",
+                                            "pagination"
+                                        ],
                                         api: {
                                             method: 'get',
                                             url:'http://${hostname}/${uri}/GetFinancialRecord',
+                                            data: {
+                                                page: "${page}",
+                                                pagesize: "${perPage}"
+                                            },
                                             responseData: {
                                                 '&': '$$'
                                             }
@@ -281,7 +290,8 @@ body,
                                                     4: "红包",
                                                     5: "充值缴费",
                                                     6: "购物",
-                                                    7: "出行"
+                                                    7: "出行",
+                                                    8: "工资"
                                                 }
                                             },
                                             { name: 'comments', label: '备注' },
@@ -354,7 +364,8 @@ body,
                                                                                 { label: "红包", value: 4 },
                                                                                 { label: "充值缴费", value: 5 },
                                                                                 { label: "购物", value: 6 },
-                                                                                { label: "出行", value: 7 }
+                                                                                { label: "出行", value: 7 },
+                                                                                { label: "工资", value: 8 }
                                                                             ]
                                                                         },
                                                                         {
@@ -390,7 +401,32 @@ body,
                                 ]
                             },
                             {
-
+                                type: 'page',
+                                title: '账户余额',
+                                hash: 'user balance',
+                                body: [
+                                    {
+                                        type: 'crud',
+                                        className: 'm-t-sm',
+                                        api: {
+                                            method: 'get',
+                                            url: 'http://${hostname}/${uri}/GetFinancialAsset',
+                                            responseData: {
+                                                '&': '$$'
+                                            }
+                                        },
+                                        columns: [
+                                            { name: 'timestamp', label: '时间'},
+                                            {
+                                                name: 'uid',
+                                                label: '用户',
+                                                type: 'mapping',
+                                                source: 'http://${hostname}/${uri}/GetFinancialUser?OptionsFormat=MAPPING'
+                                            },
+                                            { name: 'amount', label: '余额' }
+                                        ]
+                                    }
+                                ]
                             }
                         ]                           
                     }

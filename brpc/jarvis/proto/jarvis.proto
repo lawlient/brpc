@@ -36,7 +36,8 @@ message financial_response {
         dberr = 1;
     }
     rcode code     =  1;
-    repeated financial_records records = 2;
+    repeated financial_records records = 2;     // 记录数组
+    int32 total                        = 3;     // 总数据量，用于分页展示
 };
 
 
@@ -55,4 +56,7 @@ service Jarvis {
     rpc AppendFinancialRecord(financial_request) returns (financial_response);
     rpc DeleteFinancialRecord(financial_request) returns (financial_response);
     rpc UpdateFinancialRecord(financial_request) returns (financial_response);
+
+    /* financial asset related */
+    rpc GetFinancialAsset(HttpRequest) returns (HttpResponse);
 }

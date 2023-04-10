@@ -98,6 +98,26 @@ create table `financial_records` (
 - `Payer` & `payee` are `uid` in table `financial_users`.
 - Classification is hard. Version I should be as simple as possible.
 
+> Attention: you should use it append only, replace deletion with a cancelation record.
+
+3. A table to count user's asset.
+
+
+```sql
+create table `financial_asset` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `timestamp` DATETIME,
+    `uid` INT,
+    `amount` DOUBLE,
+    `recordid` INT,
+    `create_time` DATETIME,
+    `update_time` DATETIME,
+    primary key(`id`)
+)ENGINE=InnoDB DEFAULT charset=utf8;
+```
+
+- `recordid` is the `id` in `financial_records`
+
 ## Fix Me
 
 ### Maintain manually

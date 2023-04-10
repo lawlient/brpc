@@ -10,11 +10,17 @@ using namespace google::protobuf;
 
 namespace jarvis {
 
+static const int32_t kOwnerUid = 0; /* It is me */
+
+static inline bool is_record_with_me(const jarvis::financial_records& r) {
+    return (r.payer() == kOwnerUid || r.payee() == kOwnerUid);
+}
+
 static inline void common_cntl_set(::google::protobuf::RpcController* controller) {
     brpc::Controller* cntl = dynamic_cast<brpc::Controller*>(controller);
     if (cntl) {
         auto origin_header = cntl->http_request().GetHeader("Origin");
-        std::string origin = origin_header ? *origin_header : "http://wsl:333";
+        std::string origin = origin_header ? *origin_header : "http://localhost:3000";
         cntl->set_always_print_primitive_fields(true);
         cntl->http_response().SetHeader("Access-Control-Allow-Origin", origin);
         cntl->http_response().SetHeader("Access-Control-Allow-Credentials", "true");
@@ -32,6 +38,7 @@ static inline std::string nowstring() {
     return  std::string(buf);
 }
 
+/* 用户数相对有限， 全量查询 */
 void financial_all_users(::jarvis::financial_users_response* response) {
     std::unique_ptr<sql::ResultSet> res;
     jarvis::financial_users users;
@@ -53,10 +60,31 @@ void financial_all_users(::jarvis::financial_users_response* response) {
     }
 }
 
-void financial_all_records(::jarvis::financial_response* response) {
+
+void get_financial_record_size(int32_t* total) {
+    *total = 0;
     std::unique_ptr<sql::ResultSet> res;
     jarvis::financial_records financial;
-    res.reset(mysql_instance->SelectAll(financial, "", "`when` asc", "", "100"));
+    std::ostringstream cmd;
+    cmd << "select count(*) from "  << financial.descriptor()->name() << " where status = 0";
+    res.reset(mysql_instance->ExecuteQuery(cmd.str()));
+    if (!res) return;
+
+    try {
+        while (res->next()) {
+            *total = res->getInt(1);
+        }
+    } catch(std::exception& e) {
+        LOG(ERROR) << "what: " << e.what();
+    }
+}
+
+/* 记录数不断追加，分页展示, 按id倒序，即最新数据在前 */
+void financial_all_records(::jarvis::financial_response* response, int page = 0, int pagesize = 10) {
+    std::unique_ptr<sql::ResultSet> res;
+    jarvis::financial_records financial;
+    std::string limit = std::to_string(page * pagesize) + ", " + std::to_string(pagesize);
+    res.reset(mysql_instance->SelectAll(financial, "status = 0", "`id` desc", "", limit));
     if (!res) return;
 
     std::vector<google::protobuf::Message*> msgs;
@@ -72,7 +100,73 @@ void financial_all_records(::jarvis::financial_response* response) {
         r->CopyFrom(*row);
         LOG(DEBUG) << r->ShortDebugString();
     }
+
+    int32_t total = 0;
+    get_financial_record_size(&total);
+    response->set_total(total);
 }
+
+bool get_user_balance(int32_t uid, jarvis::financial_asset* asset) {
+    std::unique_ptr<sql::ResultSet> res;
+    std::string where = "uid = " + std::to_string(uid);
+    res.reset(mysql_instance->SelectAll(*asset, where, "`timestamp` desc", "", "1"));
+    if (!res) return false;
+
+    std::vector<google::protobuf::Message*> msgs;
+    mysql_instance->Parse(res.get(), asset, msgs);
+
+    bool success = false;
+    for (const auto* msg : msgs) {
+        const auto* row = dynamic_cast<const jarvis::financial_asset*>(msg);
+        if (row == nullptr) {
+            LOG(ERROR) << "cast financial asset fail";
+            continue;
+        }
+        asset->CopyFrom(*row);
+        success = true;
+        LOG(DEBUG) << asset->ShortDebugString();
+    }
+    return success;
+}
+
+bool update_user_balance(const jarvis::financial_asset& casset, 
+                         const jarvis::financial_records& record) {
+    if (record.payer() == record.payee()) return true; // ignore self to self
+
+    double asset = casset.amount();
+    if (record.payer() == casset.uid()) {
+        asset -= record.amount();
+    } else if (record.payee() == casset.uid()) {
+        asset += record.amount();
+    }
+
+    const auto* descriptor  = casset.descriptor();
+    const std::string nows  = nowstring();
+    std::ostringstream cmd;
+    cmd << "insert into " << descriptor->name() << " ("
+           "`timestamp`, "
+           "`uid`, "
+           "`amount`, "
+           "`recordid`, "
+           "`create_time`, "
+           "`update_time`"
+           ") values (";
+    cmd << "\"" << record.create_time() << "\", ";
+    cmd << casset.uid() << ", ";
+    cmd << asset << ", ";
+    cmd << record.id() << ", ";
+    cmd << "\"" << nows << "\", ";
+    cmd << "\"" << nows << "\"";
+    cmd << ")";
+
+    bool suc = mysql_instance->Execute(cmd.str());
+    return suc;
+}
+
+
+
+
+// ---------------------------   对外接口 ---------------------------------------
 
 void JarvisServiceImpl::TestQuery(::google::protobuf::RpcController* controller,
                        const ::jarvis::HttpRequest* request,
@@ -85,7 +179,7 @@ void JarvisServiceImpl::TestQuery(::google::protobuf::RpcController* controller,
     LOG(INFO) << cntl->request_attachment();
 
     ::jarvis::financial_response tmp;
-    financial_all_records(&tmp);
+    financial_all_records(&tmp, 0, 10000);
 
     std::string data;
     google::protobuf::util::JsonPrintOptions option;
@@ -243,9 +337,17 @@ void JarvisServiceImpl::GetFinancialRecord(::google::protobuf::RpcController* co
     common_cntl_set(controller);
 
     brpc::Controller* cntl = static_cast<brpc::Controller*>(controller);
+    int page = 0, pagesize = 10;
+    const auto& uri = cntl->http_request().uri();
+    auto pagestr     = uri.GetQuery("page"); /* start from 1 */
+    auto pagesizestr = uri.GetQuery("pagesize");
+    if (pagestr && pagesizestr) {
+        page = atoi(pagestr->c_str()) - 1;
+        pagesize = atoi(pagesizestr->c_str());
+    }
 
     ::jarvis::financial_response tmp;
-    financial_all_records(&tmp);
+    financial_all_records(&tmp, page, pagesize);
 
     std::string data;
     google::protobuf::util::JsonPrintOptions option;
@@ -269,6 +371,7 @@ void JarvisServiceImpl::AppendFinancialRecord(::google::protobuf::RpcController*
 
     const auto& record = request->record();
     const auto* descriptor = record.descriptor();
+    const auto& nows       = nowstring();
     std::ostringstream cmd;
     cmd << "insert into " << descriptor->name() << " ("
            "`when`, "
@@ -286,18 +389,20 @@ void JarvisServiceImpl::AppendFinancialRecord(::google::protobuf::RpcController*
     cmd << record.amount() << ", ";
     cmd << record.clasify() << ", ";
     cmd << "\"" << record.comments() << "\", ";
-
-    char buf[50];
-    struct tm tm;
-    time_t now = time(nullptr);
-    localtime_r(&now, &tm);
-    strftime(buf, 50, "%F %T", &tm);
-    cmd << "\"" << std::string(buf) << "\", ";
-    cmd << "\"" << std::string(buf) << "\"";
+    cmd << "\"" << nows << "\", ";
+    cmd << "\"" << nows << "\"";
     cmd << ")";
 
     bool suc = mysql_instance->Execute(cmd.str());
     financial_all_records(response);
+
+    if (suc && is_record_with_me(record)) {
+        jarvis::financial_asset asset;
+        if (get_user_balance(kOwnerUid, &asset)) {
+            bool suc = update_user_balance(asset, response->records(0));
+            if (!suc) LOG(ERROR) << "update my balance fail, record id:" << response->records(0).id();
+        }
+    }
 
     response->set_code(suc ? financial_response_rcode_ok : financial_response_rcode_dberr);
     return;
@@ -312,7 +417,7 @@ void JarvisServiceImpl::DeleteFinancialRecord(::google::protobuf::RpcController*
 
     const auto& record = request->record();
     std::ostringstream cmd;
-    cmd << "delete from financial_records where id = " << record.id();
+    cmd << "update from financial_records set status = 1 where id = " << record.id();
     mysql_instance->Execute(cmd.str());
     financial_all_records(response);
     response->set_code(financial_response_rcode_ok);
@@ -335,19 +440,36 @@ void JarvisServiceImpl::UpdateFinancialRecord(::google::protobuf::RpcController*
     cmd << "`amount` = " << record.amount() << ", ";
     cmd << "`clasify` = " << record.clasify() << ", ";
     cmd << "`comments` = '" << record.comments() << "', ";
-
-    char buf[50];
-    struct tm tm;
-    time_t now = time(nullptr);
-    localtime_r(&now, &tm);
-    strftime(buf, 50, "%F %T", &tm);
-    cmd << "`update_time` = '" << std::string(buf) << "'";
+    cmd << "`update_time` = '" << nowstring() << "'";
     cmd << " where `id` = " << record.id();
 
     bool suc = mysql_instance->Execute(cmd.str());
     financial_all_records(response);
 
     response->set_code(suc ? financial_response_rcode_ok : financial_response_rcode_dberr);
+}
+
+void JarvisServiceImpl::GetFinancialAsset(::google::protobuf::RpcController* controller,
+                                          const ::jarvis::HttpRequest* request,
+                                          ::jarvis::HttpResponse* response,
+                                          ::google::protobuf::Closure* done) {
+    brpc::ClosureGuard done_guard(done);
+
+    common_cntl_set(controller);
+    brpc::Controller* cntl = static_cast<brpc::Controller*>(controller);
+
+    ::jarvis::financial_asset asset;
+    get_user_balance(kOwnerUid, &asset);
+
+    std::string data;
+    google::protobuf::util::JsonPrintOptions joption;
+    joption.always_print_primitive_fields = true;
+    joption.preserve_proto_field_names = true;
+    google::protobuf::util::MessageToJsonString(asset, &data, joption);
+    std::ostringstream oss;
+    oss << "{\"status\":0, \"msg\":\"Success\", \"data\":[" << data << "]}";
+    cntl->response_attachment().append(oss.str());
+    LOG(INFO) << cntl->response_attachment();
 }
 
 
