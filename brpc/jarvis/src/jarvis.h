@@ -21,6 +21,11 @@ public:
                        ::jarvis::HttpResponse* response,
                        ::google::protobuf::Closure* done) override;
 
+    virtual void Login(::google::protobuf::RpcController* controller,
+                       const ::jarvis::HttpRequest* request,
+                       ::jarvis::HttpResponse* response,
+                       ::google::protobuf::Closure* done) override;
+
     virtual void GetFinancialUser(::google::protobuf::RpcController* controller,
                        const ::jarvis::HttpRequest* request,
                        ::jarvis::HttpResponse* response,

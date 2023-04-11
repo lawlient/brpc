@@ -25,7 +25,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 # file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/client)
 # file(GLOB COMMON_PROTO "${CMAKE_CURRENT_LIST_DIR}/proto/*.proto")
 
-add_common_source(COMMON_SRCS COMMON_LIBS ASYNCLOG MYSQL TEXTCONFIG)
+add_common_source(COMMON_SRCS COMMON_LIBS ASYNCLOG MYSQL REDIS TEXTCONFIG)
 add_library(commonlibs ${PB_SRCS} ${PB_HDRS} ${COMMON_SRCS})
 target_link_libraries(commonlibs ${COMMON_LIBS} nlohmann_json::nlohmann_json)
 

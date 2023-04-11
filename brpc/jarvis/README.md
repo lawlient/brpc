@@ -35,6 +35,14 @@ Actually, all records is around of me.
 
 There are 2 roles, payer and payee, it means amount is always positive.
 
+3. Login
+
+Financial is a private function, so we have to enable access right control.
+
+Login is a simple right control, only those login successfully can access to financial system.
+
+
+
 ## Designation
 
 ### 1. TimeTable
@@ -117,6 +125,25 @@ create table `financial_asset` (
 ```
 
 - `recordid` is the `id` in `financial_records`
+
+
+### 3. Login
+
+```sql
+create table `jusers` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(100) UNIQUE,
+    `right` INT,
+    `secret` VARCHAR(100),
+    `create_time` DATETIME,
+    `update_time` DATETIME,
+    primary key(`id`)
+)ENGINE=InnoDB DEFAULT charset=utf8;
+```
+
+- name: user name
+- right: 0:viewer, 1: admin
+- secret: store password. For simple store it with plain text.
 
 ## Fix Me
 

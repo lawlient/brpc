@@ -2,6 +2,11 @@ syntax="proto3";
 package jarvis;
 
 
+message jusers {
+    string name     = 1;
+    int32 right     = 2;
+    string secret   = 3;
+}
 
 message time_table {
     int32  id      =   1;

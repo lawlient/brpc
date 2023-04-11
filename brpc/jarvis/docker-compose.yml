@@ -15,7 +15,17 @@ services:
             - "827"
         tty: true
         depends_on:
+            - jarvis_cache
             - jarvis_memory
+
+    jarvis_cache:
+        container_name: "jarvis_cache"
+        image: "redis:latest"
+        volumes:
+            - "/etc/localtime:/etc/localtime:ro"
+            - "/data:/data"
+        tty: true
+
 
     jarvis_memory:
         container_name: "jarvis_memory"

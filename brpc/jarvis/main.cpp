@@ -22,6 +22,7 @@
 
 #include "jarvis.h"
 #include "mysql.h"
+#include "redis_client.h"
 
 #include <log/asynclog.h>
 #include <config/config.h>
@@ -50,13 +51,19 @@ int main(int argc, char* argv[]) {
     if (alog) alog->Init();
 
     const auto& mysql_config = cfg->cfg().mysql();
-
     MysqlOption mysql_option;
     mysql_option.url    = mysql_config.url();
     mysql_option.user   = mysql_config.user();
     mysql_option.passwd = mysql_config.passwd();
     mysql_option.schema = mysql_config.schema();
     mysql_instance = std::make_shared<MysqlWrapper>(mysql_option);
+
+    const auto& redis_config = cfg->cfg().redis();
+    redis::RedisClientOption redis_option;
+    redis_option.url = redis_config.url();
+    redis::RedisClient rclient(redis_option);
+    LOG(INFO) << "access to redis:" << (rclient.set() ? " success." : " failed.");
+
 
     // Generally you only need one Server.
     brpc::Server server;

@@ -6,7 +6,7 @@ WORKDIR amis
 
 RUN npm i --legacy-peer-deps && npm run build && npm i amis 
 
-COPY ./jarvis.html /amis/node_modules/amis/sdk/index.html
+COPY ./*.html /amis/node_modules/amis/sdk/
 
 RUN npm i -g serve
 

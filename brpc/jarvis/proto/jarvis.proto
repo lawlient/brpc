@@ -43,6 +43,9 @@ message financial_response {
 
 service Jarvis {
     rpc TestQuery(HttpRequest) returns (HttpResponse);
+    /* login */
+    rpc Login(HttpRequest) returns (HttpResponse);
+
 
     /* financial users related */
     rpc GetFinancialUser(HttpRequest) returns (HttpResponse);

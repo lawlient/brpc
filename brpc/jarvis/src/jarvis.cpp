@@ -16,6 +16,8 @@ static inline bool is_record_with_me(const jarvis::financial_records& r) {
     return (r.payer() == kOwnerUid || r.payee() == kOwnerUid);
 }
 
+static std::string token_generator();
+
 static inline void common_cntl_set(::google::protobuf::RpcController* controller) {
     brpc::Controller* cntl = dynamic_cast<brpc::Controller*>(controller);
     if (cntl) {
@@ -192,6 +194,33 @@ void JarvisServiceImpl::TestQuery(::google::protobuf::RpcController* controller,
 
     cntl->response_attachment().append(oss.str());
 
+    LOG(INFO) << cntl->response_attachment();
+}
+
+void JarvisServiceImpl::Login(::google::protobuf::RpcController* controller,
+                              const ::jarvis::HttpRequest* request,
+                              ::jarvis::HttpResponse* response,
+                              ::google::protobuf::Closure* done) {
+    brpc::ClosureGuard done_guard(done);
+    common_cntl_set(controller);
+    brpc::Controller* cntl = static_cast<brpc::Controller*>(controller);
+
+    // const auto& uri = cntl->http_request().uri();
+    const auto payload = cntl->request_attachment().to_string();
+    nlohmann::json jpayload = nlohmann::json::parse(payload.c_str(), payload.c_str() + payload.size());
+    
+    const auto username = jpayload["username"].get<std::string>();
+    const auto secret   = jpayload["secret"].get<std::string>();
+    if (username.empty() || secret.empty()) {
+        LOG(ERROR) << "username: " << username << "secret: " << secret;
+        return;
+    }
+
+    nlohmann::json res;
+    res["status"]         = 0;
+    res["msg"]            = "success";
+    res["data"]["token"]  = token_generator();
+    cntl->response_attachment().append(res.dump());
     LOG(INFO) << cntl->response_attachment();
 }
 
@@ -472,5 +501,9 @@ void JarvisServiceImpl::GetFinancialAsset(::google::protobuf::RpcController* con
     LOG(INFO) << cntl->response_attachment();
 }
 
+std::string token_generator() {
+    return "i am jarvis"; /* todo */
+}
 
 } // namespace jarvis
+

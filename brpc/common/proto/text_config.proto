@@ -10,6 +10,10 @@ message MysqlConfig {
     string schema   = 5;
 }
 
+message RedisConfig {
+    string url      = 1;
+}
+
 message LogConfig {
     string prefix   = 1;
     uint32 id       = 2;
@@ -22,5 +26,6 @@ message Config {
     uint32 port         =   2;
     int32  idle_tmo_s   =   3;  // Connection will be closed if there is no read/write operations during me
     MysqlConfig mysql   =   4;
-    LogConfig log       =   5;
+    RedisConfig redis   =   5;
+    LogConfig log       =   6;
 };
