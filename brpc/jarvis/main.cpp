@@ -58,13 +58,6 @@ int main(int argc, char* argv[]) {
     mysql_option.schema = mysql_config.schema();
     mysql_instance = std::make_shared<MysqlWrapper>(mysql_option);
 
-    const auto& redis_config = cfg->cfg().redis();
-    redis::RedisClientOption redis_option;
-    redis_option.url = redis_config.url();
-    redis::RedisClient rclient(redis_option);
-    LOG(INFO) << "access to redis:" << (rclient.set() ? " success." : " failed.");
-
-
     // Generally you only need one Server.
     brpc::Server server;
 

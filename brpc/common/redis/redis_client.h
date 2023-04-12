@@ -3,6 +3,8 @@
 #include <brpc/redis.h>
 #include <brpc/channel.h>
 
+#include <vector>
+
 
 namespace redis {
 
@@ -14,7 +16,10 @@ class RedisClient {
 public:
     explicit RedisClient(const RedisClientOption& opt);
 
-    bool set();
+    bool Execute(const std::string& cmd);
+    
+    bool set(const std::string& key, const std::string& val, int32_t ttl = 86400 * 30);
+    bool get(const std::string& key, std::string* val);
 
 private:
     RedisClient() = default;

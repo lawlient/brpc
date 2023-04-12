@@ -1,7 +1,13 @@
 #include "jarvis.h"
 #include "mysql.h"
+#include "redis_client.h"
+
+#include <config/config.h>
 
 #include <nlohmann/json.hpp>
+
+#include <openssl/hmac.h>
+#include <openssl/evp.h>
 
 #include <google/protobuf/util/json_util.h>
 
@@ -29,6 +35,17 @@ static inline void common_cntl_set(::google::protobuf::RpcController* controller
         cntl->http_response().SetHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS");
         cntl->http_response().SetHeader("Access-Control-Allow-Headers", "Origin, Content-Type, X-Auth-Token");
     }
+}
+
+static bool check_login() {
+    auto* cfg = basis::text_config::TextConfig::GetInstance();
+    const auto& redis_config = cfg->cfg().redis();
+    redis::RedisClientOption redis_option;
+    redis_option.url = redis_config.url();
+    redis::RedisClient rclient(redis_option);
+    std::string token;
+    rclient.get("token", &token);
+    return 64 == token.size();
 }
 
 static inline std::string nowstring() {
@@ -131,6 +148,29 @@ bool get_user_balance(int32_t uid, jarvis::financial_asset* asset) {
     return success;
 }
 
+bool get_login_user(const std::string& name, jarvis::jusers* usr) {
+    std::unique_ptr<sql::ResultSet> res;
+    std::string where = "`name` = '" + name + "'";
+    res.reset(mysql_instance->SelectAll(*usr, where, "", "", "1"));
+    if (!res) return false;
+
+    std::vector<google::protobuf::Message*> msgs;
+    mysql_instance->Parse(res.get(), usr, msgs);
+
+    bool success = false;
+    for (const auto* msg : msgs) {
+        const auto* row = dynamic_cast<const jarvis::jusers*>(msg);
+        if (row == nullptr) {
+            LOG(ERROR) << "cast login user fail";
+            continue;
+        }
+        usr->CopyFrom(*row);
+        success = true;
+        LOG(DEBUG) << usr->ShortDebugString();
+    }
+    return success;   
+}
+
 bool update_user_balance(const jarvis::financial_asset& casset, 
                          const jarvis::financial_records& record) {
     if (record.payer() == record.payee()) return true; // ignore self to self
@@ -197,6 +237,18 @@ void JarvisServiceImpl::TestQuery(::google::protobuf::RpcController* controller,
     LOG(INFO) << cntl->response_attachment();
 }
 
+static bool check_login_info(const std::string& name, const std::string& secret) {
+    jarvis::jusers usr;
+    if (!get_login_user(name, &usr)) {
+        return false;
+    }
+    if (secret != usr.secret()) {
+        LOG(INFO) << "secret check fail";
+        return false;
+    }
+    return true;
+}
+
 void JarvisServiceImpl::Login(::google::protobuf::RpcController* controller,
                               const ::jarvis::HttpRequest* request,
                               ::jarvis::HttpResponse* response,
@@ -205,7 +257,6 @@ void JarvisServiceImpl::Login(::google::protobuf::RpcController* controller,
     common_cntl_set(controller);
     brpc::Controller* cntl = static_cast<brpc::Controller*>(controller);
 
-    // const auto& uri = cntl->http_request().uri();
     const auto payload = cntl->request_attachment().to_string();
     nlohmann::json jpayload = nlohmann::json::parse(payload.c_str(), payload.c_str() + payload.size());
     
@@ -215,11 +266,27 @@ void JarvisServiceImpl::Login(::google::protobuf::RpcController* controller,
         LOG(ERROR) << "username: " << username << "secret: " << secret;
         return;
     }
+    if (!check_login_info(username, secret)) {
+        nlohmann::json res;
+        res["status"]         = 1;
+        res["msg"]            = "password check failed";
+        res["data"]["Hint"]   = "please contact with your admin!";
+        cntl->response_attachment().append(res.dump());
+        LOG(INFO) << "username: " << username << "secret: " << secret << " check failed. "
+                  << cntl->response_attachment();
+        return;
+    }
+    const auto& token = token_generator();
+    auto* cfg = basis::text_config::TextConfig::GetInstance();
+    const auto& redis_config = cfg->cfg().redis();
+    redis::RedisClientOption redis_option;
+    redis_option.url = redis_config.url();
+    redis::RedisClient rclient(redis_option);
+    rclient.set("token", token, 300);
 
     nlohmann::json res;
     res["status"]         = 0;
     res["msg"]            = "success";
-    res["data"]["token"]  = token_generator();
     cntl->response_attachment().append(res.dump());
     LOG(INFO) << cntl->response_attachment();
 }
@@ -231,6 +298,14 @@ void JarvisServiceImpl::GetFinancialUser(::google::protobuf::RpcController* cont
     brpc::ClosureGuard done_guard(done);
     common_cntl_set(controller);
     brpc::Controller* cntl = static_cast<brpc::Controller*>(controller);
+
+    if (!check_login()) {
+        nlohmann::json res;
+        res["status"] = 1;
+        res["msg"]    = "Please login";
+        cntl->response_attachment().append(res.dump());
+        return;
+    }
 
     const auto& uri = cntl->http_request().uri();
     auto optformat = uri.GetQuery("OptionsFormat");
@@ -292,6 +367,15 @@ void JarvisServiceImpl::AddFinancialUser(::google::protobuf::RpcController* cont
                     ::google::protobuf::Closure* done) {
     brpc::ClosureGuard done_guard(done);
     common_cntl_set(controller);
+    brpc::Controller* cntl = static_cast<brpc::Controller*>(controller);
+
+    if (!check_login()) {
+        nlohmann::json res;
+        res["status"] = 1;
+        res["msg"]    = "Please login";
+        cntl->response_attachment().append(res.dump());
+        return;
+    }
 
     const auto& user        = request->user();
     const auto* descriptor  = user.descriptor();
@@ -323,6 +407,15 @@ void JarvisServiceImpl::UpdFinancialUser(::google::protobuf::RpcController* cont
     brpc::ClosureGuard done_guard(done);
 
     common_cntl_set(controller);
+    brpc::Controller* cntl = static_cast<brpc::Controller*>(controller);
+
+    if (!check_login()) {
+        nlohmann::json res;
+        res["status"] = 1;
+        res["msg"]    = "Please login";
+        cntl->response_attachment().append(res.dump());
+        return;
+    }
 
     const auto& user        = request->user();
     const auto* descriptor  = user.descriptor();
@@ -346,6 +439,15 @@ void JarvisServiceImpl::DelFinancialUser(::google::protobuf::RpcController* cont
                     ::google::protobuf::Closure* done) {
     brpc::ClosureGuard done_guard(done);
     common_cntl_set(controller);
+    brpc::Controller* cntl = static_cast<brpc::Controller*>(controller);
+
+    if (!check_login()) {
+        nlohmann::json res;
+        res["status"] = 1;
+        res["msg"]    = "Please login";
+        cntl->response_attachment().append(res.dump());
+        return;
+    }
 
     const auto& user = request->user();
     std::ostringstream cmd;
@@ -364,8 +466,16 @@ void JarvisServiceImpl::GetFinancialRecord(::google::protobuf::RpcController* co
                        ::google::protobuf::Closure* done)  {
     brpc::ClosureGuard done_guard(done);
     common_cntl_set(controller);
-
     brpc::Controller* cntl = static_cast<brpc::Controller*>(controller);
+
+    if (!check_login()) {
+        nlohmann::json res;
+        res["status"] = 1;
+        res["msg"]    = "Please login";
+        cntl->response_attachment().append(res.dump());
+        return;
+    }
+
     int page = 0, pagesize = 10;
     const auto& uri = cntl->http_request().uri();
     auto pagestr     = uri.GetQuery("page"); /* start from 1 */
@@ -397,6 +507,15 @@ void JarvisServiceImpl::AppendFinancialRecord(::google::protobuf::RpcController*
                        ::google::protobuf::Closure* done) {
     brpc::ClosureGuard done_guard(done);
     common_cntl_set(controller);
+    brpc::Controller* cntl = static_cast<brpc::Controller*>(controller);
+
+    if (!check_login()) {
+        nlohmann::json res;
+        res["status"] = 1;
+        res["msg"]    = "Please login";
+        cntl->response_attachment().append(res.dump());
+        return;
+    }
 
     const auto& record = request->record();
     const auto* descriptor = record.descriptor();
@@ -443,6 +562,15 @@ void JarvisServiceImpl::DeleteFinancialRecord(::google::protobuf::RpcController*
                        ::google::protobuf::Closure* done) {
     brpc::ClosureGuard done_guard(done);
     common_cntl_set(controller);
+    brpc::Controller* cntl = static_cast<brpc::Controller*>(controller);
+
+    if (!check_login()) {
+        nlohmann::json res;
+        res["status"] = 1;
+        res["msg"]    = "Please login";
+        cntl->response_attachment().append(res.dump());
+        return;
+    }
 
     const auto& record = request->record();
     std::ostringstream cmd;
@@ -458,6 +586,15 @@ void JarvisServiceImpl::UpdateFinancialRecord(::google::protobuf::RpcController*
                     ::google::protobuf::Closure* done) {
     brpc::ClosureGuard done_guard(done);
     common_cntl_set(controller);
+    brpc::Controller* cntl = static_cast<brpc::Controller*>(controller);
+
+    if (!check_login()) {
+        nlohmann::json res;
+        res["status"] = 1;
+        res["msg"]    = "Please login";
+        cntl->response_attachment().append(res.dump());
+        return;
+    }
 
     const auto& record = request->record();
     const auto* descriptor = record.descriptor();
@@ -487,6 +624,14 @@ void JarvisServiceImpl::GetFinancialAsset(::google::protobuf::RpcController* con
     common_cntl_set(controller);
     brpc::Controller* cntl = static_cast<brpc::Controller*>(controller);
 
+    if (!check_login()) {
+        nlohmann::json res;
+        res["status"] = 1;
+        res["msg"]    = "Please login";
+        cntl->response_attachment().append(res.dump());
+        return;
+    }
+
     ::jarvis::financial_asset asset;
     get_user_balance(kOwnerUid, &asset);
 
@@ -501,8 +646,23 @@ void JarvisServiceImpl::GetFinancialAsset(::google::protobuf::RpcController* con
     LOG(INFO) << cntl->response_attachment();
 }
 
-std::string token_generator() {
-    return "i am jarvis"; /* todo */
+
+static std::string hmac_sha256(const unsigned char* data, size_t datalen) {
+    static const char* KEY = "huba";
+    unsigned char md[33];
+    unsigned int mdlen = 0;
+
+    HMAC(EVP_sha256(), KEY, strlen(KEY), data, datalen, md, &mdlen);
+
+    char buf[65];
+    for (unsigned int i = 0; i < mdlen; i++)
+        snprintf(buf + 2*i, 65 - 2*i, "%.2x", md[i]);
+    return std::string(buf);
+}
+
+std::string token_generator() { 
+    const auto& msg = nowstring();
+    return hmac_sha256((unsigned char*)msg.c_str(), msg.size());
 }
 
 } // namespace jarvis
