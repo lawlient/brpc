@@ -5,6 +5,7 @@ services:
     log_agent:
         container_name: "log_agent"
         build: .
+        restart: unless-stopped
         volumes:
             - "/data/:/data"
             - "/var/:/var"
