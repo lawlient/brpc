@@ -20,6 +20,7 @@ public:
     
     bool set(const std::string& key, const std::string& val, int32_t ttl = 86400 * 30);
     bool get(const std::string& key, std::string* val);
+    bool expire(const std::string& key, int32_t ttl);
 
 private:
     RedisClient() = default;

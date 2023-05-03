@@ -77,4 +77,24 @@ bool RedisClient::get(const std::string& key, std::string* val) {
     return true;
 }
 
+bool RedisClient::expire(const std::string& key, int32_t ttl) {
+    brpc::RedisRequest request;
+    brpc::RedisResponse response;
+    brpc::Controller cntl;
+
+    request.AddCommand("EXPIRE %s %d", key.c_str(), ttl);
+    m_channel.CallMethod(NULL, &cntl, &request, &response, NULL/*done*/);
+    if (cntl.Failed()) {
+        LOG(ERROR) << "Fail to access redis server";
+        return false;
+    }
+
+    // 可以通过response.reply(i)访问某个reply
+    if (response.reply(0).is_error()) {
+        LOG(ERROR) << response.reply(0).error_message();
+        return false;
+    }
+    return true;
+}
+
 } // namespace redis

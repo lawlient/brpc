@@ -14,12 +14,23 @@
 
 using namespace google::protobuf;
 
+DEFINE_int32(login_cache_ttl, 300, "default seconds of login token caching");
+
 namespace jarvis {
 
 static const int32_t kOwnerUid = 0; /* It is me */
 
 static inline bool is_record_with_me(const jarvis::financial_records& r) {
     return (r.payer() == kOwnerUid || r.payee() == kOwnerUid);
+}
+
+static void update_token_ttl() {
+    auto* cfg = basis::text_config::TextConfig::GetInstance();
+    const auto& redis_config = cfg->cfg().redis();
+    redis::RedisClientOption redis_option;
+    redis_option.url = redis_config.url();
+    redis::RedisClient rclient(redis_option);
+    rclient.expire("token", FLAGS_login_cache_ttl);
 }
 
 static std::string token_generator();
@@ -282,7 +293,7 @@ void JarvisServiceImpl::Login(::google::protobuf::RpcController* controller,
     redis::RedisClientOption redis_option;
     redis_option.url = redis_config.url();
     redis::RedisClient rclient(redis_option);
-    rclient.set("token", token, 300);
+    rclient.set("token", token, FLAGS_login_cache_ttl);
 
     nlohmann::json res;
     res["status"]         = 0;
@@ -306,6 +317,7 @@ void JarvisServiceImpl::GetFinancialUser(::google::protobuf::RpcController* cont
         cntl->response_attachment().append(res.dump());
         return;
     }
+    update_token_ttl();
 
     const auto& uri = cntl->http_request().uri();
     auto optformat = uri.GetQuery("OptionsFormat");
@@ -376,6 +388,7 @@ void JarvisServiceImpl::AddFinancialUser(::google::protobuf::RpcController* cont
         cntl->response_attachment().append(res.dump());
         return;
     }
+    update_token_ttl();
 
     const auto& user        = request->user();
     const auto* descriptor  = user.descriptor();
@@ -416,6 +429,7 @@ void JarvisServiceImpl::UpdFinancialUser(::google::protobuf::RpcController* cont
         cntl->response_attachment().append(res.dump());
         return;
     }
+    update_token_ttl();
 
     const auto& user        = request->user();
     const auto* descriptor  = user.descriptor();
@@ -448,6 +462,8 @@ void JarvisServiceImpl::DelFinancialUser(::google::protobuf::RpcController* cont
         cntl->response_attachment().append(res.dump());
         return;
     }
+    update_token_ttl();
+
 
     const auto& user = request->user();
     std::ostringstream cmd;
@@ -475,6 +491,8 @@ void JarvisServiceImpl::GetFinancialRecord(::google::protobuf::RpcController* co
         cntl->response_attachment().append(res.dump());
         return;
     }
+    update_token_ttl();
+
 
     int page = 0, pagesize = 10;
     const auto& uri = cntl->http_request().uri();
@@ -516,6 +534,8 @@ void JarvisServiceImpl::AppendFinancialRecord(::google::protobuf::RpcController*
         cntl->response_attachment().append(res.dump());
         return;
     }
+    update_token_ttl();
+
 
     const auto& record = request->record();
     const auto* descriptor = record.descriptor();
@@ -571,6 +591,7 @@ void JarvisServiceImpl::DeleteFinancialRecord(::google::protobuf::RpcController*
         cntl->response_attachment().append(res.dump());
         return;
     }
+    update_token_ttl();
 
     const auto& record = request->record();
     std::ostringstream cmd;
@@ -595,6 +616,7 @@ void JarvisServiceImpl::UpdateFinancialRecord(::google::protobuf::RpcController*
         cntl->response_attachment().append(res.dump());
         return;
     }
+    update_token_ttl();
 
     const auto& record = request->record();
     const auto* descriptor = record.descriptor();
@@ -631,6 +653,7 @@ void JarvisServiceImpl::GetFinancialAsset(::google::protobuf::RpcController* con
         cntl->response_attachment().append(res.dump());
         return;
     }
+    update_token_ttl();
 
     ::jarvis::financial_asset asset;
     get_user_balance(kOwnerUid, &asset);
