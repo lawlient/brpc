@@ -26,7 +26,7 @@ MysqlWrapper::MysqlWrapper(const MysqlOption& option) : m_option(option)
 MysqlWrapper::~MysqlWrapper() { if (m_conn) delete m_conn; }
 
 
-bool MysqlWrapper::check_connection() {
+bool MysqlWrapper::connected() {
     if (m_conn == nullptr) {
         m_conn = get_driver_instance()->connect(m_option.url, m_option.user, m_option.passwd);
         if (m_conn == nullptr) {

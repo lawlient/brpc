@@ -5,6 +5,8 @@
 #include "table.pb.h"
 #include "jarvis.pb.h"
 
+#include "util/util.h"
+
 #include <config/config.h>
 #include <nlohmann/json.hpp>
 #include <brpc/server.h>
@@ -71,6 +73,25 @@ public:
                        ::jarvis::HttpResponse* response,
                        ::google::protobuf::Closure* done) override;
 
+    virtual void GetTask(::google::protobuf::RpcController* controller,
+                       const ::jarvis::HttpRequest* request,
+                       ::jarvis::HttpResponse* response,
+                       ::google::protobuf::Closure* done) override;
+
+    virtual void AddTask(::google::protobuf::RpcController* controller,
+                       const ::jarvis::HttpRequest* request,
+                       ::jarvis::HttpResponse* response,
+                       ::google::protobuf::Closure* done) override;
+
+    virtual void UpdTask(::google::protobuf::RpcController* controller,
+                       const ::jarvis::HttpRequest* request,
+                       ::jarvis::HttpResponse* response,
+                       ::google::protobuf::Closure* done) override;
+
+    virtual void DelTask(::google::protobuf::RpcController* controller,
+                       const ::jarvis::HttpRequest* request,
+                       ::jarvis::HttpResponse* response,
+                       ::google::protobuf::Closure* done) override;
 
 
 private:

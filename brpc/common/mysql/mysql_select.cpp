@@ -12,7 +12,7 @@ sql::ResultSet *MysqlWrapper::SelectAll(const google::protobuf::Message &meta,
                                         const std::string orderby,
                                         const std::string groupby,
                                         const std::string limit) {
-    if (!check_connection()) {
+    if (!connected()) {
         LOG(ERROR) << "connection is not valid";
         return nullptr;
     }
@@ -22,11 +22,7 @@ sql::ResultSet *MysqlWrapper::SelectAll(const google::protobuf::Message &meta,
 
     const std::string& table = descriptor->name();
     std::ostringstream cmd;
-    cmd << "select `" << descriptor->field(0)->name() << "`";
-    for (int i = 1; i < descriptor->field_count(); i++) {
-        cmd << ", `" << descriptor->field(i)->name() << "`";
-    }
-    cmd << " from " << table;
+    cmd << "select * from " << table;
     if (!where.empty())   cmd << " where " << where;
     if (!orderby.empty()) cmd << " order by " << orderby;
     if (!groupby.empty()) cmd << " group by " << groupby;

@@ -69,7 +69,7 @@ bool JarvisServiceImpl::update_user_balance() {
         return false;
     }
 
-    const std::string nows  = jutil::nowstring();
+    const std::string nows  = basis::util::datetimenow();
     std::ostringstream cmd;
     cmd << "insert into " << table() << " ("
            "`timestamp`, "

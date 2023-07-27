@@ -1,169 +1,44 @@
-# jarvis
+ Jarvis
 
-Jarvis is my good assistant. He helps me to manager my time elapse and financial records.
+Jarvis is my good assistant. He helps me to manager my work and life.
 
-## Functions' Indroduction
+## Core Functions
 
-1. TimeTable
-
-Time clasify version I is very simple. There are total 5 Top Level classifications, as follow:
-
-| Abbreviation | Full Name  | Description                                                  |
-| :----------: | :--------- | :----------------------------------------------------------- |
-|      I      | Investment | Do something valuable                                        |
-|      S      | Sleep      | Sleep is important                                           |
-|      R      | Relaxation | Meditation & Notes & so on                                   |
-|      B      | Black Hole | Something meaningless, eg. games, video                      |
-|      T      | Trivial    | Something less value but have to do, eg. eating, have a bath |
-
-2. Financial
-
-So many years, I am still so poor. Do as Rich Dad said is unavoidable.
-
-First，I have to record my income and pay out details.
-
-| Column   | Description                    |
-| :------- | :----------------------------- |
-| when     | Record concrete date and time  |
-| payer    | Who pays                       |
-| payee    | A person to whom money is paid |
-| amount   | Too easy to explain            |
-| clasify  | Clasify for the record         |
-| comments | Record something special       |
-
-Actually, all records is around of me.
-
-There are 2 roles, payer and payee, it means amount is always positive.
-
-3. Login
-
-Financial is a private function, so we have to enable access right control.
-
-Login is a simple right control, only those login successfully can access to financial system.
-
-
-
-## Designation
-
-### 1. TimeTable
-
-Creating a table as follow to record rate of time classification.
-
-```sql
-create table `time_table` (
-    `id` INT NOT NULL AUTO_INCREMENT,
-    `when` DATE,
-    `i` DOUBLE,
-    `s` DOUBLE,
-    `r` DOUBLE,
-    `b` DOUBLE,
-    `t` DOUBLE,
-    `create_time` DATETIME,
-    `update_time` DATETIME,
-    primary key(`id`)
-)ENGINE=InnoDB DEFAULT charset=utf8;
-```
-
-### 2. Financial
-
-1. A table to record all uses, including payer and payee.
-
-```sql
-create table `financial_users` (
-    `uid` INT,
-    `name` VARCHAR(100) NOT NULL,
-    `create_time` DATETIME NOT NULL,
-    `update_time` DATETIME NOT NULL,
-    primary key(`uid`)
-)ENGINE=InnoDB DEFAULT charset=utf8;
-```
-
-There are some dificult points.
-
-- Sometimes uid is too trivial to clasify.
-
-eg. carry out restaurant. It's meaningless to clasify each one of it.
-
-So, I will aggregate all of it tobe restaurant.
-
-2. Another table to record all payments.
-
-```sql
-create table `financial_records` (
-    `id` INT NOT NULL AUTO_INCREMENT,
-    `when` DATETIME,
-    `payer` INT,
-    `payee` INT,
-    `amount` DOUBLE,
-    `clasify` TINYINT,
-    `comments` VARCHAR(1024),
-    `create_time` DATETIME,
-    `update_time` DATETIME,
-    primary key(`id`)
-)ENGINE=InnoDB DEFAULT charset=utf8;
-```
-
-- `Payer` & `payee` are `uid` in table `financial_users`.
-- Classification is hard. Version I should be as simple as possible.
-
-> Attention: you should use it append only, replace deletion with a cancelation record.
-
-3. A table to count user's asset.
-
-
-```sql
-create table `financial_asset` (
-    `id` INT NOT NULL AUTO_INCREMENT,
-    `timestamp` DATETIME,
-    `uid` INT,
-    `amount` DOUBLE,
-    `recordid` INT,
-    `create_time` DATETIME,
-    `update_time` DATETIME,
-    primary key(`id`)
-)ENGINE=InnoDB DEFAULT charset=utf8;
-```
-
-- `recordid` is the `id` in `financial_records`
-
-
-### 3. Login
-
-```sql
-create table `jusers` (
-    `id` INT NOT NULL AUTO_INCREMENT,
-    `name` VARCHAR(100) UNIQUE,
-    `right` INT,
-    `secret` VARCHAR(100),
-    `create_time` DATETIME,
-    `update_time` DATETIME,
-    primary key(`id`)
-)ENGINE=InnoDB DEFAULT charset=utf8;
-```
-
-- name: user name
-- right: 0:viewer, 1: admin
-- secret: store password. For simple store it with plain text.
+1. [Financial Management](doc/01Financial.md)
+2. [Login](doc/02Login.md)
+3. [Task Management](doc/03Task.md)
 
 ## Fix Me
 
 ### Maintain manually
 
-Creating image & starting contianer and so on are too complex to maintain.
+~~~Creating image & starting contianer and so on are too complex to maintain.~~~
 
-There are too many details to remember it with brain.
+~~~There are too many details to remember it with brain.~~~
 
-We need config file or scripts to maintain all of it.
+~~~We need config file or scripts to maintain all of it.~~~
 
-`docker-compose` maybe a good option.
+~~~`docker-compose` maybe a good option.~~~
+
+docker-compose helps me to manage containers easily.
+
+It's a yaml config file, remember something like port, volume, network, name and so on.
+
+What I need to do is execute command: `docker-compose up -d --build`, it is easy.
 
 ### Bugs cause of windows + docker + wsl2 enviorment
 
-Need a server machine run ubuntu os.
+~~~Need a server machine run ubuntu os.~~~
 
-Not enmergency, I will have it in the future.
+~~~Not enmergency, I will have it in the future.~~~
 
-Eventually，we can access to the system no matter where and no matter when.
+~~~Eventually，we can access to the system no matter where and no matter when.~~~
+
+Since my old machine have worked for me 5 years and disk is broken now, I choose to buy a new machine.
+
+Then I transform the old one to be a ubuntu server.
+
+For now it works well, and I don't have to solve problems with windows and wsl.
 
 ### Data is not persistence
 

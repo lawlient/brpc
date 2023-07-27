@@ -25,7 +25,6 @@ services:
         restart: unless-stopped
         volumes:
             - "/etc/localtime:/etc/localtime:ro"
-            - "/data:/data"
         tty: true
 
 

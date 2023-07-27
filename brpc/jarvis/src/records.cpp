@@ -146,7 +146,7 @@ void JarvisServiceImpl::AppendFinancialRecord(::google::protobuf::RpcController*
 
 
     const auto& record = request->record();
-    const auto& nows       = jutil::nowstring();
+    const auto& nows       = basis::util::datetimenow();
     std::ostringstream cmd;
     cmd << "insert into " << table() << " ("
            "`when`, "
@@ -231,7 +231,7 @@ void JarvisServiceImpl::UpdateFinancialRecord(::google::protobuf::RpcController*
     // cmd << "`amount` = " << record.amount() << ", ";
     cmd << "`clasify` = " << record.clasify() << ", ";
     cmd << "`comments` = '" << record.comments() << "', ";
-    cmd << "`update_time` = '" << jutil::nowstring() << "'";
+    cmd << "`update_time` = '" << basis::util::datetimenow() << "'";
     cmd << " where `id` = " << record.id();
 
     bool suc = mysql_instance->Execute(cmd.str());

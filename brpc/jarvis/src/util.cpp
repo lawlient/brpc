@@ -1,5 +1,7 @@
 #include "util.h"
 
+#include "util/util.h"
+
 #include <cstring>
 
 #include <openssl/hmac.h>
@@ -9,14 +11,6 @@
 
 namespace jutil {
 
-std::string nowstring() {
-    char buf[50];
-    struct tm tm;
-    time_t now = time(nullptr);
-    localtime_r(&now, &tm);
-    strftime(buf, 50, "%F %T", &tm);
-    return  std::string(buf);
-}
 
 static std::string hmac_sha256(const unsigned char* data, size_t datalen) {
     static const char* KEY = "huba";
@@ -32,7 +26,7 @@ static std::string hmac_sha256(const unsigned char* data, size_t datalen) {
 }
 
 std::string token_generator() { 
-    const auto& msg = nowstring();
+    const auto& msg = basis::util::datetimenow();
     return hmac_sha256((unsigned char*)msg.c_str(), msg.size());
 }
 

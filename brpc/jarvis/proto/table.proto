@@ -47,3 +47,18 @@ message financial_asset {
     string create_time  =   6;
     string update_time  =   7;
 }
+
+message tasks {
+    int32 id         = 1;
+    string date       = 2;
+    string task       = 3;
+    float esthour     = 4;
+    float acthour     = 5;
+    int32 priority   = 6;
+    int32 completion = 7;
+    int32 classify   = 8;
+    int32 status     = 9;
+    string comments   = 10;
+    string ctime      = 11;
+    string mtime      = 12;
+}

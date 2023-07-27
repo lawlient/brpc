@@ -40,6 +40,17 @@ message financial_response {
     int32 total                        = 3;     // 总数据量，用于分页展示
 };
 
+message task_response {
+    enum rcode {
+        ok = 0;
+        dberr = 1;
+    }
+    rcode code = 1;
+    string msg  = 2;
+    repeated tasks task_list = 3;
+    int32 total = 4;
+}
+
 
 service Jarvis {
     rpc TestQuery(HttpRequest) returns (HttpResponse);
@@ -62,4 +73,11 @@ service Jarvis {
 
     /* financial asset related */
     rpc GetFinancialAsset(HttpRequest) returns (HttpResponse);
+
+
+    // task related
+    rpc GetTask(HttpRequest) returns (HttpResponse);
+    rpc AddTask(HttpRequest) returns (HttpResponse);
+    rpc UpdTask(HttpRequest) returns (HttpResponse);
+    rpc DelTask(HttpRequest) returns (HttpResponse);
 }

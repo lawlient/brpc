@@ -6,9 +6,6 @@ namespace jutil {
 
 
 
-
-std::string nowstring();
-
 std::string token_generator();
 
     

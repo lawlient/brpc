@@ -119,7 +119,7 @@ void JarvisServiceImpl::AddFinancialUser(::google::protobuf::RpcController* cont
 
     const auto& user        = request->user();
     const auto* descriptor  = user.descriptor();
-    const std::string nows  = jutil::nowstring();
+    const std::string nows  = basis::util::datetimenow();
 
     std::ostringstream cmd;
     cmd << "insert into " << descriptor->name() << " ("
@@ -160,7 +160,7 @@ void JarvisServiceImpl::UpdFinancialUser(::google::protobuf::RpcController* cont
 
     const auto& user        = request->user();
     const auto* descriptor  = user.descriptor();
-    const std::string nows  = jutil::nowstring();
+    const std::string nows  = basis::util::datetimenow();
 
     std::ostringstream cmd;
     cmd << "update " << descriptor->name() << " set ";

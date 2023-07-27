@@ -8,7 +8,7 @@
 using namespace google::protobuf;
 
 
-int MysqlWrapper::InsertRaw(const google::protobuf::Message &raw) {
+int MysqlWrapper::UpdateRaw(const google::protobuf::Message &raw, const std::string& where) {
     if (!connected()) {
         LOG(ERROR) << "connection is not valid";
         return 0;
@@ -18,18 +18,10 @@ int MysqlWrapper::InsertRaw(const google::protobuf::Message &raw) {
     const auto* refl = raw.GetReflection();
 
     std::stringstream cmd;
-    cmd << "INSERT into " << desc->name() << " ";
+    cmd << "UPDATE " << desc->name() << " ";
     int i = 0;
     const auto* field = desc->field(i++);
-    cmd << "(`" << field->name() << "`";
-    for (; i < desc->field_count(); i++) {
-        field = desc->field(i);
-        cmd << ", `" << field->name() << "`";
-    }
-    cmd << ") VALUES (";
-
-    i = 0; 
-    field = desc->field(i++);
+    cmd << "SET `" << field->name() << "` = ";
     switch (field->type()) {
         case FieldDescriptor::Type::TYPE_DOUBLE: { cmd << refl->GetDouble(raw, field); break; }
         case FieldDescriptor::Type::TYPE_FLOAT: { cmd << refl->GetFloat(raw, field); break; }
@@ -41,9 +33,10 @@ int MysqlWrapper::InsertRaw(const google::protobuf::Message &raw) {
         case FieldDescriptor::Type::TYPE_STRING: { cmd << "\"" << refl->GetString(raw, field) << "\""; break; }
         default: break;
     }
+
     for (; i < desc->field_count(); i++) {
         field = desc->field(i);
-        cmd << ", ";
+        cmd << ", `" << field->name() << "` = ";
         switch (field->type()) {
             case FieldDescriptor::Type::TYPE_DOUBLE: { cmd << refl->GetDouble(raw, field); break; }
             case FieldDescriptor::Type::TYPE_FLOAT: { cmd << refl->GetFloat(raw, field); break; }
@@ -56,7 +49,8 @@ int MysqlWrapper::InsertRaw(const google::protobuf::Message &raw) {
             default: break;
         }
     }
-    cmd << ")";
+    cmd << " WHERE " << where;
+
     LOG(INFO) << cmd.str();
 
     return execute(cmd.str());

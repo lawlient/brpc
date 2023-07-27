@@ -145,6 +145,7 @@ include_directories(${COMMON}/mysql)
 include_directories(${COMMON}/redis)
 include_directories(${COMMON}/log)
 include_directories(${COMMON}/thirdparth)
+include_directories(${COMMON}/util)
 
 
 ## nlohmann-json
@@ -185,7 +186,7 @@ endfunction()
 
 
 function(add_common_source SRCS LIBS)
-    cmake_parse_arguments(common "ASYNCLOG;MYSQL;REDIS;TEXTCONFIG" "" "" "" ${ARGN})
+    cmake_parse_arguments(common "ASYNCLOG;MYSQL;REDIS;TEXTCONFIG;UTIL" "" "" "" ${ARGN})
     if (common_ASYNCLOG)
         aux_source_directory(${COMMON}/log/ _src)
         list(APPEND SRCS ${_src})
@@ -213,7 +214,12 @@ function(add_common_source SRCS LIBS)
 
         message(STATUS "enable text config")
     endif()
+    if (common_UTIL)
+        aux_source_directory(${COMMON}/util/ _src)
+        list(APPEND SRCS ${_src})
 
+        message(STATUS "enable util")
+    endif()
 
     set(${SRCS} ${${SRCS}} PARENT_SCOPE)
     set(${LIBS} ${${LIBS}} PARENT_SCOPE)

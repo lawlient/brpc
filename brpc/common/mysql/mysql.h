@@ -38,11 +38,15 @@ public:
     int Fprintf(int fd, const google::protobuf::Message& meta, sql::ResultSet *res) const;
     int Parse(sql::ResultSet *res, google::protobuf::Message* meta, std::vector<google::protobuf::Message*>& msgs) const;
 
+    int InsertRaw(const google::protobuf::Message &raw);
+    int UpdateRaw(const google::protobuf::Message &raw, const std::string& where);
+
 private:                            
     MysqlWrapper();
 
     
-    bool check_connection();
+    bool connected();
+    int execute(const std::string& cmd);
 
 private:
     bool m_initialized;
