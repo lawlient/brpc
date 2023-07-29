@@ -4,10 +4,7 @@
         <meta charset="UTF-8" />
         <title>financial</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-        <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1, maximum-scale=1"
-            />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
         <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
         <link rel="stylesheet" href="sdk.css" />
         <link rel="stylesheet" href="helper.css" />
@@ -28,6 +25,8 @@ body,
 }
         </style>
     </head>
+
+
     <body>
         <div id="root" class="app-wrapper"></div>
         <script src="sdk.js"></script>
@@ -38,7 +37,7 @@ body,
                 let amisJSON = {
                     type: 'service',
                     data : {
-                        hostname: '33451565.r7.vip.cpolar.cn',
+                        hostname: '705ecc8f.r3.vip.cpolar.cn',
                         uri: 'jarvis/Jarvis'
                     },
                     body: {
@@ -251,12 +250,53 @@ body,
                                             "switch-per-page",
                                             "pagination"
                                         ],
+                                        filter: {
+                                            debug: false,
+                                            title: '条件搜索',
+                                            body: [
+                                                {
+                                                    type: 'group',
+                                                    body: [
+                                                        {
+                                                            type: 'select',
+                                                            name: 'payer',
+                                                            label: '付款人',
+                                                            source: 'http://${hostname}/${uri}/GetFinancialUser?OptionsFormat=OPTIONS',
+                                                            clearable: true,
+                                                            size: 'sm'
+                                                        },
+                                                        {
+                                                            type: 'select',
+                                                            name: 'payee',
+                                                            label: '收款人',
+                                                            source: 'http://${hostname}/${uri}/GetFinancialUser?OptionsFormat=OPTIONS',
+                                                            clearable: true,
+                                                            size: 'sm'
+
+                                                        }
+                                                    ]
+                                                }
+                                            ],
+                                            actions: [
+                                                {
+                                                    type: 'reset',
+                                                    label: '重置'
+                                                },
+                                                {
+                                                    type: 'submit',
+                                                    level: 'primary',
+                                                    label: '查询'
+                                                }
+                                            ]
+                                        },
                                         api: {
                                             method: 'get',
                                             url:'http://${hostname}/${uri}/GetFinancialRecord',
                                             data: {
                                                 page: "${page}",
-                                                pagesize: "${perPage}"
+                                                pagesize: "${perPage}",
+                                                payer: "${payer}",
+                                                payee: "${payee}"
                                             },
                                             responseData: {
                                                 '&': '$$'

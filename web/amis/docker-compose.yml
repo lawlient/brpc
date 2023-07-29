@@ -5,14 +5,15 @@ services:
     jarvis_ui:
         container_name: "jarvis_ui"
         build: .
+        restart: unless-stopped
         volumes:
             - "/data/:/data"
-            - "/var/:/var"
+            - "./pages/:/amis/node_modules/amis/pages"
             - "/etc/localtime:/etc/localtime:ro"
         networks:
             - jarvisnet
         entrypoint: serve .
-        working_dir: '/amis/node_modules/amis/sdk'
+        working_dir: '/amis/node_modules/amis/'
         tty: true
 networks:
     jarvisnet:

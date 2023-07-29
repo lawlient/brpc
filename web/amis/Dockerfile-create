@@ -1,0 +1,16 @@
+# the file is used to create base image
+FROM node:latest
+
+# size of repository is 1.2G, too huge
+RUN git clone --depth=1 https://gitee.com/baidu/amis.git
+
+WORKDIR amis
+
+RUN npm i --legacy-peer-deps && npm run build && npm i amis 
+
+RUN npm i -g serve
+
+EXPOSE 3000
+
+CMD /usr/local/bin/serve /amis/node_modules/amis/sdk && tail -f /dev/null
+

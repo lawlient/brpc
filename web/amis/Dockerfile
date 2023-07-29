@@ -1,12 +1,7 @@
-FROM node:latest
-
-RUN git clone --depth=1 https://github.com/baidu/amis.git
+# the file is used to update config & data files
+FROM amis_jarvis_ui
 
 WORKDIR amis
-
-RUN npm i --legacy-peer-deps && npm run build && npm i amis 
-
-COPY ./*.html /amis/node_modules/amis/sdk/
 
 RUN npm i -g serve
 
