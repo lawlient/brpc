@@ -11,7 +11,7 @@ services:
             - "/data:/data"
         ipc: "container:log_agent"
         working_dir: /data/services/jarvis/bin
-        entrypoint: ./jarvis
+        entrypoint: ./jarvis --flagfile=../conf/gflags.conf
         expose: 
             - "827"
         tty: true

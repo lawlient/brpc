@@ -39,3 +39,4 @@ target_link_libraries(${exe} commonlibs ${BRPC_LIB} ${DYNAMIC_LIB})
 
 install(TARGETS ${exe} RUNTIME DESTINATION ${install_prefix}/bin)
 install(FILES ${CMAKE_CURRENT_LIST_DIR}/conf/default.conf DESTINATION ${install_prefix}/conf)
+install(FILES ${CMAKE_CURRENT_LIST_DIR}/conf/gflags.conf DESTINATION ${install_prefix}/conf)
