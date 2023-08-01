@@ -2,7 +2,7 @@
 <html lang="zh">
     <head>
         <meta charset="UTF-8" />
-        <title>financial</title>
+        <title>Task</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
         <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
@@ -37,17 +37,17 @@ body,
                 let amisJSON = {
                     type: 'service',
                     data : {
-                        hostname: '705ecc8f.r3.vip.cpolar.cn',
+                        hostname: '17cfd139.r3.vip.cpolar.cn',
                         uri: 'jarvis/Jarvis'
                     },
                     body: {
-
                         type: 'tabs',
                         activeKey: 'task manager',
+                        tabsMode: 'chrome',
                         tabs: [
                             {
-                                type: 'page',
                                 title: 'TODO',
+                                icon: 'https://img1.baidu.com/it/u=4040472656,1478609108&fm=253&fmt=auto&app=138&f=PNG?w=500&h=500',
                                 hash: 'task manager',
                                 body: [
                                     {
@@ -86,12 +86,14 @@ body,
                                                             {
                                                                 type: 'input-number',
                                                                 name: 'esthour',
+                                                                precision: 2,
                                                                 label: '估时'
                                                             },
                                                             {
                                                                 type: 'input-number',
                                                                 name: 'acthour',
                                                                 value: 0,
+                                                                precision: 2,
                                                                 label: '耗时'
                                                             },
                                                             {
@@ -167,7 +169,7 @@ body,
                                         ],
                                         api: {
                                             method: 'get',
-                                            url:'http://${hostname}/${uri}/GetTask',
+                                            url:'http://${hostname}/${uri}/GetTask?status=0',
                                             data: {
                                                 page: "${page}",
                                                 pagesize: "${perPage}"
@@ -329,11 +331,283 @@ body,
                                                                         {
                                                                             type: 'input-number',
                                                                             name: 'esthour',
+                                                                            precision: 2,
                                                                             label: '估时'
                                                                         },
                                                                         {
                                                                             type: 'input-number',
                                                                             name: 'acthour',
+                                                                            precision: 2,
+                                                                            label: '耗时'
+                                                                        },
+                                                                        {
+                                                                            type: 'select',
+                                                                            name: 'priority',
+                                                                            label: '优先级',
+                                                                            options: [
+                                                                                { label: "P0", value: 0 },
+                                                                                { label: "P1", value: 1 },
+                                                                                { label: "P2", value: 2 },
+                                                                                { label: "P3", value: 3 }
+                                                                            ]
+                                                                        },
+                                                                        {
+                                                                            type: 'select',
+                                                                            name: 'completion',
+                                                                            label: '完成度',
+                                                                            options: [
+                                                                                { label: "0%",  value: 0 },
+                                                                                { label: "10%", value: 10 },
+                                                                                { label: "20%", value: 20 },
+                                                                                { label: "30%", value: 30 },
+                                                                                { label: "40%", value: 40 },
+                                                                                { label: "50%", value: 50 },
+                                                                                { label: "60%", value: 60 },
+                                                                                { label: "70%", value: 70 },
+                                                                                { label: "80%", value: 80 },
+                                                                                { label: "90%", value: 90 },
+                                                                                { label: "100%", value: 100 }
+                                                                            ]
+                                                                        },
+                                                                        {
+                                                                            type: 'select',
+                                                                            name: 'classify',
+                                                                            label: '时间类型',
+                                                                            options: [
+                                                                                { label: "I", value: 0 },
+                                                                                { label: "T", value: 1 },
+                                                                                { label: "S", value: 2 },
+                                                                                { label: "B", value: 3 },
+                                                                                { label: "R", value: 4 }
+                                                                            ]
+                                                                        },
+                                                                        {
+                                                                            type: 'select',
+                                                                            name: 'status',
+                                                                            label: '状态',
+                                                                            options: [
+                                                                                { label: "todo", value: 0 },
+                                                                                { label: "done", value: 1 },
+                                                                                { label: "discard", value: 2 }
+                                                                            ]
+                                                                        },
+                                                                        {
+                                                                            type: 'input-rich-text',
+                                                                            name: 'comments',
+                                                                            label: '备注'
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        }
+                                                    },
+                                                    {
+                                                        type: 'button',
+                                                        label: "删除",
+                                                        actionType: 'ajax',
+                                                        level: 'secondary',
+                                                        confirmText: "Data will lost, are you sure?",
+                                                        api: {
+                                                            method: 'post',
+                                                            url: 'http://${hostname}/${uri}/DelTask',
+                                                            data: {
+                                                                id: '${id}'
+                                                            }
+                                                        }
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                title: 'DONE',
+                                icon: 'https://img1.baidu.com/it/u=3574169706,3440891984&fm=253&fmt=auto&app=138&f=PNG?w=500&h=500',
+                                hash: 'done',
+                                body: [
+                                    {
+                                        type: 'crud',
+                                        className: 'm-t-sm',
+                                        headerToolbar: [
+                                            "export-excel",
+                                            "export-csv"
+                                        ],
+                                        footerToolbar: [
+                                            "switch-per-page",
+                                            "pagination"
+                                        ],
+                                        api: {
+                                            method: 'get',
+                                            url:'http://${hostname}/${uri}/GetTask?status=1',
+                                            data: {
+                                                page: "${page}",
+                                                pagesize: "${perPage}"
+                                            },
+                                            responseData: {
+                                                '&': '$$'
+                                            }
+                                        },
+                                        columns: [
+                                            {
+                                                name: 'date',
+                                                label: '日期',
+                                                quickEdit: {
+                                                    type: 'input-date'
+                                                }
+                                            },
+                                            {
+                                                name: 'task',
+                                                label: '事项',
+                                                quickEdit: true,
+                                                popOverEnableOn: "${comments}",
+                                                popOver: {
+                                                    mode: 'popOver',
+                                                    trigger: 'hover',
+                                                    position: 'left-top',
+                                                    body: {
+                                                        type: 'page',
+                                                        body: '${comments|raw}'
+                                                    }
+                                                }
+                                            },
+                                            { 
+                                                name: 'esthour',
+                                                label: '估时',
+                                                quickEdit: true
+                                            },
+                                            { 
+                                                name: 'acthour',
+                                                label: '耗时',
+                                                quickEdit: true
+                                            },
+                                            {
+                                                name: 'priority',
+                                                label: '优先级',
+                                                quickEdit: {
+                                                    type: 'select',
+                                                    options: [
+                                                        { value: 0, label: "P0" },
+                                                        { value: 1, label: "P1" },
+                                                        { value: 2, label: "P2" },
+                                                        { value: 3, label: "P3" }
+                                                    ]
+                                                },
+                                                type: 'mapping',
+                                                map: {
+                                                    0: "P0",
+                                                    1: "P1",
+                                                    2: "P2",
+                                                    3: "P3"
+                                                }
+                                            },
+                                            {
+                                                name: 'completion',
+                                                label: '完成度',
+                                                type: 'progress',
+                                                quickEdit: {
+                                                    type: 'input-number'
+                                                }
+                                            },
+                                            { 
+                                                name: 'classify',
+                                                label: '时间类型',
+                                                type: 'mapping', 
+                                                map: {
+                                                    0: "<span class='label label-success'>I</span>",
+                                                    1: "<span class='label label-info'>T</span>",
+                                                    2: "<span class='label label-danger'>B</span>",
+                                                    3: "<span class='label label-warning'>S</span>",
+                                                    4: "<span class='label label-default'>R</span>",
+                                                },
+                                                quickEdit: {
+                                                    type: 'select',
+                                                    options: [
+                                                        { value: 0, label: "I" },
+                                                        { value: 1, label: "T" },
+                                                        { value: 2, label: "B" },
+                                                        { value: 3, label: "S" },
+                                                        { value: 4, label: "R" }
+                                                    ]
+                                                }
+                                            },
+                                            {
+                                                name: 'status',
+                                                label: '状态',
+                                                type: "mapping",
+                                                map : {
+                                                    0: "<span class='label label-info'>todo</span>",
+                                                    1: "<span class='label label-success'>done</span>",
+                                                    2: "<span class='label label-default'>discard</span>",
+                                                },
+                                                quickEdit: {
+                                                    type: 'select',
+                                                    options: [
+                                                        { label: "todo", value: 0 },
+                                                        { label: "done", value: 1 },
+                                                        { label: "discard", value: 2 }
+                                                    ]
+                                                }
+                                            },
+                                            {
+                                                type: 'operation',
+                                                label: '操作',
+                                                buttons: [
+                                                    {
+                                                        type: 'button',
+                                                        label: '保存',
+                                                        actionType: 'ajax',
+                                                        level: '',
+                                                        api: {
+                                                            method: 'post',
+                                                            url: 'http://${hostname}/${uri}/UpdTask',
+                                                            data: {
+                                                                id: '${id}',
+                                                                '&': '$$'
+                                                            }
+                                                        }
+                                                    },
+                                                    {
+                                                        type: 'button',
+                                                        label: '编辑',
+                                                        level: 'primary',
+                                                        actionType: 'dialog',
+                                                        dialog: {
+                                                            title: '编辑',
+                                                            body: [
+                                                                {
+                                                                    type: 'form',
+                                                                    api: {
+                                                                        method: 'post',
+                                                                        url: 'http://${hostname}/${uri}/UpdTask',
+                                                                        data: {
+                                                                            id: '${id}',
+                                                                            '&': '$$',
+                                                                            ctime: '${ctime}'
+                                                                        }
+                                                                    },
+                                                                    body: [
+                                                                        {
+                                                                            type: 'input-date',
+                                                                            name: 'date',
+                                                                            label: '日期',
+                                                                            format: "YYYY-MM-DD"
+                                                                        },
+                                                                        {
+                                                                            type: 'input-text',
+                                                                            name: 'task',
+                                                                            label: '事项'
+                                                                        },
+                                                                        {
+                                                                            type: 'input-number',
+                                                                            name: 'esthour',
+                                                                            precision: 2,
+                                                                            label: '估时'
+                                                                        },
+                                                                        {
+                                                                            type: 'input-number',
+                                                                            name: 'acthour',
+                                                                            precision: 2,
                                                                             label: '耗时'
                                                                         },
                                                                         {
