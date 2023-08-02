@@ -42,8 +42,8 @@ message financial_response {
 
 message task_response {
     enum rcode {
-        ok = 0;
-        dberr = 1;
+        ok      = 0;
+        dberr   = 1;
     }
     rcode code = 1;
     string msg  = 2;
@@ -51,6 +51,35 @@ message task_response {
     int32 total = 4;
 }
 
+message obj {
+    /* copy from okr, should be same as okr*/
+    int32 id         = 1;
+    string event     = 2;
+    string start     = 3;
+    string end       = 4;
+    float est        = 5;
+    float act        = 6;
+    int32 parent     = 7;
+    int32 score      = 8;
+    int32 classify   = 9;
+    int32 level      = 10;
+    string comments  = 11;
+    string ctime     = 12;
+    string mtime     = 13;
+
+    repeated obj children = 99; /* for nest */
+}
+message okr_response {
+    enum rcode {
+        ok      = 0;
+        dberr   = 1;
+        noyear  = 2;
+    }
+    rcode code = 1;
+    string msg  = 2;
+    repeated obj okr_list = 3;
+    int32 total = 4;
+}
 
 service Jarvis {
     rpc TestQuery(HttpRequest) returns (HttpResponse);
@@ -80,4 +109,10 @@ service Jarvis {
     rpc AddTask(HttpRequest) returns (HttpResponse);
     rpc UpdTask(HttpRequest) returns (HttpResponse);
     rpc DelTask(HttpRequest) returns (HttpResponse);
+
+    // okr related
+    rpc GetOKR(HttpRequest) returns (HttpResponse);
+    rpc AddOKR(HttpRequest) returns (HttpResponse);
+    rpc UpdOKR(HttpRequest) returns (HttpResponse);
+    rpc DelOKR(HttpRequest) returns (HttpResponse);
 }

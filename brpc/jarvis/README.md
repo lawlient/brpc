@@ -7,6 +7,7 @@ Jarvis is my good assistant. He helps me to manager my work and life.
 1. [Financial Management](doc/01Financial.md)
 2. [Login](doc/02Login.md)
 3. [Task Management](doc/03Task.md)
+4. [OKR Management](doc/04OKR.md)
 
 ## Fix Me
 

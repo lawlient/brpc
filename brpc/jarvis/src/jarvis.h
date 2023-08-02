@@ -93,6 +93,27 @@ public:
                        ::jarvis::HttpResponse* response,
                        ::google::protobuf::Closure* done) override;
 
+    virtual void GetOKR(::google::protobuf::RpcController* controller,
+                       const ::jarvis::HttpRequest* request,
+                       ::jarvis::HttpResponse* response,
+                       ::google::protobuf::Closure* done) override;
+
+    virtual void AddOKR(::google::protobuf::RpcController* controller,
+                       const ::jarvis::HttpRequest* request,
+                       ::jarvis::HttpResponse* response,
+                       ::google::protobuf::Closure* done) override;
+
+    virtual void UpdOKR(::google::protobuf::RpcController* controller,
+                       const ::jarvis::HttpRequest* request,
+                       ::jarvis::HttpResponse* response,
+                       ::google::protobuf::Closure* done) override;
+
+    virtual void DelOKR(::google::protobuf::RpcController* controller,
+                       const ::jarvis::HttpRequest* request,
+                       ::jarvis::HttpResponse* response,
+                       ::google::protobuf::Closure* done) override;
+
+
 
 private:
     static inline void common_cntl_set(::google::protobuf::RpcController* controller) {

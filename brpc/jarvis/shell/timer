@@ -1,0 +1,118 @@
+#!/usr/bin/bash
+
+declare -A CLASSIFY
+CLASSIFY=(
+    ["0"]="I"
+    ["1"]="T"
+    ["2"]="S"
+    ["3"]="B"
+    ["4"]="R"
+)
+declare -A PN
+PN=(
+    ["0"]="P0"
+    ["1"]="P1"
+    ["2"]="P2"
+    ["3"]="P3"
+)
+declare -A STATUS
+STATUS=(
+    ["0"]="todo"
+    ["1"]="done"
+    ["2"]="discard"
+)
+
+function day_table() {
+    day=$1
+
+    output=$(curl localhost/jarvis/Jarvis/GetTask?date=$day 2>/dev/null)
+    output=$(echo $output | jq .task_list)
+
+    [[ "[]" == "$output" ]] && return 0
+
+    echo '<table border="1" cellpadding="5" style="font-size:10px">' >> $html
+    echo "    <caption> $(date -d "$day" +"%F %A") </caption>" >>  $html
+    echo "    <tr> " >> $html
+    echo "        <th>事项</th>" >> $html
+    echo "        <th>估时</th>" >> $html
+    echo "        <th>耗时</th>" >> $html
+    echo "        <th>优先级</th>" >> $html
+    echo "        <th>类型</th>" >> $html
+    echo "        <th>状态</th>" >> $html
+    echo "    </tr>" >> $html
+
+    for line in `seq 10`
+    do
+        row=$(($line - 1))
+        task=$(echo $output | jq .[$row])
+        [[ "null" == "$task" ]] && break
+        #echo $task   # debug log
+
+        echo "    <tr>" >> $html
+        content=$(echo $task | jq .task)    # 字符串，包含"
+        echo "        <td> ${content//\"/} </td>" >> $html  # 删除所有"
+        echo "        <td> $(echo $task | jq .esthour) </td>" >> $html
+        echo "        <td> $(echo $task | jq .acthour) </td>" >> $html
+        echo "        <td> ${PN[$(echo $task | jq .priority)]} </td>" >> $html
+        echo "        <td> ${CLASSIFY[$(echo $task | jq .classify)]} </td>" >> $html
+        echo "        <td> ${STATUS[$(echo $task | jq .status)]} </td>" >> $html
+        echo "    </tr>" >> $html
+    done
+    echo "</table>" >> $html
+}
+
+function html_body() {
+    html=$1
+
+    echo "<body>" >> $html
+
+    echo "<header align='center'>" >> $html
+    echo "JARVIS"   >> $html
+    echo "</header>" >> $html
+
+    # print every days' tasks in this week
+    whichday=`date +%w`
+    offset=$(($whichday - 1))
+    for i in `seq 7`
+    do 
+        day_table $(date -d "$offset days" +"%F %A")
+        offset=$(($offset + 1));
+    done
+
+
+    echo "</body>" >> $html
+}
+
+
+
+function html_head() {
+    cat > $1 << EOF 
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>TODO</title>
+</head>
+
+EOF
+}
+
+
+
+function generate_html() {
+    TMP=`mktemp` || exit 1
+    #TMP="./tmp"
+
+    html_head $TMP
+
+    html_body $TMP
+
+    jarvis -m $TMP
+
+    trap 'rm -f "$TMP"' EXIT
+}
+
+
+generate_html

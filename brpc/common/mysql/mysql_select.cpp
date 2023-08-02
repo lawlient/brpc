@@ -29,6 +29,15 @@ sql::ResultSet *MysqlWrapper::SelectAll(const google::protobuf::Message &meta,
     if (!limit.empty())   cmd << " limit " << limit;
     LOG(INFO) << "cmd: " << cmd.str();
 
-    std::unique_ptr<sql::Statement> stmt(m_conn->createStatement());
-    return stmt->executeQuery(cmd.str());
+    sql::ResultSet* res = nullptr;
+    try {
+        std::unique_ptr<sql::Statement> stmt(m_conn->createStatement());
+        res = stmt->executeQuery(cmd.str());
+    } catch (sql::SQLException &e) {
+        LOG(ERROR) <<"[" << __FUNCTION__ << "]"
+                   << " Code: " << e.getErrorCode()
+                   << " Msg: " << e.what()
+                   << " SQLState: " << e.getSQLState();
+    }
+    return res;
 }

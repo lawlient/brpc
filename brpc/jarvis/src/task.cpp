@@ -29,10 +29,31 @@ void JarvisServiceImpl::GetTask(::google::protobuf::RpcController *controller,
     ::jarvis::task_response taskres;
     taskres.set_code(::jarvis::task_response_rcode_ok);
     taskres.set_msg("ok");
+
+
+    const auto& uri = cntl->http_request().uri();
+    std::vector<std::string> conditions;
+    auto it         = uri.GetQuery("status");
+    if (it && it->size()) {
+        if (it->at(0) == '(') conditions.push_back("status in " + *it);
+        else if (isdigit( it->at(0))) conditions.push_back("status = " + *it);
+    }
+    it = uri.GetQuery("date");
+    if (it && it->size()) {
+        if (it->at(0) == '(') conditions.push_back("date in " + *it);
+        else conditions.push_back("date = \'" + *it + "\'");
+    }
+    std::ostringstream where;
+    if (conditions.size()) {
+        where  << conditions[0];
+        for (size_t i = 1; i < conditions.size(); i++) {
+            where << " and " << conditions[i];
+        }
+    }
     
     std::unique_ptr<sql::ResultSet> res;
     ::jarvis::tasks tasks;
-    res.reset(mysql_instance->SelectAll(tasks, "", "id", "", "1000"));
+    res.reset(mysql_instance->SelectAll(tasks, where.str(), "id", "", "1000"));
     if (res) {
         std::vector<google::protobuf::Message*> tl;
         mysql_instance->Parse(res.get(), &tasks, tl);
@@ -108,10 +129,11 @@ void JarvisServiceImpl::DelTask(::google::protobuf::RpcController *controller,
     taskres.set_code(::jarvis::task_response_rcode_ok);
     taskres.set_msg("ok");
 
-    const auto& uri = cntl->http_request().uri();
-    auto id         = uri.GetQuery("id");
-    if (id) {
-        const auto sql = "delete from " + table() + " where `id` = " + *id;
+    jarvis::tasks t;
+    const auto& body = cntl->request_attachment().to_string();
+    google::protobuf::util::JsonStringToMessage(body, &t);
+    if (t.id()) {
+        const auto sql = "delete from " + table() + " where `id` = " + std::to_string(t.id());
         bool suc = mysql_instance->Execute(sql);
         if (!suc)  {
             taskres.set_code(task_response_rcode_dberr);

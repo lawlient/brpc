@@ -62,3 +62,21 @@ message tasks {
     string ctime      = 11;
     string mtime      = 12;
 }
+
+message okr {
+    int32 id         = 1;
+    string event     = 2;
+    string start     = 3;
+    string end       = 4;
+    float est        = 5;
+    float act        = 6;
+    int32 parent     = 7;
+    int32 score      = 8;
+    int32 classify   = 9;
+    int32 level      = 10;
+    string comments  = 11;
+    string ctime     = 12;
+    string mtime     = 13;
+}
+
+

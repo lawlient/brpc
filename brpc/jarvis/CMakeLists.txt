@@ -3,6 +3,10 @@ cmake_minimum_required(VERSION 3.22)
 project(jarvis CXX)
 set(exe "jarvis")
 
+SET(CMAKE_BUILD_TYPE "Debug")
+SET(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb")
+SET(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall")
+
 set(COMMON ${CMAKE_CURRENT_LIST_DIR}/../common)
 include(${COMMON}/common.cmake)
 

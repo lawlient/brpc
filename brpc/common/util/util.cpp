@@ -21,5 +21,14 @@ std::string timenow() { return now("%T"); }
 std::string datetimenow() { return now("%F %T"); }
     
     
+std::string pb2json(const google::protobuf::Message& m) {
+    google::protobuf::util::JsonPrintOptions joption;
+    joption.always_print_primitive_fields = true;
+    joption.preserve_proto_field_names = true;
+    std::string data;
+    google::protobuf::util::MessageToJsonString(m, &data, joption);
+    return data;
+}
+
 } // namespace util
 } // namespace basis

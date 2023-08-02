@@ -37,170 +37,263 @@ body,
                 let amisJSON = {
                     type: 'service',
                     data : {
-                        hostname: '17cfd139.r3.vip.cpolar.cn',
+                        hostname: '4be8b3b0.r3.vip.cpolar.cn',
                         uri: 'jarvis/Jarvis'
                     },
-                    body: {
-
-                        type: 'tabs',
-                        mode: 'vertical',
-                        activeKey: 'record manager',
-                        tabs: [
-                            {
-                                type: 'page',
-                                title: '用户管理',
-                                hash: 'user manager',
-                                body: [
-                                    {
-                                        type: 'crud',
-                                        className: 'm-t-sm',
-                                        headerToolbar: [
-                                            {
-                                                label: '添加用户',
-                                                type: 'button',
-                                                actionType: 'dialog',
-                                                level: 'primary',
-                                                dialog: {
-                                                    title: '添加用户',
-                                                    body: {
-                                                        type: 'form',
-                                                        api: {
-                                                            method: 'post',
-                                                            url:'http://${hostname}/${uri}/AddFinancialUser',
-                                                            data: {
-                                                                user: {
-                                                                    '&': "$$"
+                    body: [
+                        {
+                            "type": 'nav',
+                            "stacked": false,
+                            "itemBadge": {
+                                "mode": "ribbon",
+                                "text": "${customText}",
+                                "position": "top-left",
+                                "visibleOn": "this.customText",
+                                "level": "${customLevel}"
+                            },
+                            "links": [
+                                {
+                                    "label": "活动管理",
+                                    "to": "./task",
+                                    "customText": "task",
+                                    "customLevel": "success"
+                                },
+                                {
+                                    "label": "OKR管理",
+                                    "to": "./okr",
+                                    "customText": "okr",
+                                    "customLevel": "info"
+                                },
+                                {
+                                    "label": "财务管理",
+                                    "to": "./financial",
+                                    "customText": "financial",
+                                    "customLevel": "danger"
+                                }
+                            ]
+                        },{
+                            type: 'tabs',
+                            mode: 'vertical',
+                            activeKey: 'record manager',
+                            tabs: [
+                                {
+                                    type: 'page',
+                                    title: '用户管理',
+                                    hash: 'user manager',
+                                    body: [
+                                        {
+                                            type: 'crud',
+                                            className: 'm-t-sm',
+                                            headerToolbar: [
+                                                {
+                                                    label: '添加用户',
+                                                    type: 'button',
+                                                    actionType: 'dialog',
+                                                    level: 'primary',
+                                                    dialog: {
+                                                        title: '添加用户',
+                                                        body: {
+                                                            type: 'form',
+                                                            api: {
+                                                                method: 'post',
+                                                                url:'http://${hostname}/${uri}/AddFinancialUser',
+                                                                data: {
+                                                                    user: {
+                                                                        '&': "$$"
+                                                                    }
                                                                 }
-                                                            }
-                                                        },
-                                                        body: [
-                                                            {
-                                                                type: 'input-number',
-                                                                name: 'uid',
-                                                                label: '用户ID'
                                                             },
-                                                            {
-                                                                type: 'input-text',
-                                                                name: 'name',
-                                                                label: '姓名'
-                                                            }
-                                                        ]
-                                                    }
-                                                }
-                                            },
-                                            "export-excel",
-                                            "export-csv"
-                                        ],
-                                        api: {
-                                            method: 'get',
-                                            url:'http://${hostname}/${uri}/GetFinancialUser',
-                                            responseData: {
-                                                '&': '$$'
-                                            }
-                                        },
-                                        columns: [
-                                            { name: 'uid', label: 'UID', sortable: true },
-                                            { name: 'name', label: '姓名' },
-                                            { name: 'create_time', label: '添加时间' },
-                                            { name: 'update_time', label: '更新时间' },
-                                            {
-                                                type: 'operation',
-                                                label: '操作',
-                                                buttons: [
-                                                    {
-                                                        type: 'button',
-                                                        label: '编辑',
-                                                        level: 'primary',
-                                                        actionType: 'dialog',
-                                                        dialog: {
-                                                            title: '编辑',
                                                             body: [
                                                                 {
-                                                                    type: 'form',
-                                                                    api: {
-                                                                        method: 'post',
-                                                                        url: 'http://${hostname}/${uri}/UpdFinancialUser',
-                                                                        data: {
-                                                                            user: {
-                                                                                uid: '${uid}',
-                                                                                '&': '$$'
-                                                                            }
-                                                                        }
-                                                                    },
-                                                                    body: [
-                                                                        {
-                                                                            type: 'input-text',
-                                                                            name: 'name',
-                                                                            label: '姓名'
-                                                                        }
-                                                                    ]
+                                                                    type: 'input-number',
+                                                                    name: 'uid',
+                                                                    label: '用户ID'
+                                                                },
+                                                                {
+                                                                    type: 'input-text',
+                                                                    name: 'name',
+                                                                    label: '姓名'
                                                                 }
                                                             ]
                                                         }
-                                                    },
-                                                    {
-                                                        type: 'button',
-                                                        label: "删除",
-                                                        actionType: 'ajax',
-                                                        level: 'secondary',
-                                                        confirmText: "Data will lost, are you sure?",
-                                                        api: {
-                                                            method: 'post',
-                                                            url: 'http://${hostname}/${uri}/DelFinancialUser',
-                                                            data: {
-                                                                user: {
-                                                                    uid: '${uid}'
+                                                    }
+                                                },
+                                                "export-excel",
+                                                "export-csv"
+                                            ],
+                                            api: {
+                                                method: 'get',
+                                                url:'http://${hostname}/${uri}/GetFinancialUser',
+                                                responseData: {
+                                                    '&': '$$'
+                                                }
+                                            },
+                                            columns: [
+                                                { name: 'uid', label: 'UID', sortable: true },
+                                                { name: 'name', label: '姓名' },
+                                                { name: 'create_time', label: '添加时间' },
+                                                { name: 'update_time', label: '更新时间' },
+                                                {
+                                                    type: 'operation',
+                                                    label: '操作',
+                                                    buttons: [
+                                                        {
+                                                            type: 'button',
+                                                            label: '编辑',
+                                                            level: 'primary',
+                                                            actionType: 'dialog',
+                                                            dialog: {
+                                                                title: '编辑',
+                                                                body: [
+                                                                    {
+                                                                        type: 'form',
+                                                                        api: {
+                                                                            method: 'post',
+                                                                            url: 'http://${hostname}/${uri}/UpdFinancialUser',
+                                                                            data: {
+                                                                                user: {
+                                                                                    uid: '${uid}',
+                                                                                    '&': '$$'
+                                                                                }
+                                                                            }
+                                                                        },
+                                                                        body: [
+                                                                            {
+                                                                                type: 'input-text',
+                                                                                name: 'name',
+                                                                                label: '姓名'
+                                                                            }
+                                                                        ]
+                                                                    }
+                                                                ]
+                                                            }
+                                                        },
+                                                        {
+                                                            type: 'button',
+                                                            label: "删除",
+                                                            actionType: 'ajax',
+                                                            level: 'secondary',
+                                                            confirmText: "Data will lost, are you sure?",
+                                                            api: {
+                                                                method: 'post',
+                                                                url: 'http://${hostname}/${uri}/DelFinancialUser',
+                                                                data: {
+                                                                    user: {
+                                                                        uid: '${uid}'
+                                                                    }
                                                                 }
                                                             }
                                                         }
-                                                    }
-                                                ]
-                                            }
-                                        ]
-                                    }
-                                ]
-                            },
-                            {
-                                type: 'page',
-                                title: '财务记录',
-                                hash: 'record manager',
-                                body: [
-                                    {
-                                        type: 'crud',
-                                        className: 'm-t-sm',
-                                        headerToolbar: [
-                                            {
-                                                label: '添加',
-                                                type: 'button',
-                                                actionType: 'dialog',
-                                                level: 'primary',
-                                                dialog: {
-                                                    title: '添加交易记录',
-                                                    body: {
-                                                        type: 'form',
-                                                        api: {
-                                                            method: 'post',
-                                                            url:'http://${hostname}/${uri}/AppendFinancialRecord',
-                                                            data: {
-                                                                record: {
-                                                                    '&': "$$"
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    type: 'page',
+                                    title: '财务记录',
+                                    hash: 'record manager',
+                                    body: [
+                                        {
+                                            type: 'crud',
+                                            className: 'm-t-sm',
+                                            headerToolbar: [
+                                                {
+                                                    label: '添加',
+                                                    type: 'button',
+                                                    actionType: 'dialog',
+                                                    level: 'primary',
+                                                    dialog: {
+                                                        title: '添加交易记录',
+                                                        body: {
+                                                            type: 'form',
+                                                            api: {
+                                                                method: 'post',
+                                                                url:'http://${hostname}/${uri}/AppendFinancialRecord',
+                                                                data: {
+                                                                    record: {
+                                                                        '&': "$$"
+                                                                    }
                                                                 }
-                                                            }
-                                                        },
-                                                        body: [
-                                                            {
-                                                                type: 'input-datetime',
-                                                                name: 'when',
-                                                                label: '时间',
-                                                                format: "YYYY-MM-DD HH:mm:ss"
                                                             },
+                                                            body: [
+                                                                {
+                                                                    type: 'input-datetime',
+                                                                    name: 'when',
+                                                                    label: '时间',
+                                                                    format: "YYYY-MM-DD HH:mm:ss"
+                                                                },
+                                                                {
+                                                                    type: 'select',
+                                                                    name: 'payer',
+                                                                    label: '付款人',
+                                                                    source: 'http://${hostname}/${uri}/GetFinancialUser?OptionsFormat=OPTIONS',
+                                                                    clearable: true,
+                                                                    searchable: true
+                                                                },
+                                                                {
+                                                                    type: 'select',
+                                                                    name: 'payee',
+                                                                    label: '收款人',
+                                                                    source: 'http://${hostname}/${uri}/GetFinancialUser?OptionsFormat=OPTIONS',
+                                                                    clearable: true,
+                                                                    searchable: true
+
+                                                                },
+                                                                {
+                                                                    type: 'input-number',
+                                                                    name: 'amount',
+                                                                    label: '金额',
+                                                                    precision: 2,
+                                                                    step: 0.01
+                                                                },
+                                                                {
+                                                                    type: 'select',
+                                                                    name: 'clasify',
+                                                                    label: '类别',
+                                                                    options: [
+                                                                        { label: "生活费", value: 0 },
+                                                                        { label: "房租", value: 1 },
+                                                                        { label: "水电", value: 2 },
+                                                                        { label: "餐饮", value: 3 },
+                                                                        { label: "红包", value: 4 },
+                                                                        { label: "充值缴费", value: 5 },
+                                                                        { label: "购物", value: 6 },
+                                                                        { label: "出行", value: 7 },
+                                                                        { label: "工资", value: 8 }
+                                                                    ]
+                                                                },
+                                                                {
+                                                                    type: 'input-text',
+                                                                    name: 'comments',
+                                                                    label: '备注'
+                                                                }
+                                                            ]
+                                                        }
+                                                    }
+                                                },
+                                                "export-excel",
+                                                "export-csv"
+                                            ],
+                                            footerToolbar: [
+                                                "switch-per-page",
+                                                "pagination"
+                                            ],
+                                            filter: {
+                                                debug: false,
+                                                title: '条件搜索',
+                                                body: [
+                                                    {
+                                                        type: 'group',
+                                                        body: [
                                                             {
                                                                 type: 'select',
                                                                 name: 'payer',
                                                                 label: '付款人',
                                                                 source: 'http://${hostname}/${uri}/GetFinancialUser?OptionsFormat=OPTIONS',
                                                                 clearable: true,
-                                                                searchable: true
+                                                                size: 'sm'
                                                             },
                                                             {
                                                                 type: 'select',
@@ -208,268 +301,206 @@ body,
                                                                 label: '收款人',
                                                                 source: 'http://${hostname}/${uri}/GetFinancialUser?OptionsFormat=OPTIONS',
                                                                 clearable: true,
-                                                                searchable: true
+                                                                size: 'sm'
 
-                                                            },
-                                                            {
-                                                                type: 'input-number',
-                                                                name: 'amount',
-                                                                label: '金额',
-                                                                precision: 2,
-                                                                step: 0.01
-                                                            },
-                                                            {
-                                                                type: 'select',
-                                                                name: 'clasify',
-                                                                label: '类别',
-                                                                options: [
-                                                                    { label: "生活费", value: 0 },
-                                                                    { label: "房租", value: 1 },
-                                                                    { label: "水电", value: 2 },
-                                                                    { label: "餐饮", value: 3 },
-                                                                    { label: "红包", value: 4 },
-                                                                    { label: "充值缴费", value: 5 },
-                                                                    { label: "购物", value: 6 },
-                                                                    { label: "出行", value: 7 },
-                                                                    { label: "工资", value: 8 }
-                                                                ]
-                                                            },
-                                                            {
-                                                                type: 'input-text',
-                                                                name: 'comments',
-                                                                label: '备注'
                                                             }
                                                         ]
                                                     }
-                                                }
-                                            },
-                                            "export-excel",
-                                            "export-csv"
-                                        ],
-                                        footerToolbar: [
-                                            "switch-per-page",
-                                            "pagination"
-                                        ],
-                                        filter: {
-                                            debug: false,
-                                            title: '条件搜索',
-                                            body: [
-                                                {
-                                                    type: 'group',
-                                                    body: [
-                                                        {
-                                                            type: 'select',
-                                                            name: 'payer',
-                                                            label: '付款人',
-                                                            source: 'http://${hostname}/${uri}/GetFinancialUser?OptionsFormat=OPTIONS',
-                                                            clearable: true,
-                                                            size: 'sm'
-                                                        },
-                                                        {
-                                                            type: 'select',
-                                                            name: 'payee',
-                                                            label: '收款人',
-                                                            source: 'http://${hostname}/${uri}/GetFinancialUser?OptionsFormat=OPTIONS',
-                                                            clearable: true,
-                                                            size: 'sm'
-
-                                                        }
-                                                    ]
-                                                }
-                                            ],
-                                            actions: [
-                                                {
-                                                    type: 'reset',
-                                                    label: '重置'
-                                                },
-                                                {
-                                                    type: 'submit',
-                                                    level: 'primary',
-                                                    label: '查询'
-                                                }
-                                            ]
-                                        },
-                                        api: {
-                                            method: 'get',
-                                            url:'http://${hostname}/${uri}/GetFinancialRecord',
-                                            data: {
-                                                page: "${page}",
-                                                pagesize: "${perPage}",
-                                                payer: "${payer}",
-                                                payee: "${payee}"
-                                            },
-                                            responseData: {
-                                                '&': '$$'
-                                            }
-                                        },
-                                        columns: [
-                                            { name: 'id', label: 'ID' },
-                                            { name: 'when', label: '时间' },
-                                            { 
-                                                name: 'payer',
-                                                label: '付款人',
-                                                type: 'mapping',
-                                                source: 'http://${hostname}/${uri}/GetFinancialUser?OptionsFormat=MAPPING'
-                                            },
-                                            {
-                                                name: 'payee',
-                                                label: '收款人',
-                                                type: 'mapping',
-                                                source: 'http://${hostname}/${uri}/GetFinancialUser?OptionsFormat=MAPPING'
-                                            },
-                                            { name: 'amount', label: '金额' },
-                                            { 
-                                                name: 'clasify',
-                                                label: '分类',
-                                                type: 'static-mapping',
-                                                map: {
-                                                    0: "生活费",
-                                                    1: "房租",
-                                                    2: "水电",
-                                                    3: "餐饮",
-                                                    4: "红包",
-                                                    5: "充值缴费",
-                                                    6: "购物",
-                                                    7: "出行",
-                                                    8: "工资"
-                                                }
-                                            },
-                                            { name: 'comments', label: '备注' },
-                                            { name: 'create_time', label: '创建时间' },
-                                            { name: 'update_time', label: '修改时间' },
-                                            {
-                                                type: 'operation',
-                                                label: '操作',
-                                                buttons: [
+                                                ],
+                                                actions: [
                                                     {
-                                                        type: 'button',
-                                                        label: '编辑',
-                                                        level: 'primary',
-                                                        actionType: 'dialog',
-                                                        dialog: {
-                                                            title: '编辑',
-                                                            body: [
-                                                                {
-                                                                    type: 'form',
-                                                                    api: {
-                                                                        method: 'post',
-                                                                        url: 'http://${hostname}/${uri}/UpdateFinancialRecord',
-                                                                        data: {
-                                                                            record: {
-                                                                                id: '${id}',
-                                                                                '&': '$$'
-                                                                            }
-                                                                        }
-                                                                    },
-                                                                    body: [
-                                                                        {
-                                                                            type: 'input-datetime',
-                                                                            name: 'when',
-                                                                            label: '时间',
-                                                                            format: "YYYY-MM-DD HH:mm:ss"
-                                                                        },
-                                                                        {
-                                                                            type: 'select',
-                                                                            name: 'payer',
-                                                                            label: '付款人',
-                                                                            source: 'http://${hostname}/${uri}/GetFinancialUser?OptionsFormat=OPTIONS',
-                                                                            clearable: true,
-                                                                            searchable: true
-                                                                        },
-                                                                        {
-                                                                            type: 'select',
-                                                                            name: 'payee',
-                                                                            label: '收款人',
-                                                                            source: 'http://${hostname}/${uri}/GetFinancialUser?OptionsFormat=OPTIONS',
-                                                                            clearable: true,
-                                                                            searchable: true
-
-                                                                        },
-                                                                        {
-                                                                            type: 'input-number',
-                                                                            name: 'amount',
-                                                                            label: '金额',
-                                                                            precision: 2,
-                                                                            step: 0.01
-                                                                        },
-                                                                        {
-                                                                            type: 'select',
-                                                                            name: 'clasify',
-                                                                            label: '类别',
-                                                                            options: [
-                                                                                { label: "生活费", value: 0 },
-                                                                                { label: "房租", value: 1 },
-                                                                                { label: "水电", value: 2 },
-                                                                                { label: "餐饮", value: 3 },
-                                                                                { label: "红包", value: 4 },
-                                                                                { label: "充值缴费", value: 5 },
-                                                                                { label: "购物", value: 6 },
-                                                                                { label: "出行", value: 7 },
-                                                                                { label: "工资", value: 8 }
-                                                                            ]
-                                                                        },
-                                                                        {
-                                                                            type: 'input-text',
-                                                                            name: 'comments',
-                                                                            label: '备注'
-                                                                        }
-                                                                    ]
-                                                                }
-                                                            ]
-                                                        }
+                                                        type: 'reset',
+                                                        label: '重置'
                                                     },
                                                     {
-                                                        type: 'button',
-                                                        label: "删除",
-                                                        actionType: 'ajax',
-                                                        level: 'secondary',
-                                                        confirmText: "Data will lost, are you sure?",
-                                                        api: {
-                                                            method: 'post',
-                                                            url: 'http://${hostname}/${uri}/DeleteFinancialRecord',
-                                                            data: {
-                                                                record: {
-                                                                    id: '${id}'
+                                                        type: 'submit',
+                                                        level: 'primary',
+                                                        label: '查询'
+                                                    }
+                                                ]
+                                            },
+                                            api: {
+                                                method: 'get',
+                                                url:'http://${hostname}/${uri}/GetFinancialRecord',
+                                                data: {
+                                                    page: "${page}",
+                                                    pagesize: "${perPage}",
+                                                    payer: "${payer}",
+                                                    payee: "${payee}"
+                                                },
+                                                responseData: {
+                                                    '&': '$$'
+                                                }
+                                            },
+                                            columns: [
+                                                { name: 'id', label: 'ID' },
+                                                { name: 'when', label: '时间' },
+                                                { 
+                                                    name: 'payer',
+                                                    label: '付款人',
+                                                    type: 'mapping',
+                                                    source: 'http://${hostname}/${uri}/GetFinancialUser?OptionsFormat=MAPPING'
+                                                },
+                                                {
+                                                    name: 'payee',
+                                                    label: '收款人',
+                                                    type: 'mapping',
+                                                    source: 'http://${hostname}/${uri}/GetFinancialUser?OptionsFormat=MAPPING'
+                                                },
+                                                { name: 'amount', label: '金额' },
+                                                { 
+                                                    name: 'clasify',
+                                                    label: '分类',
+                                                    type: 'static-mapping',
+                                                    map: {
+                                                        0: "生活费",
+                                                        1: "房租",
+                                                        2: "水电",
+                                                        3: "餐饮",
+                                                        4: "红包",
+                                                        5: "充值缴费",
+                                                        6: "购物",
+                                                        7: "出行",
+                                                        8: "工资"
+                                                    }
+                                                },
+                                                { name: 'comments', label: '备注' },
+                                                { name: 'create_time', label: '创建时间' },
+                                                { name: 'update_time', label: '修改时间' },
+                                                {
+                                                    type: 'operation',
+                                                    label: '操作',
+                                                    buttons: [
+                                                        {
+                                                            type: 'button',
+                                                            label: '编辑',
+                                                            level: 'primary',
+                                                            actionType: 'dialog',
+                                                            dialog: {
+                                                                title: '编辑',
+                                                                body: [
+                                                                    {
+                                                                        type: 'form',
+                                                                        api: {
+                                                                            method: 'post',
+                                                                            url: 'http://${hostname}/${uri}/UpdateFinancialRecord',
+                                                                            data: {
+                                                                                record: {
+                                                                                    id: '${id}',
+                                                                                    '&': '$$'
+                                                                                }
+                                                                            }
+                                                                        },
+                                                                        body: [
+                                                                            {
+                                                                                type: 'input-datetime',
+                                                                                name: 'when',
+                                                                                label: '时间',
+                                                                                format: "YYYY-MM-DD HH:mm:ss"
+                                                                            },
+                                                                            {
+                                                                                type: 'select',
+                                                                                name: 'payer',
+                                                                                label: '付款人',
+                                                                                source: 'http://${hostname}/${uri}/GetFinancialUser?OptionsFormat=OPTIONS',
+                                                                                clearable: true,
+                                                                                searchable: true
+                                                                            },
+                                                                            {
+                                                                                type: 'select',
+                                                                                name: 'payee',
+                                                                                label: '收款人',
+                                                                                source: 'http://${hostname}/${uri}/GetFinancialUser?OptionsFormat=OPTIONS',
+                                                                                clearable: true,
+                                                                                searchable: true
+
+                                                                            },
+                                                                            {
+                                                                                type: 'input-number',
+                                                                                name: 'amount',
+                                                                                label: '金额',
+                                                                                precision: 2,
+                                                                                step: 0.01
+                                                                            },
+                                                                            {
+                                                                                type: 'select',
+                                                                                name: 'clasify',
+                                                                                label: '类别',
+                                                                                options: [
+                                                                                    { label: "生活费", value: 0 },
+                                                                                    { label: "房租", value: 1 },
+                                                                                    { label: "水电", value: 2 },
+                                                                                    { label: "餐饮", value: 3 },
+                                                                                    { label: "红包", value: 4 },
+                                                                                    { label: "充值缴费", value: 5 },
+                                                                                    { label: "购物", value: 6 },
+                                                                                    { label: "出行", value: 7 },
+                                                                                    { label: "工资", value: 8 }
+                                                                                ]
+                                                                            },
+                                                                            {
+                                                                                type: 'input-text',
+                                                                                name: 'comments',
+                                                                                label: '备注'
+                                                                            }
+                                                                        ]
+                                                                    }
+                                                                ]
+                                                            }
+                                                        },
+                                                        {
+                                                            type: 'button',
+                                                            label: "删除",
+                                                            actionType: 'ajax',
+                                                            level: 'secondary',
+                                                            confirmText: "Data will lost, are you sure?",
+                                                            api: {
+                                                                method: 'post',
+                                                                url: 'http://${hostname}/${uri}/DeleteFinancialRecord',
+                                                                data: {
+                                                                    record: {
+                                                                        id: '${id}'
+                                                                    }
                                                                 }
                                                             }
                                                         }
-                                                    }
-                                                ]
-                                            }
-                                        ]
-                                    }
-                                ]
-                            },
-                            {
-                                type: 'page',
-                                title: '账户余额',
-                                hash: 'user balance',
-                                body: [
-                                    {
-                                        type: 'crud',
-                                        className: 'm-t-sm',
-                                        api: {
-                                            method: 'get',
-                                            url: 'http://${hostname}/${uri}/GetFinancialAsset',
-                                            responseData: {
-                                                '&': '$$'
-                                            }
-                                        },
-                                        columns: [
-                                            { name: 'timestamp', label: '时间'},
-                                            {
-                                                name: 'uid',
-                                                label: '用户',
-                                                type: 'mapping',
-                                                source: 'http://${hostname}/${uri}/GetFinancialUser?OptionsFormat=MAPPING'
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    type: 'page',
+                                    title: '账户余额',
+                                    hash: 'user balance',
+                                    body: [
+                                        {
+                                            type: 'crud',
+                                            className: 'm-t-sm',
+                                            api: {
+                                                method: 'get',
+                                                url: 'http://${hostname}/${uri}/GetFinancialAsset',
+                                                responseData: {
+                                                    '&': '$$'
+                                                }
                                             },
-                                            { name: 'amount', label: '余额' }
-                                        ]
-                                    }
-                                ]
-                            }
-                        ]                           
-                    }
+                                            columns: [
+                                                { name: 'timestamp', label: '时间'},
+                                                {
+                                                    name: 'uid',
+                                                    label: '用户',
+                                                    type: 'mapping',
+                                                    source: 'http://${hostname}/${uri}/GetFinancialUser?OptionsFormat=MAPPING'
+                                                },
+                                                { name: 'amount', label: '余额' }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]                           
+                        }
+                    ]
                 };
                 let amisScoped = amis.embed('#root', amisJSON);
             })();

@@ -37,23 +37,79 @@ body,
                 let amisJSON = {
                     type: 'service',
                     data : {
-                        hostname: '17cfd139.r3.vip.cpolar.cn',
+                        hostname: '4be8b3b0.r3.vip.cpolar.cn',
                         uri: 'jarvis/Jarvis'
                     },
-                    body: {
-                        type: 'tabs',
-                        activeKey: 'task manager',
-                        tabsMode: 'chrome',
-                        tabs: [
-                            {
-                                title: 'TODO',
-                                icon: 'https://img1.baidu.com/it/u=4040472656,1478609108&fm=253&fmt=auto&app=138&f=PNG?w=500&h=500',
-                                hash: 'task manager',
-                                body: [
-                                    {
+                    body: [
+                        {
+                            "type": 'nav',
+                            "stacked": false,
+                            "itemBadge": {
+                                "mode": "ribbon",
+                                "text": "${customText}",
+                                "position": "top-left",
+                                "visibleOn": "this.customText",
+                                "level": "${customLevel}"
+                            },
+                            "links": [
+                                {
+                                    "label": "活动管理",
+                                    "to": "./task",
+                                    "customText": "task",
+                                    "customLevel": "success"
+                                },
+                                {
+                                    "label": "OKR管理",
+                                    "to": "./okr",
+                                    "customText": "okr",
+                                    "customLevel": "info"
+                                },
+                                {
+                                    "label": "财务管理",
+                                    "to": "./financial",
+                                    "customText": "financial",
+                                    "customLevel": "danger"
+                                }
+                            ]
+                        },
+                        {
+                            type: 'tabs',
+                            activeKey: 'task manager',
+                            tabsMode: 'chrome',
+                            tabs: [
+                                {
+                                    title: 'TODO',
+                                    icon: 'https://img1.baidu.com/it/u=4040472656,1478609108&fm=253&fmt=auto&app=138&f=PNG?w=500&h=500',
+                                    hash: 'task manager',
+                                    body: {
                                         type: 'crud',
                                         className: 'm-t-sm',
+                                        id: 'todo-crud',
+                                        name: 'todo-crud',
+                                        data: {
+                                            day: "${DATETOSTR(TODAY(), 'YYYY-MM-DD')}"
+                                        },
                                         headerToolbar: [
+                                            {
+                                                type: 'input-date',
+                                                value: "${day}",
+                                                name: 'da',
+                                                inputFormat: 'YYYY-MM-DD',
+                                                format: 'YYYY-MM-DD',
+                                                onEvent : {
+                                                    change: {
+                                                        actions: [
+                                                            {
+                                                                actionType: 'reload',
+                                                                componentId: 'todo-crud',
+                                                                args: {
+                                                                    day: '${da}'
+                                                                }
+                                                            }
+                                                        ]
+                                                    }
+                                                }
+                                            },
                                             {
                                                 label: '添加',
                                                 type: 'button',
@@ -74,8 +130,9 @@ body,
                                                             {
                                                                 type: 'input-date',
                                                                 name: 'date',
-                                                                value: 'today',
+                                                                value: "${DATETOSTR(TODAY(), 'YYYY-MM-DD')}",
                                                                 label: '日期',
+                                                                inputFormat: "YYYY-MM-DD",
                                                                 format: "YYYY-MM-DD"
                                                             },
                                                             {
@@ -163,29 +220,8 @@ body,
                                             "export-excel",
                                             "export-csv"
                                         ],
-                                        footerToolbar: [
-                                            "switch-per-page",
-                                            "pagination"
-                                        ],
-                                        api: {
-                                            method: 'get',
-                                            url:'http://${hostname}/${uri}/GetTask?status=0',
-                                            data: {
-                                                page: "${page}",
-                                                pagesize: "${perPage}"
-                                            },
-                                            responseData: {
-                                                '&': '$$'
-                                            }
-                                        },
+                                        api: "http://${hostname}/${uri}/GetTask?status=0&date=${DATETOSTR(NOW(), 'YYYY-MM-DD')}",
                                         columns: [
-                                            {
-                                                name: 'date',
-                                                label: '日期',
-                                                quickEdit: {
-                                                    type: 'input-date'
-                                                }
-                                            },
                                             {
                                                 name: 'task',
                                                 label: '事项',
@@ -419,43 +455,52 @@ body,
                                             }
                                         ]
                                     }
-                                ]
-                            },
-                            {
-                                title: 'DONE',
-                                icon: 'https://img1.baidu.com/it/u=3574169706,3440891984&fm=253&fmt=auto&app=138&f=PNG?w=500&h=500',
-                                hash: 'done',
-                                body: [
-                                    {
+                                },
+                                {
+                                    title: 'DONE',
+                                    icon: 'https://img1.baidu.com/it/u=3574169706,3440891984&fm=253&fmt=auto&app=138&f=PNG?w=500&h=500',
+                                    hash: 'done',
+                                    body: {
                                         type: 'crud',
                                         className: 'm-t-sm',
+                                        id: 'done-crud',
+                                        name: 'done-crud',
+                                        data: {
+                                            day: "${DATETOSTR(DATEMODIFY(TODAY(), -1, 'days'), 'YYYY-MM-DD')}"
+                                        },
                                         headerToolbar: [
+                                            {
+                                                type: 'input-date',
+                                                name: 'da',
+                                                value: "${day}",
+                                                inputFormat: 'YYYY-MM-DD',
+                                                format: 'YYYY-MM-DD',
+                                                onEvent : {
+                                                    change: {
+                                                        actions: [
+                                                            {
+                                                                actionType: 'reload',
+                                                                componentId: 'done-crud',
+                                                                args: {
+                                                                    day: '${da}'
+                                                                }
+                                                            }
+                                                        ]
+                                                    }
+                                                }
+                                            },
                                             "export-excel",
                                             "export-csv"
                                         ],
-                                        footerToolbar: [
-                                            "switch-per-page",
-                                            "pagination"
-                                        ],
                                         api: {
                                             method: 'get',
-                                            url:'http://${hostname}/${uri}/GetTask?status=1',
+                                            url:"http://${hostname}/${uri}/GetTask",
                                             data: {
-                                                page: "${page}",
-                                                pagesize: "${perPage}"
-                                            },
-                                            responseData: {
-                                                '&': '$$'
+                                                status: 1,
+                                                date: '${day}'
                                             }
                                         },
                                         columns: [
-                                            {
-                                                name: 'date',
-                                                label: '日期',
-                                                quickEdit: {
-                                                    type: 'input-date'
-                                                }
-                                            },
                                             {
                                                 name: 'task',
                                                 label: '事项',
@@ -689,10 +734,10 @@ body,
                                             }
                                         ]
                                     }
-                                ]
-                            }
-                        ]
-                    }
+                                }
+                            ]
+                        }
+                    ]
                 };
                 let amisScoped = amis.embed('#root', amisJSON);
             })();
