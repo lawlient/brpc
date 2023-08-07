@@ -6,6 +6,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
         <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <link rel="icon" href="http://5fc73cca.r3.vip.cpolar.cn/ftp/Pictures/jarvis/an.icon" />
         <link rel="stylesheet" href="../sdk/sdk.css" />
         <link rel="stylesheet" href="../sdk/helper.css" />
         <link rel="stylesheet" href="../sdk/iconfont.css" />
@@ -37,7 +38,7 @@ body,
                 let amisJSON = {
                     type: 'service',
                     data : {
-                        hostname: '4be8b3b0.r3.vip.cpolar.cn',
+                        hostname: '5fc73cca.r3.vip.cpolar.cn',
                         uri: 'jarvis/Jarvis'
                     },
                     body: [
@@ -220,7 +221,7 @@ body,
                                             "export-excel",
                                             "export-csv"
                                         ],
-                                        api: "http://${hostname}/${uri}/GetTask?status=0&date=${DATETOSTR(NOW(), 'YYYY-MM-DD')}",
+                                        api: "http://${hostname}/${uri}/GetTask?status=0&date=${day}",
                                         columns: [
                                             {
                                                 name: 'task',
@@ -445,10 +446,7 @@ body,
                                                         confirmText: "Data will lost, are you sure?",
                                                         api: {
                                                             method: 'post',
-                                                            url: 'http://${hostname}/${uri}/DelTask',
-                                                            data: {
-                                                                id: '${id}'
-                                                            }
+                                                            url: 'http://${hostname}/${uri}/DelTask&id=${id}',
                                                         }
                                                     }
                                                 ]
@@ -734,6 +732,148 @@ body,
                                             }
                                         ]
                                     }
+                                },
+                                {  
+                                    title: 'SCHEDULE',
+                                    hash: 'schedule manager',
+                                    body: [
+                                        {
+                                            type: 'calendar',
+                                            id: 'schedule-crud',
+                                            name: 'schedule-crud',
+                                            onEvent : {
+                                                change: {
+                                                    actions: [
+                                                        {
+                                                            actionType: 'ajax',
+                                                            api: {
+                                                                method: "get",
+                                                                url: "http://${hostname}/${uri}/GetTask",
+                                                            },
+                                                        },
+                                                        {
+                                                            actionType: 'setValue',
+                                                            componentId: 'schedule-crud',
+                                                            args: {
+                                                                schedules: []
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            },
+                                        },
+                                        {
+                                            type: 'crud',
+                                            className: 'm-t-sm',
+                                            id: 'sch-crud',
+                                            name: 'sch-crud',
+                                            data: {
+                                                day: "${DATETOSTR(TODAY(), 'YYYY-MM-DD')}"
+                                            },
+                                            api: {
+                                                method: 'get',
+                                                url:"http://${hostname}/${uri}/GetTask",
+                                                data: {
+                                                    date: '${day}'
+                                                }
+                                            },
+                                            columns: [
+                                                {
+                                                    name: 'task',
+                                                    label: '事项',
+                                                    quickEdit: true,
+                                                    popOverEnableOn: "${comments}",
+                                                    popOver: {
+                                                        mode: 'popOver',
+                                                        trigger: 'hover',
+                                                        position: 'left-top',
+                                                        body: {
+                                                            type: 'page',
+                                                            body: '${comments|raw}'
+                                                        }
+                                                    }
+                                                },
+                                                { 
+                                                    name: 'esthour',
+                                                    label: '估时',
+                                                    quickEdit: true
+                                                },
+                                                { 
+                                                    name: 'acthour',
+                                                    label: '耗时',
+                                                    quickEdit: true
+                                                },
+                                                {
+                                                    name: 'priority',
+                                                    label: '优先级',
+                                                    quickEdit: {
+                                                        type: 'select',
+                                                        options: [
+                                                            { value: 0, label: "P0" },
+                                                            { value: 1, label: "P1" },
+                                                            { value: 2, label: "P2" },
+                                                            { value: 3, label: "P3" }
+                                                        ]
+                                                    },
+                                                    type: 'mapping',
+                                                    map: {
+                                                        0: "P0",
+                                                        1: "P1",
+                                                        2: "P2",
+                                                        3: "P3"
+                                                    }
+                                                },
+                                                {
+                                                    name: 'completion',
+                                                    label: '完成度',
+                                                    type: 'progress',
+                                                    quickEdit: {
+                                                        type: 'input-number'
+                                                    }
+                                                },
+                                                { 
+                                                    name: 'classify',
+                                                    label: '时间类型',
+                                                    type: 'mapping', 
+                                                    map: {
+                                                        0: "<span class='label label-success'>I</span>",
+                                                        1: "<span class='label label-info'>T</span>",
+                                                        2: "<span class='label label-danger'>B</span>",
+                                                        3: "<span class='label label-warning'>S</span>",
+                                                        4: "<span class='label label-default'>R</span>",
+                                                    },
+                                                    quickEdit: {
+                                                        type: 'select',
+                                                        options: [
+                                                            { value: 0, label: "I" },
+                                                            { value: 1, label: "T" },
+                                                            { value: 2, label: "B" },
+                                                            { value: 3, label: "S" },
+                                                            { value: 4, label: "R" }
+                                                        ]
+                                                    }
+                                                },
+                                                {
+                                                    name: 'status',
+                                                    label: '状态',
+                                                    type: "mapping",
+                                                    map : {
+                                                        0: "<span class='label label-info'>todo</span>",
+                                                        1: "<span class='label label-success'>done</span>",
+                                                        2: "<span class='label label-default'>discard</span>",
+                                                    },
+                                                    quickEdit: {
+                                                        type: 'select',
+                                                        options: [
+                                                            { label: "todo", value: 0 },
+                                                            { label: "done", value: 1 },
+                                                            { label: "discard", value: 2 }
+                                                        ]
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    ]
                                 }
                             ]
                         }
