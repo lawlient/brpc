@@ -24,6 +24,7 @@ STATUS=(
 
 function day_table() {
     day=$1
+    #echo $day      # debug
 
     output=$(curl localhost/jarvis/Jarvis/GetTask?date=$day 2>/dev/null)
     output=$(echo $output | jq .task_list)
@@ -72,10 +73,10 @@ function html_body() {
 
     # print every days' tasks in this week
     whichday=`date +%w`
-    offset=$(($whichday - 1))
+    offset=$((1 - $whichday))
     for i in `seq 7`
     do 
-        day_table $(date -d "$offset days" +"%F %A")
+        day_table $(date -d "$offset days" +"%F")
         offset=$(($offset + 1));
     done
 
