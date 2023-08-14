@@ -12,11 +12,11 @@ static std::string table() {
 
 static void latest_record(::jarvis::financial_records* record) {
     std::unique_ptr<sql::ResultSet> res;
-    res.reset(mysql_instance->SelectAll(*record, "", "`id` desc", "", "1"));
+    res.reset(make_sql_ins()->SelectAll(*record, "", "`id` desc", "", "1"));
     if (!res) return ;
 
     std::vector<google::protobuf::Message*> msgs;
-    mysql_instance->Parse(res.get(), record, msgs);
+    make_sql_ins()->Parse(res.get(), record, msgs);
     for (const auto* msg : msgs) {
         const auto* row = dynamic_cast<const jarvis::financial_records*>(msg);
         record->CopyFrom(*row);
@@ -27,11 +27,11 @@ static void latest_record(::jarvis::financial_records* record) {
 bool get_user_balance(int32_t uid, jarvis::financial_asset* asset) {
     std::unique_ptr<sql::ResultSet> res;
     std::string where = "uid = " + std::to_string(uid);
-    res.reset(mysql_instance->SelectAll(*asset, where, "`timestamp` desc", "", "1"));
+    res.reset(make_sql_ins()->SelectAll(*asset, where, "`timestamp` desc", "", "1"));
     if (!res) return false;
 
     std::vector<google::protobuf::Message*> msgs;
-    mysql_instance->Parse(res.get(), asset, msgs);
+    make_sql_ins()->Parse(res.get(), asset, msgs);
 
     bool success = false;
     for (const auto* msg : msgs) {
@@ -87,7 +87,7 @@ bool JarvisServiceImpl::update_user_balance() {
     cmd << "\"" << nows << "\"";
     cmd << ")";
 
-    bool suc = mysql_instance->Execute(cmd.str());
+    bool suc = make_sql_ins()->Execute(cmd.str());
     return suc;
 }
 

@@ -50,14 +50,6 @@ int main(int argc, char* argv[]) {
     auto alog = basis::asynclog::AsyncLog::GetInstance();
     if (alog) alog->Init();
 
-    const auto& mysql_config = cfg->cfg().mysql();
-    MysqlOption mysql_option;
-    mysql_option.url    = mysql_config.url();
-    mysql_option.user   = mysql_config.user();
-    mysql_option.passwd = mysql_config.passwd();
-    mysql_option.schema = mysql_config.schema();
-    mysql_instance = std::make_shared<MysqlWrapper>(mysql_option);
-
     // Generally you only need one Server.
     brpc::Server server;
 

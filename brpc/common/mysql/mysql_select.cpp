@@ -7,6 +7,9 @@
 
 using namespace google::protobuf;
 
+
+namespace mysql {
+
 sql::ResultSet *MysqlWrapper::SelectAll(const google::protobuf::Message &meta,
                                         const std::string where,
                                         const std::string orderby,
@@ -41,3 +44,6 @@ sql::ResultSet *MysqlWrapper::SelectAll(const google::protobuf::Message &meta,
     }
     return res;
 }
+
+
+} // namespace mysql

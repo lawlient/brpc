@@ -27,7 +27,7 @@ function day_table() {
     #echo $day      # debug
 
     output=$(curl localhost/jarvis/Jarvis/GetTask?date=$day 2>/dev/null)
-    output=$(echo $output | jq .task_list)
+    output=$(echo $output | jq .data.items)
 
     [[ "[]" == "$output" ]] && return 0
 

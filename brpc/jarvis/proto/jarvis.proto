@@ -40,15 +40,13 @@ message financial_response {
     int32 total                        = 3;     // 总数据量，用于分页展示
 };
 
-message task_response {
-    enum rcode {
-        ok      = 0;
-        dberr   = 1;
+message TaskResponse {
+    int32 status             = 1;
+    string msg               = 2;
+    message Data {
+        repeated tasks items = 1;
     }
-    rcode code = 1;
-    string msg  = 2;
-    repeated tasks task_list = 3;
-    int32 total = 4;
+    Data data = 3;
 }
 
 message obj {
@@ -62,7 +60,7 @@ message obj {
     int32 parent     = 7;
     int32 score      = 8;
     int32 classify   = 9;
-    int32 level      = 10;
+    int32 completion = 10;
     string comments  = 11;
     string ctime     = 12;
     string mtime     = 13;
@@ -75,10 +73,9 @@ message okr_response {
         dberr   = 1;
         noyear  = 2;
     }
-    rcode code = 1;
-    string msg  = 2;
+    rcode status          = 1;
+    string msg            = 2;
     repeated obj okr_list = 3;
-    int32 total = 4;
 }
 
 service Jarvis {
@@ -105,10 +102,10 @@ service Jarvis {
 
 
     // task related
-    rpc GetTask(HttpRequest) returns (HttpResponse);
-    rpc AddTask(HttpRequest) returns (HttpResponse);
-    rpc UpdTask(HttpRequest) returns (HttpResponse);
-    rpc DelTask(HttpRequest) returns (HttpResponse);
+    rpc GetTask(HttpRequest) returns (TaskResponse);
+    rpc AddTask(HttpRequest) returns (TaskResponse);
+    rpc UpdTask(HttpRequest) returns (TaskResponse);
+    rpc DelTask(HttpRequest) returns (TaskResponse);
 
     // okr related
     rpc GetOKR(HttpRequest) returns (HttpResponse);

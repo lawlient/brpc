@@ -33,11 +33,11 @@ bool JarvisServiceImpl::check_login() {
 static bool get_login_user(const std::string& name, jarvis::jusers* usr) {
     std::unique_ptr<sql::ResultSet> res;
     std::string where = "`name` = '" + name + "'";
-    res.reset(mysql_instance->SelectAll(*usr, where, "", "", "1"));
+    res.reset(make_sql_ins()->SelectAll(*usr, where, "", "", "1"));
     if (!res) return false;
 
     std::vector<google::protobuf::Message*> msgs;
-    mysql_instance->Parse(res.get(), usr, msgs);
+    make_sql_ins()->Parse(res.get(), usr, msgs);
 
     bool success = false;
     for (const auto* msg : msgs) {

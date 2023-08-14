@@ -3,6 +3,9 @@ version: '3.8'
 networks:
   monitoring:
     driver: bridge
+  jarvisnet:
+    name: jarvis_default
+    external: true
 
 volumes:
   prometheus_data: {}
@@ -44,6 +47,7 @@ services:
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
+    user: '0:0'
     restart: unless-stopped
     volumes:
       - /etc/prometheus/:/etc/prometheus/
@@ -60,3 +64,4 @@ services:
       - 9090
     networks:
       - monitoring
+      - jarvisnet

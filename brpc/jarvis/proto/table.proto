@@ -73,10 +73,10 @@ message okr {
     int32 parent     = 7;
     int32 score      = 8;
     int32 classify   = 9;
-    int32 level      = 10;
+    int32 completion = 10;
     string comments  = 11;
     string ctime     = 12;
     string mtime     = 13;
 }
 
-
+     

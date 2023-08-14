@@ -10,11 +10,11 @@ namespace jarvis {
 static void financial_all_users(::jarvis::financial_users_response* response) {
     std::unique_ptr<sql::ResultSet> res;
     jarvis::financial_users users;
-    res.reset(mysql_instance->SelectAll(users, "", "`uid` asc", "", "1000"));
+    res.reset(make_sql_ins()->SelectAll(users, "", "`uid` asc", "", "1000"));
     if (!res) return;
 
     std::vector<google::protobuf::Message*> msgs;
-    mysql_instance->Parse(res.get(), &users, msgs);
+    make_sql_ins()->Parse(res.get(), &users, msgs);
 
     for (const auto* msg : msgs) {
         const auto* row = dynamic_cast<const jarvis::financial_users*>(msg);
@@ -134,7 +134,7 @@ void JarvisServiceImpl::AddFinancialUser(::google::protobuf::RpcController* cont
     cmd << "\"" << nows << "\"";
     cmd << ")";
 
-    bool suc = mysql_instance->Execute(cmd.str());
+    bool suc = make_sql_ins()->Execute(cmd.str());
 
     financial_all_users(response);
     response->set_code(suc ? financial_users_response_rcode_ok : financial_users_response_rcode_dberr);
@@ -168,7 +168,7 @@ void JarvisServiceImpl::UpdFinancialUser(::google::protobuf::RpcController* cont
     cmd << "`update_time` = " << nows;
     cmd << " where `uid` = " << user.uid();
 
-    bool suc = mysql_instance->Execute(cmd.str());
+    bool suc = make_sql_ins()->Execute(cmd.str());
 
     financial_all_users(response);
     response->set_code(suc ? financial_users_response_rcode_ok : financial_users_response_rcode_dberr);
@@ -196,7 +196,7 @@ void JarvisServiceImpl::DelFinancialUser(::google::protobuf::RpcController* cont
     std::ostringstream cmd;
     cmd << "delete from financial_users where uid = " << user.uid();
     LOG(INFO) << cmd.str();
-    mysql_instance->Execute(cmd.str());
+    make_sql_ins()->Execute(cmd.str());
 
     financial_all_users(response);
     response->set_code(financial_users_response_rcode_ok);

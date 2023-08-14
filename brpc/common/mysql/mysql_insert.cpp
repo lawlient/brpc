@@ -8,14 +8,19 @@
 using namespace google::protobuf;
 
 
-int MysqlWrapper::InsertRaw(const google::protobuf::Message &raw) {
+namespace mysql {
+
+
+Status MysqlWrapper::InsertRaw(const google::protobuf::Message &raw) {
+    Status status;
     if (!connected()) {
-        LOG(ERROR) << "connection is not valid";
-        return 0;
+        status.code = 1;
+        status.msg = "connection is not valid";
+        LOG(ERROR) << status.msg;
+        return status;
     }
 
     const auto* desc = raw.GetDescriptor();
-    const auto* refl = raw.GetReflection();
 
     std::stringstream cmd;
     cmd << "INSERT into " << desc->name() << " ";
@@ -30,38 +35,20 @@ int MysqlWrapper::InsertRaw(const google::protobuf::Message &raw) {
 
     i = 0; 
     field = desc->field(i++);
-    switch (field->type()) {
-        case FieldDescriptor::Type::TYPE_DOUBLE: { cmd << refl->GetDouble(raw, field); break; }
-        case FieldDescriptor::Type::TYPE_FLOAT: { cmd << refl->GetFloat(raw, field); break; }
-        case FieldDescriptor::Type::TYPE_INT64: { cmd << refl->GetInt64(raw, field); break; }
-        case FieldDescriptor::Type::TYPE_UINT64: { cmd << refl->GetUInt64(raw, field); break; }
-        case FieldDescriptor::Type::TYPE_INT32: { cmd << refl->GetInt32(raw, field); break; }
-        case FieldDescriptor::Type::TYPE_FIXED64: { cmd << refl->GetUInt64(raw, field); break; }
-        case FieldDescriptor::Type::TYPE_FIXED32: { cmd << refl->GetUInt32(raw, field); break; }
-        case FieldDescriptor::Type::TYPE_STRING: { cmd << "\"" << refl->GetString(raw, field) << "\""; break; }
-        default: break;
-    }
+    append_field(cmd, raw, field);
     for (; i < desc->field_count(); i++) {
         field = desc->field(i);
         cmd << ", ";
-        switch (field->type()) {
-            case FieldDescriptor::Type::TYPE_DOUBLE: { cmd << refl->GetDouble(raw, field); break; }
-            case FieldDescriptor::Type::TYPE_FLOAT: { cmd << refl->GetFloat(raw, field); break; }
-            case FieldDescriptor::Type::TYPE_INT64: { cmd << refl->GetInt64(raw, field); break; }
-            case FieldDescriptor::Type::TYPE_UINT64: { cmd << refl->GetUInt64(raw, field); break; }
-            case FieldDescriptor::Type::TYPE_INT32: { cmd << refl->GetInt32(raw, field); break; }
-            case FieldDescriptor::Type::TYPE_FIXED64: { cmd << refl->GetUInt64(raw, field); break; }
-            case FieldDescriptor::Type::TYPE_FIXED32: { cmd << refl->GetUInt32(raw, field); break; }
-            case FieldDescriptor::Type::TYPE_STRING: { cmd << "\"" << refl->GetString(raw, field) << "\""; break; }
-            default: break;
-        }
+        append_field(cmd, raw, field);
     }
     cmd << ")";
     LOG(INFO) << cmd.str();
 
-    return execute(cmd.str());
+    execute(cmd.str(), &status);
+    return status;
 }
 
 
 
 
+} // namespace mysql

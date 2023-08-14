@@ -9,26 +9,17 @@ static inline std::string table() {
     return jarvis::tasks::GetDescriptor()->name();
 }
 
-static inline std::string res2json(const google::protobuf::Message& m) {
-    google::protobuf::util::JsonPrintOptions joption;
-    joption.always_print_primitive_fields = true;
-    joption.preserve_proto_field_names = true;
-    std::string data;
-    google::protobuf::util::MessageToJsonString(m, &data, joption);
-    return data;
-}
-
 
 void JarvisServiceImpl::GetTask(::google::protobuf::RpcController *controller,
                         const ::jarvis::HttpRequest *request,
-                        ::jarvis::HttpResponse *response,
+                        ::jarvis::TaskResponse *response,
                         ::google::protobuf::Closure *done) {
     brpc::ClosureGuard done_guard(done);
     common_cntl_set(controller);
     brpc::Controller* cntl = static_cast<brpc::Controller*>(controller);
-    ::jarvis::task_response taskres;
-    taskres.set_code(::jarvis::task_response_rcode_ok);
-    taskres.set_msg("ok");
+    
+    response->set_status(0);
+    response->set_msg("success");
 
 
     const auto& uri = cntl->http_request().uri();
@@ -53,29 +44,31 @@ void JarvisServiceImpl::GetTask(::google::protobuf::RpcController *controller,
     
     std::unique_ptr<sql::ResultSet> res;
     ::jarvis::tasks tasks;
-    res.reset(mysql_instance->SelectAll(tasks, where.str(), "id", "", "1000"));
-    if (res) {
-        std::vector<google::protobuf::Message*> tl;
-        mysql_instance->Parse(res.get(), &tasks, tl);
-        for (const auto* t : tl) {
-            taskres.add_task_list()->CopyFrom(*dynamic_cast<const jarvis::tasks*>(t));
-        }
+    res.reset(make_sql_ins()->SelectAll(tasks, where.str(), "id", "", "1000"));
+    if (!res) {
+        response->set_status(1);
+        response->set_msg("select from table fail");
+        return;
     }
 
-    cntl->response_attachment().append(res2json(taskres));
+    std::vector<google::protobuf::Message*> tl;
+    make_sql_ins()->Parse(res.get(), &tasks, tl);
+    for (const auto* t : tl) {
+        response->mutable_data()->add_items()->CopyFrom(*dynamic_cast<const jarvis::tasks*>(t));
+    }
 }
 
 void JarvisServiceImpl::AddTask(::google::protobuf::RpcController *controller,
                         const ::jarvis::HttpRequest *request,
-                        ::jarvis::HttpResponse *response,
+                        ::jarvis::TaskResponse *response,
                         ::google::protobuf::Closure *done) {
     brpc::ClosureGuard done_guard(done);
 
     common_cntl_set(controller);
     brpc::Controller* cntl = static_cast<brpc::Controller*>(controller);
-    ::jarvis::task_response taskres;
-    taskres.set_code(::jarvis::task_response_rcode_ok);
-    taskres.set_msg("ok");
+
+    response->set_status(0);
+    response->set_msg("ok");
 
     jarvis::tasks t;
     const auto& body = cntl->request_attachment().to_string();
@@ -84,62 +77,66 @@ void JarvisServiceImpl::AddTask(::google::protobuf::RpcController *controller,
     t.set_id(0);  // auto inc
     t.set_ctime(now);
     t.set_mtime(now);
-    auto change = mysql_instance->InsertRaw(t);
-    if (!change) {
-        taskres.set_code(task_response_rcode_dberr);
+    auto status = make_sql_ins()->InsertRaw(t);
+    if (status.code) {
+        response->set_status(status.code);
+        response->set_msg(status.msg);
     }
-
-    cntl->response_attachment().append(res2json(taskres));
 }
 
 void JarvisServiceImpl::UpdTask(::google::protobuf::RpcController *controller,
                         const ::jarvis::HttpRequest *request,
-                        ::jarvis::HttpResponse *response,
+                        ::jarvis::TaskResponse *response,
                         ::google::protobuf::Closure *done) {
     brpc::ClosureGuard done_guard(done);
 
     common_cntl_set(controller);
     brpc::Controller* cntl = static_cast<brpc::Controller*>(controller);
-    ::jarvis::task_response taskres;
-    taskres.set_code(::jarvis::task_response_rcode_ok);
-    taskres.set_msg("ok");
+    response->set_status(0);
+    response->set_msg("ok");
 
     jarvis::tasks t;
     const auto& body = cntl->request_attachment().to_string();
-    google::protobuf::util::JsonStringToMessage(body, &t);
+    google::protobuf::util::JsonParseOptions option;
+    option.ignore_unknown_fields = true;
+    auto s = google::protobuf::util::JsonStringToMessage(body, &t, option);
+    if (!s.ok()) {
+        LOG(ERROR) << "parse body: " << body << " fail";
+        response->set_status(2);
+        response->set_msg(s.message());
+        return;
+    }
     const auto& now = basis::util::datetimenow();
     t.set_mtime(now);       // update time
-    auto change = mysql_instance->UpdateRaw(t, "id = " + std::to_string(t.id()));
-    if (!change) {
-        taskres.set_code(task_response_rcode_dberr);
+    auto status = make_sql_ins()->UpdateRaw(t, "id = " + std::to_string(t.id()));
+    if (status.code) {
+        response->set_status(status.code);
+        response->set_msg(status.msg);
     }
-
-    cntl->response_attachment().append(res2json(taskres));
 }
 
 void JarvisServiceImpl::DelTask(::google::protobuf::RpcController *controller,
                         const ::jarvis::HttpRequest *request,
-                        ::jarvis::HttpResponse *response,
+                        ::jarvis::TaskResponse *response,
                         ::google::protobuf::Closure *done) {
     brpc::ClosureGuard done_guard(done);
 
     common_cntl_set(controller);
     brpc::Controller* cntl = static_cast<brpc::Controller*>(controller);
-    ::jarvis::task_response taskres;
-    taskres.set_code(::jarvis::task_response_rcode_ok);
-    taskres.set_msg("ok");
+    response->set_status(0);
+    response->set_msg("ok");
 
     jarvis::tasks t;
     const auto& body = cntl->request_attachment().to_string();
     google::protobuf::util::JsonStringToMessage(body, &t);
     if (t.id()) {
         const auto sql = "delete from " + table() + " where `id` = " + std::to_string(t.id());
-        bool suc = mysql_instance->Execute(sql);
+        bool suc = make_sql_ins()->Execute(sql);
         if (!suc)  {
-            taskres.set_code(task_response_rcode_dberr);
+            response->set_status(1);
+            response->set_msg("execute delete from table error");
         }
     }
-    cntl->response_attachment().append(res2json(taskres));
 }
 
 

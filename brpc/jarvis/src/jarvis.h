@@ -17,6 +17,20 @@ namespace jarvis {
 
 static const int32_t kOwnerUid = 0; /* It is me */
 
+
+static inline std::shared_ptr<mysql::MysqlWrapper> make_sql_ins() { 
+    auto* cfg = basis::text_config::TextConfig::GetInstance();
+    const auto& mysql_config = cfg->cfg().mysql();
+    mysql::MysqlOption mysql_option;
+    mysql_option.url    = mysql_config.url();
+    mysql_option.user   = mysql_config.user();
+    mysql_option.passwd = mysql_config.passwd();
+    mysql_option.schema = mysql_config.schema();
+    return std::make_shared<mysql::MysqlWrapper>(mysql_option);
+}
+
+
+
 class JarvisServiceImpl : public jarvis::Jarvis {
 public:
 
@@ -75,22 +89,22 @@ public:
 
     virtual void GetTask(::google::protobuf::RpcController* controller,
                        const ::jarvis::HttpRequest* request,
-                       ::jarvis::HttpResponse* response,
+                       ::jarvis::TaskResponse* response,
                        ::google::protobuf::Closure* done) override;
 
     virtual void AddTask(::google::protobuf::RpcController* controller,
                        const ::jarvis::HttpRequest* request,
-                       ::jarvis::HttpResponse* response,
+                       ::jarvis::TaskResponse* response,
                        ::google::protobuf::Closure* done) override;
 
     virtual void UpdTask(::google::protobuf::RpcController* controller,
                        const ::jarvis::HttpRequest* request,
-                       ::jarvis::HttpResponse* response,
+                       ::jarvis::TaskResponse* response,
                        ::google::protobuf::Closure* done) override;
 
     virtual void DelTask(::google::protobuf::RpcController* controller,
                        const ::jarvis::HttpRequest* request,
-                       ::jarvis::HttpResponse* response,
+                       ::jarvis::TaskResponse* response,
                        ::google::protobuf::Closure* done) override;
 
     virtual void GetOKR(::google::protobuf::RpcController* controller,
@@ -126,6 +140,8 @@ private:
             cntl->http_response().SetHeader("Access-Control-Allow-Credentials", "true");
             cntl->http_response().SetHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS");
             cntl->http_response().SetHeader("Access-Control-Allow-Headers", "Origin, Content-Type, X-Auth-Token");
+
+            cntl->set_pb_jsonify_empty_array(true);
         }
 
     }
@@ -133,7 +149,6 @@ private:
     void update_token_ttl(); /* 刷新登录token的过期时间，保活用 */
     bool check_login(); /* */
     bool update_user_balance();
-
 
 private:
 };

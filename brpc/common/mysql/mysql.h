@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include <butil/logging.h>
 #include <google/protobuf/message.h>
 /*
@@ -15,11 +14,22 @@
 #include <cppconn/resultset.h>
 #include <cppconn/statement.h>
 
+
+namespace mysql {
+
 struct MysqlOption {
     std::string url;
     std::string user;
     std::string passwd;
     std::string schema;
+};
+
+struct Status {
+    int code;
+    std::string msg;
+    int rows;
+
+    Status() : code(0), msg("success"), rows(0) {}
 };
 
 class MysqlWrapper {
@@ -38,15 +48,17 @@ public:
     int Fprintf(int fd, const google::protobuf::Message& meta, sql::ResultSet *res) const;
     int Parse(sql::ResultSet *res, google::protobuf::Message* meta, std::vector<google::protobuf::Message*>& msgs) const;
 
-    int InsertRaw(const google::protobuf::Message &raw);
-    int UpdateRaw(const google::protobuf::Message &raw, const std::string& where);
+    Status InsertRaw(const google::protobuf::Message &raw);
+    Status UpdateRaw(const google::protobuf::Message &raw, const std::string& where);
 
 private:                            
     MysqlWrapper();
 
     
     bool connected();
-    int execute(const std::string& cmd);
+    void execute(const std::string& cmd, Status* s);
+
+    static std::ostream& append_field(std::ostream& cmd, const google::protobuf::Message &raw, const google::protobuf::FieldDescriptor* field);
 
 private:
     bool m_initialized;
@@ -64,3 +76,4 @@ extern std::shared_ptr<MysqlWrapper> mysql_instance;
 
 
 
+} // namespace mysql

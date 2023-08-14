@@ -1,6 +1,8 @@
 #include "mysql.h"
 
 
+namespace mysql {
+
 
 std::shared_ptr<MysqlWrapper> mysql_instance = nullptr;
 
@@ -47,3 +49,4 @@ bool MysqlWrapper::connected() {
 }
 
 
+} // namespace mysql

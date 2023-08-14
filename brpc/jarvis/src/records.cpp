@@ -16,7 +16,7 @@ static void get_financial_record_size(int32_t* total) {
     std::unique_ptr<sql::ResultSet> res;
     std::ostringstream cmd;
     cmd << "select count(*) from "  << table() << " where status = 0";
-    res.reset(mysql_instance->ExecuteQuery(cmd.str()));
+    res.reset(make_sql_ins()->ExecuteQuery(cmd.str()));
     if (!res) return;
 
     try {
@@ -57,11 +57,11 @@ static const record_condition kRecordCondition = {
 static void financial_all_records(::jarvis::financial_response* response, const record_condition& cond = kRecordCondition) {
     std::unique_ptr<sql::ResultSet> res;
     jarvis::financial_records financial;
-    res.reset(mysql_instance->SelectAll(financial, cond.where(), cond.orderby(), "", cond.limit()));
+    res.reset(make_sql_ins()->SelectAll(financial, cond.where(), cond.orderby(), "", cond.limit()));
     if (!res) return;
 
     std::vector<google::protobuf::Message*> msgs;
-    mysql_instance->Parse(res.get(), &financial, msgs);
+    make_sql_ins()->Parse(res.get(), &financial, msgs);
 
     for (const auto* msg : msgs) {
         const auto* row = dynamic_cast<const jarvis::financial_records*>(msg);
@@ -168,7 +168,7 @@ void JarvisServiceImpl::AppendFinancialRecord(::google::protobuf::RpcController*
     cmd << "\"" << nows << "\"";
     cmd << ")";
 
-    bool suc = mysql_instance->Execute(cmd.str());
+    bool suc = make_sql_ins()->Execute(cmd.str());
     if (suc) {
         update_user_balance();
     }
@@ -197,7 +197,7 @@ void JarvisServiceImpl::DeleteFinancialRecord(::google::protobuf::RpcController*
     const auto& record = request->record();
     std::ostringstream cmd;
     cmd << "update " << table() << " set status = 1 where id = " << record.id();
-    mysql_instance->Execute(cmd.str());
+    make_sql_ins()->Execute(cmd.str());
     financial_all_records(response);
     response->set_code(financial_response_rcode_ok);
 }
@@ -234,7 +234,7 @@ void JarvisServiceImpl::UpdateFinancialRecord(::google::protobuf::RpcController*
     cmd << "`update_time` = '" << basis::util::datetimenow() << "'";
     cmd << " where `id` = " << record.id();
 
-    bool suc = mysql_instance->Execute(cmd.str());
+    bool suc = make_sql_ins()->Execute(cmd.str());
     financial_all_records(response);
 
     response->set_code(suc ? financial_response_rcode_ok : financial_response_rcode_dberr);
