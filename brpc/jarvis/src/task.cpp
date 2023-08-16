@@ -96,17 +96,10 @@ void JarvisServiceImpl::UpdTask(::google::protobuf::RpcController *controller,
     response->set_msg("ok");
 
     jarvis::tasks t;
-    const auto& body = cntl->request_attachment().to_string();
-    google::protobuf::util::JsonParseOptions option;
-    option.ignore_unknown_fields = true;
-    auto s = google::protobuf::util::JsonStringToMessage(body, &t, option);
-    if (!s.ok()) {
-        LOG(ERROR) << "parse body: " << body << " fail";
-        response->set_status(2);
-        response->set_msg(s.message());
+    const auto& now = basis::util::datetimenow();
+    if (!parse_param_from_http_req(cntl, response, &t)) {
         return;
     }
-    const auto& now = basis::util::datetimenow();
     t.set_mtime(now);       // update time
     auto status = make_sql_ins()->UpdateRaw(t, "id = " + std::to_string(t.id()));
     if (status.code) {
@@ -127,8 +120,9 @@ void JarvisServiceImpl::DelTask(::google::protobuf::RpcController *controller,
     response->set_msg("ok");
 
     jarvis::tasks t;
-    const auto& body = cntl->request_attachment().to_string();
-    google::protobuf::util::JsonStringToMessage(body, &t);
+    if (!parse_param_from_http_req(cntl, response, &t)) {
+        return;
+    }
     if (t.id()) {
         const auto sql = "delete from " + table() + " where `id` = " + std::to_string(t.id());
         bool suc = make_sql_ins()->Execute(sql);

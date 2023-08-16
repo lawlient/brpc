@@ -12,15 +12,6 @@ namespace jarvis {
 
 static inline std::string table() { return jarvis::okr::GetDescriptor()->name(); }
 
-static inline std::string res2json(const google::protobuf::Message& m) {
-    google::protobuf::util::JsonPrintOptions joption;
-    joption.always_print_primitive_fields = true;
-    joption.preserve_proto_field_names = true;
-    std::string data;
-    google::protobuf::util::MessageToJsonString(m, &data, joption);
-    return data;
-}
-
 /* 将select返回的数据改造成树结构, 通过递归实现广度优先遍历 */
 static void make_tree(std::vector<google::protobuf::Message*>& tl, ::jarvis::obj* n) {
     auto it = tl.begin();
@@ -41,15 +32,13 @@ static void make_tree(std::vector<google::protobuf::Message*>& tl, ::jarvis::obj
 
 void JarvisServiceImpl::GetOKR(::google::protobuf::RpcController *controller,
                         const ::jarvis::HttpRequest *request,
-                        ::jarvis::HttpResponse *response,
+                        ::jarvis::OKResponse *response,
                         ::google::protobuf::Closure *done) {
     brpc::ClosureGuard done_guard(done);
     common_cntl_set(controller);
     brpc::Controller* cntl = static_cast<brpc::Controller*>(controller);
-    ::jarvis::okr_response okrres;
-    okrres.set_status(::jarvis::okr_response_rcode_ok);
-    okrres.set_msg("ok");
-
+    response->set_status(0);
+    response->set_msg("success");
 
     std::ostringstream where;
     const auto& uri = cntl->http_request().uri();
@@ -62,9 +51,8 @@ void JarvisServiceImpl::GetOKR(::google::protobuf::RpcController *controller,
     if (it) {
         int y = 0;
         if (!butil::StringToInt(*it, &y)) {
-            okrres.set_status(::jarvis::okr_response_rcode_noyear);
-            okrres.set_msg("you have to specify year");
-            cntl->response_attachment().append(res2json(okrres));
+            response->set_status(1);
+            response->set_msg("you have to specify year");
             return;
         }
         it = uri.GetQuery("month");
@@ -110,28 +98,25 @@ void JarvisServiceImpl::GetOKR(::google::protobuf::RpcController *controller,
                 it++;
                 continue;
             }
-            okrres.add_okr_list()->CopyFrom(row);
+            response->mutable_data()->add_items()->CopyFrom(row);
             it = tl.erase(it);
         }
-        for (auto& okr : *(okrres.mutable_okr_list())) {
+        for (auto& okr : *(response->mutable_data()->mutable_items())) {
             make_tree(tl, &okr);
         }
     }
-
-    cntl->response_attachment().append(res2json(okrres));
 }
 
 void JarvisServiceImpl::AddOKR(::google::protobuf::RpcController *controller,
                         const ::jarvis::HttpRequest *request,
-                        ::jarvis::HttpResponse *response,
+                        ::jarvis::OKResponse *response,
                         ::google::protobuf::Closure *done) {
     brpc::ClosureGuard done_guard(done);
 
     common_cntl_set(controller);
     brpc::Controller* cntl = static_cast<brpc::Controller*>(controller);
-    ::jarvis::okr_response okrres;
-    okrres.set_status(::jarvis::okr_response_rcode_ok);
-    okrres.set_msg("ok");
+    response->set_status(0);
+    response->set_msg("success");
 
     jarvis::okr t;
     const auto& body = cntl->request_attachment().to_string();
@@ -141,62 +126,59 @@ void JarvisServiceImpl::AddOKR(::google::protobuf::RpcController *controller,
     t.set_ctime(now);
     t.set_mtime(now);
     auto status = make_sql_ins()->InsertRaw(t);
-    if (status.code) {
-        okrres.set_status(okr_response_rcode_dberr);
-        okrres.set_msg(status.msg);
+    if (status.rows == 0) {
+        response->set_status(1);
+        response->set_msg(status.msg);
     }
-
-    cntl->response_attachment().append(res2json(okrres));
 }
 
 void JarvisServiceImpl::UpdOKR(::google::protobuf::RpcController *controller,
                         const ::jarvis::HttpRequest *request,
-                        ::jarvis::HttpResponse *response,
+                        ::jarvis::OKResponse *response,
                         ::google::protobuf::Closure *done) {
     brpc::ClosureGuard done_guard(done);
 
     common_cntl_set(controller);
     brpc::Controller* cntl = static_cast<brpc::Controller*>(controller);
-    ::jarvis::okr_response okrres;
-    okrres.set_status(::jarvis::okr_response_rcode_ok);
-    okrres.set_msg("ok");
+    response->set_status(0);
+    response->set_msg("success");
 
-    jarvis::okr t;
-    const auto& body = cntl->request_attachment().to_string();
-    google::protobuf::util::JsonStringToMessage(body, &t);
-    const auto& now = basis::util::datetimenow();
-    t.set_mtime(now);       // update time
-    auto status = make_sql_ins()->UpdateRaw(t, "id = " + std::to_string(t.id()));
-    if (!status.rows) {
-        okrres.set_status(okr_response_rcode_dberr);
-        okrres.set_msg(status.msg);
+    jarvis::okr o;
+    if (!parse_param_from_http_req(cntl, response, &o)) {
+        return;
     }
-
-    cntl->response_attachment().append(res2json(okrres));
+    const auto& now = basis::util::datetimenow();
+    o.set_mtime(now);       // update time
+    auto status = make_sql_ins()->UpdateRaw(o, "id = " + std::to_string(o.id()));
+    if (!status.rows) {
+        response->set_status(1);
+        response->set_msg(status.msg);
+    }
 }
 
 void JarvisServiceImpl::DelOKR(::google::protobuf::RpcController *controller,
                         const ::jarvis::HttpRequest *request,
-                        ::jarvis::HttpResponse *response,
+                        ::jarvis::OKResponse *response,
                         ::google::protobuf::Closure *done) {
     brpc::ClosureGuard done_guard(done);
 
     common_cntl_set(controller);
     brpc::Controller* cntl = static_cast<brpc::Controller*>(controller);
-    ::jarvis::okr_response okrres;
-    okrres.set_status(::jarvis::okr_response_rcode_ok);
-    okrres.set_msg("ok");
+    response->set_status(0);
+    response->set_msg("ok");
 
-    const auto& uri = cntl->http_request().uri();
-    auto id         = uri.GetQuery("id");
-    if (id) {
-        const auto sql = "delete from " + table() + " where `id` = " + *id;
+    jarvis::okr o;
+    if (!parse_param_from_http_req(cntl, response, &o)) {
+        return;
+    }
+    if (o.id()) {
+        const auto sql = "delete from " + table() + " where `id` = " + std::to_string(o.id());
         bool suc = make_sql_ins()->Execute(sql);
         if (!suc)  {
-            okrres.set_status(okr_response_rcode_dberr);
+            response->set_status(1);
+            response->set_msg("delete from table fail");
         }
     }
-    cntl->response_attachment().append(res2json(okrres));
 }
 
 

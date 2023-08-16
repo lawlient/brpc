@@ -2,11 +2,11 @@
 
 declare -A CLASSIFY
 CLASSIFY=(
-    ["0"]="I"
-    ["1"]="T"
-    ["2"]="S"
-    ["3"]="B"
-    ["4"]="R"
+    ["0"]='<span style="color:red">I</span>'
+    ["1"]='<span style="color:black">T</span>'
+    ["2"]='<span style="color:cyan">S</span>'
+    ["3"]='<span style="color:gray">B</span>'
+    ["4"]='<span style="color:pink">R</span>'
 )
 declare -A PN
 PN=(
@@ -17,9 +17,9 @@ PN=(
 )
 declare -A STATUS
 STATUS=(
-    ["0"]="todo"
-    ["1"]="done"
-    ["2"]="discard"
+    ["0"]="☐"
+    ["1"]="☑"
+    ["2"]="☒"
 )
 
 function day_table() {
@@ -31,7 +31,7 @@ function day_table() {
 
     [[ "[]" == "$output" ]] && return 0
 
-    echo '<table border="1" cellpadding="5" style="font-size:10px">' >> $html
+    echo '<table class="table table-bordered">' >> $html
     echo "    <caption> $(date -d "$day" +"%F %A") </caption>" >>  $html
     echo "    <tr> " >> $html
     echo "        <th>事项</th>" >> $html
@@ -51,12 +51,12 @@ function day_table() {
 
         echo "    <tr>" >> $html
         content=$(echo $task | jq .task)    # 字符串，包含"
-        echo "        <td> ${content//\"/} </td>" >> $html  # 删除所有"
-        echo "        <td> $(echo $task | jq .esthour) </td>" >> $html
-        echo "        <td> $(echo $task | jq .acthour) </td>" >> $html
-        echo "        <td> ${PN[$(echo $task | jq .priority)]} </td>" >> $html
-        echo "        <td> ${CLASSIFY[$(echo $task | jq .classify)]} </td>" >> $html
-        echo "        <td> ${STATUS[$(echo $task | jq .status)]} </td>" >> $html
+        echo "        <td width="50%"> ${content//\"/} </td>" >> $html  # 删除所有"
+        echo "        <td width="10%" align="center"> $(echo $task | jq .esthour) </td>" >> $html
+        echo "        <td width="10%" align="center"> $(echo $task | jq .acthour) </td>" >> $html
+        echo "        <td width="10%" align="center"> ${PN[$(echo $task | jq .priority)]} </td>" >> $html
+        echo "        <td width="10%" align="center"> ${CLASSIFY[$(echo $task | jq .classify)]} </td>" >> $html
+        echo "        <td width="10%" align="center"> ${STATUS[$(echo $task | jq .status)]} </td>" >> $html
         echo "    </tr>" >> $html
     done
     echo "</table>" >> $html
@@ -95,6 +95,11 @@ function html_head() {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
     <title>TODO</title>
+    <style type="text/css">
+    .table{width:100%;max-width:100%;margin-bottom:4px;border-collapse:collapse;background-color:transparent;font-size:8px}
+    td{padding:2px;line-height:1.42857143;vertical-align:top;border:1px solid #ddd;border-top:1px solid #ddd}
+    .table-bordered{border:1px solid #ddd}
+    </style>
 </head>
 
 EOF

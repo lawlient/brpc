@@ -29,6 +29,20 @@ static inline std::shared_ptr<mysql::MysqlWrapper> make_sql_ins() {
     return std::make_shared<mysql::MysqlWrapper>(mysql_option);
 }
 
+template<class R, class P>
+bool parse_param_from_http_req(brpc::Controller* cntl, R* response, P* param) {
+    google::protobuf::util::JsonParseOptions kOption;
+    kOption.ignore_unknown_fields = true;
+    const auto& body = cntl->request_attachment().to_string();
+    auto s = google::protobuf::util::JsonStringToMessage(body, param, kOption);
+    if (!s.ok()) {
+        LOG(ERROR) << "parse body: " << body << " fail";
+        response->set_status(2);
+        response->set_msg(s.message());
+        return false;
+    }
+    return true;
+}
 
 
 class JarvisServiceImpl : public jarvis::Jarvis {
@@ -109,22 +123,22 @@ public:
 
     virtual void GetOKR(::google::protobuf::RpcController* controller,
                        const ::jarvis::HttpRequest* request,
-                       ::jarvis::HttpResponse* response,
+                       ::jarvis::OKResponse* response,
                        ::google::protobuf::Closure* done) override;
 
     virtual void AddOKR(::google::protobuf::RpcController* controller,
                        const ::jarvis::HttpRequest* request,
-                       ::jarvis::HttpResponse* response,
+                       ::jarvis::OKResponse* response,
                        ::google::protobuf::Closure* done) override;
 
     virtual void UpdOKR(::google::protobuf::RpcController* controller,
                        const ::jarvis::HttpRequest* request,
-                       ::jarvis::HttpResponse* response,
+                       ::jarvis::OKResponse* response,
                        ::google::protobuf::Closure* done) override;
 
     virtual void DelOKR(::google::protobuf::RpcController* controller,
                        const ::jarvis::HttpRequest* request,
-                       ::jarvis::HttpResponse* response,
+                       ::jarvis::OKResponse* response,
                        ::google::protobuf::Closure* done) override;
 
 
