@@ -1,4 +1,5 @@
 #include "mysql.h"
+#include "mysql_connect.h"
 
 
 namespace mysql {
@@ -48,5 +49,31 @@ bool MysqlWrapper::connected() {
     return true;
 }
 
+static bool begin_with_select(const std::string& s) {
+    return s.find("select") != std::string::npos || s.find("SELECT") != std::string::npos;
+}
+
+Result *CppConnConnection::Execute(const std::string& sql, const google::protobuf::Message *msg) {
+    std::unique_ptr<sql::Statement> stmt(m_conn->createStatement());
+    Result *s = new Result();
+
+    try {
+        if (begin_with_select(sql)) {
+            auto set = stmt->executeQuery(sql);
+            if (msg) s->Parse(set, *msg);
+        } else {
+            s->rows = stmt->executeUpdate(sql);
+        }
+        LOG(INFO) << "Executing cmd: " << sql << " change rows:" << s->rows;
+    } catch (sql::SQLException &e) {
+        s->code = e.getErrorCode();  // could be zero
+        s->msg  = e.what();
+        LOG(ERROR) <<"[" << __FUNCTION__ << "]"
+                   << " Code: " << e.getErrorCode()
+                   << " Msg: " << e.what()
+                   << " SQLState: " << e.getSQLState();
+    }
+    return s;
+}
 
 } // namespace mysql

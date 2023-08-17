@@ -30,17 +30,12 @@ bool JarvisServiceImpl::check_login() {
 }
 
 
-static bool get_login_user(const std::string& name, jarvis::jusers* usr) {
-    std::unique_ptr<sql::ResultSet> res;
-    std::string where = "`name` = '" + name + "'";
-    res.reset(make_sql_ins()->SelectAll(*usr, where, "", "", "1"));
-    if (!res) return false;
-
-    std::vector<google::protobuf::Message*> msgs;
-    make_sql_ins()->Parse(res.get(), usr, msgs);
-
+static bool get_login_user(mysql::MysqlInstance* db, const std::string& name, jarvis::jusers* usr) {
+    mysql::SelectGenerator g(*usr);
+    g.where("name = '" + name + "'");
+    std::unique_ptr<mysql::Result> res(db->Execute(g.sql(), usr));
     bool success = false;
-    for (const auto* msg : msgs) {
+    for (const auto* msg : res->records) {
         const auto* row = dynamic_cast<const jarvis::jusers*>(msg);
         if (row == nullptr) {
             LOG(ERROR) << "cast login user fail";
@@ -53,9 +48,9 @@ static bool get_login_user(const std::string& name, jarvis::jusers* usr) {
     return success;   
 }
 
-static bool check_login_info(const std::string& name, const std::string& secret) {
+static bool check_login_info(mysql::MysqlInstance* db, const std::string& name, const std::string& secret) {
     jarvis::jusers usr;
-    if (!get_login_user(name, &usr)) {
+    if (!get_login_user(db, name, &usr)) {
         return false;
     }
     if (secret != usr.secret()) {
@@ -82,7 +77,7 @@ void JarvisServiceImpl::Login(::google::protobuf::RpcController* controller,
         LOG(ERROR) << "username: " << username << "secret: " << secret;
         return;
     }
-    if (!check_login_info(username, secret)) {
+    if (!check_login_info(_db.get(), username, secret)) {
         nlohmann::json res;
         res["status"]         = 1;
         res["msg"]            = "password check failed";

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "mysql.h"
+#include "mysql_instance.h"
 
 #include "table.pb.h"
 #include "jarvis.pb.h"
@@ -48,7 +49,17 @@ bool parse_param_from_http_req(brpc::Controller* cntl, R* response, P* param) {
 class JarvisServiceImpl : public jarvis::Jarvis {
 public:
 
-    JarvisServiceImpl() {}
+    JarvisServiceImpl() {
+        auto* cfg = basis::text_config::TextConfig::GetInstance();
+        const auto& mysql_config = cfg->cfg().mysql();
+        mysql::MysqlOption mysql_option;
+        mysql_option.url    = mysql_config.url();
+        mysql_option.user   = mysql_config.user();
+        mysql_option.passwd = mysql_config.passwd();
+        mysql_option.schema = mysql_config.schema();
+        _db.reset(new mysql::MysqlInstance(mysql_option));
+        _db->Init();
+    }
     virtual ~JarvisServiceImpl() {}
 
     virtual void Login(::google::protobuf::RpcController* controller,
@@ -165,6 +176,8 @@ private:
     bool update_user_balance();
 
 private:
+
+    std::unique_ptr<mysql::MysqlInstance> _db;
 };
 
 

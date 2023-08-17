@@ -54,16 +54,15 @@ static const record_condition kRecordCondition = {
     .payer = -1,
     .payee = -1,
 };
-static void financial_all_records(::jarvis::financial_response* response, const record_condition& cond = kRecordCondition) {
-    std::unique_ptr<sql::ResultSet> res;
+static void financial_all_records(mysql::MysqlInstance *db, ::jarvis::financial_response* response, const record_condition& cond = kRecordCondition) {
     jarvis::financial_records financial;
-    res.reset(make_sql_ins()->SelectAll(financial, cond.where(), cond.orderby(), "", cond.limit()));
-    if (!res) return;
+    mysql::SelectGenerator g(financial);
+    g.where(cond.where());
+    g.orderby(cond.orderby());
+    g.limit(cond.limit());
 
-    std::vector<google::protobuf::Message*> msgs;
-    make_sql_ins()->Parse(res.get(), &financial, msgs);
-
-    for (const auto* msg : msgs) {
+    std::unique_ptr<mysql::Result> res(db->Execute(g.sql(), &financial));
+    for (const auto* msg : res->records) {
         const auto* row = dynamic_cast<const jarvis::financial_records*>(msg);
         if (row == nullptr) {
             LOG(ERROR) << "cast financial records fail";
@@ -112,7 +111,7 @@ void JarvisServiceImpl::GetFinancialRecord(::google::protobuf::RpcController* co
     if (payee && !payee->empty()) cond.payee = atoi(payee->c_str());
 
     ::jarvis::financial_response tmp;
-    financial_all_records(&tmp, cond);
+    financial_all_records(_db.get(), &tmp, cond);
 
     std::string data;
     google::protobuf::util::JsonPrintOptions option;
@@ -168,12 +167,12 @@ void JarvisServiceImpl::AppendFinancialRecord(::google::protobuf::RpcController*
     cmd << "\"" << nows << "\"";
     cmd << ")";
 
-    bool suc = make_sql_ins()->Execute(cmd.str());
-    if (suc) {
+    std::unique_ptr<mysql::Result> suc(_db->Execute(cmd.str()));
+    if (1 == suc->rows) {
         update_user_balance();
     }
 
-    response->set_code(suc ? financial_response_rcode_ok : financial_response_rcode_dberr);
+    response->set_code(1 == suc->rows ? financial_response_rcode_ok : financial_response_rcode_dberr);
     return;
 }
 
@@ -197,8 +196,8 @@ void JarvisServiceImpl::DeleteFinancialRecord(::google::protobuf::RpcController*
     const auto& record = request->record();
     std::ostringstream cmd;
     cmd << "update " << table() << " set status = 1 where id = " << record.id();
-    make_sql_ins()->Execute(cmd.str());
-    financial_all_records(response);
+    _db->Execute(cmd.str());
+    financial_all_records(_db.get(), response);
     response->set_code(financial_response_rcode_ok);
 }
 
@@ -234,10 +233,10 @@ void JarvisServiceImpl::UpdateFinancialRecord(::google::protobuf::RpcController*
     cmd << "`update_time` = '" << basis::util::datetimenow() << "'";
     cmd << " where `id` = " << record.id();
 
-    bool suc = make_sql_ins()->Execute(cmd.str());
-    financial_all_records(response);
+    std::unique_ptr<mysql::Result> res(_db->Execute(cmd.str()));
+    financial_all_records(_db.get(), response);
 
-    response->set_code(suc ? financial_response_rcode_ok : financial_response_rcode_dberr);
+    response->set_code(1 == res->rows ? financial_response_rcode_ok : financial_response_rcode_dberr);
 }
 
 

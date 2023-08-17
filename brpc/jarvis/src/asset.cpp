@@ -10,31 +10,25 @@ static std::string table() {
     return financial_asset::GetDescriptor()->name();
 }
 
-static void latest_record(::jarvis::financial_records* record) {
-    std::unique_ptr<sql::ResultSet> res;
-    res.reset(make_sql_ins()->SelectAll(*record, "", "`id` desc", "", "1"));
-    if (!res) return ;
-
-    std::vector<google::protobuf::Message*> msgs;
-    make_sql_ins()->Parse(res.get(), record, msgs);
-    for (const auto* msg : msgs) {
+static void latest_record(mysql::MysqlInstance* db, ::jarvis::financial_records* record) {
+    mysql::SelectGenerator g(*record);
+    std::unique_ptr<mysql::Result> res(db->Execute(g.sql(), record));
+    for (const auto* msg : res->records) {
         const auto* row = dynamic_cast<const jarvis::financial_records*>(msg);
         record->CopyFrom(*row);
     }
 }
 
 
-bool get_user_balance(int32_t uid, jarvis::financial_asset* asset) {
-    std::unique_ptr<sql::ResultSet> res;
-    std::string where = "uid = " + std::to_string(uid);
-    res.reset(make_sql_ins()->SelectAll(*asset, where, "`timestamp` desc", "", "1"));
-    if (!res) return false;
-
-    std::vector<google::protobuf::Message*> msgs;
-    make_sql_ins()->Parse(res.get(), asset, msgs);
+bool get_user_balance(mysql::MysqlInstance* db, int32_t uid, jarvis::financial_asset* asset) {
+    mysql::SelectGenerator g(*asset);
+    g.where("uid = " + std::to_string(uid));
+    g.orderby("timestamp desc");
+    g.limit("1");
+    std::unique_ptr<mysql::Result> res(db->Execute(g.sql(), asset));
 
     bool success = false;
-    for (const auto* msg : msgs) {
+    for (const auto* msg : res->records) {
         const auto* row = dynamic_cast<const jarvis::financial_asset*>(msg);
         if (row == nullptr) {
             LOG(ERROR) << "cast financial asset fail";
@@ -51,13 +45,13 @@ bool get_user_balance(int32_t uid, jarvis::financial_asset* asset) {
    目前仅个人用来记账，省略了uid检查 */
 bool JarvisServiceImpl::update_user_balance() {
     jarvis::financial_records record;
-    latest_record(&record);
+    latest_record(_db.get(), &record);
     if (record.payer() == record.payee()) {
         return true; /* asset is unchanged */
     }
 
     jarvis::financial_asset asset;
-    get_user_balance(kOwnerUid, &asset);
+    get_user_balance(_db.get(), kOwnerUid, &asset);
 
 
     double amount = asset.amount();
@@ -87,8 +81,8 @@ bool JarvisServiceImpl::update_user_balance() {
     cmd << "\"" << nows << "\"";
     cmd << ")";
 
-    bool suc = make_sql_ins()->Execute(cmd.str());
-    return suc;
+    std::unique_ptr<mysql::Result> res(_db->Execute(cmd.str()));
+    return 1 == res->rows;
 }
 
 
@@ -111,7 +105,7 @@ void JarvisServiceImpl::GetFinancialAsset(::google::protobuf::RpcController* con
     update_token_ttl();
 
     ::jarvis::financial_asset asset;
-    get_user_balance(kOwnerUid, &asset);
+    get_user_balance(_db.get(), kOwnerUid, &asset);
 
     std::string data;
     google::protobuf::util::JsonPrintOptions joption;

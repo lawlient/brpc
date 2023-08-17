@@ -51,10 +51,10 @@ public:
     Status InsertRaw(const google::protobuf::Message &raw);
     Status UpdateRaw(const google::protobuf::Message &raw, const std::string& where);
 
-private:                            
+private:
     MysqlWrapper();
 
-    
+
     bool connected();
     void execute(const std::string& cmd, Status* s);
 
@@ -67,7 +67,6 @@ private:
     sql::Driver *m_driver;
     sql::Connection *m_conn;
 };
-
 
 extern std::shared_ptr<MysqlWrapper> mysql_instance;
 

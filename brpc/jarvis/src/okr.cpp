@@ -81,29 +81,27 @@ void JarvisServiceImpl::GetOKR(::google::protobuf::RpcController *controller,
         }
     }
     
-    std::unique_ptr<sql::ResultSet> res;
     ::jarvis::okr okr;
-    auto sql = make_sql_ins();
-    res.reset(sql->SelectAll(okr, where.str(), "id", "", "1000"));
-    if (res) {
-        std::vector<google::protobuf::Message*> tl;
-        ::jarvis::obj obj;
-        sql->Parse(res.get(), &obj, tl);
-
-        /* 该过程同make_tree的过程，由于第一层并没有一个共同祖先存在，此处单独处理 */
-        auto it = tl.begin();
-        while (it != tl.end()) {
-            const auto& row = *dynamic_cast<const ::jarvis::obj*>(it.operator*());
-            if (row.parent() > 0) {
-                it++;
-                continue;
-            }
-            response->mutable_data()->add_items()->CopyFrom(row);
-            it = tl.erase(it);
+    ::jarvis::obj obj;
+    mysql::SelectGenerator g(okr);
+    g.where(where.str());
+    g.orderby("id");
+    g.limit("1000");
+    std::unique_ptr<mysql::Result> res(_db->Execute(g.sql(), &obj));
+    auto& tl = res->records;
+    /* 该过程同make_tree的过程，由于第一层并没有一个共同祖先存在，此处单独处理 */
+    auto m = tl.begin();
+    while (m != tl.end()) {
+        const auto& row = *dynamic_cast<const ::jarvis::obj*>(*m);
+        if (row.parent() > 0) {
+            m++;
+            continue;
         }
-        for (auto& okr : *(response->mutable_data()->mutable_items())) {
-            make_tree(tl, &okr);
-        }
+        response->mutable_data()->add_items()->CopyFrom(row);
+        m = tl.erase(m);
+    }
+    for (auto& okr : *(response->mutable_data()->mutable_items())) {
+        make_tree(tl, &okr);
     }
 }
 
@@ -125,10 +123,11 @@ void JarvisServiceImpl::AddOKR(::google::protobuf::RpcController *controller,
     t.set_id(0);  // auto inc
     t.set_ctime(now);
     t.set_mtime(now);
-    auto status = make_sql_ins()->InsertRaw(t);
-    if (status.rows == 0) {
-        response->set_status(1);
-        response->set_msg(status.msg);
+    mysql::InsertGenerator g(t);
+    std::unique_ptr<mysql::Result> res(_db->Execute(g.sql(), &t));
+    if (res->rows == 0) {
+        response->set_status(res->code);
+        response->set_msg(res->msg);
     }
 }
 
@@ -149,10 +148,12 @@ void JarvisServiceImpl::UpdOKR(::google::protobuf::RpcController *controller,
     }
     const auto& now = basis::util::datetimenow();
     o.set_mtime(now);       // update time
-    auto status = make_sql_ins()->UpdateRaw(o, "id = " + std::to_string(o.id()));
-    if (!status.rows) {
-        response->set_status(1);
-        response->set_msg(status.msg);
+    mysql::UpdateGenerator g(o);
+    g.where("id = " + std::to_string(o.id()));
+    std::unique_ptr<mysql::Result> status(_db->Execute(g.sql()));
+    if (!status->rows) {
+        response->set_status(status->code);
+        response->set_msg(status->msg);
     }
 }
 
@@ -165,18 +166,19 @@ void JarvisServiceImpl::DelOKR(::google::protobuf::RpcController *controller,
     common_cntl_set(controller);
     brpc::Controller* cntl = static_cast<brpc::Controller*>(controller);
     response->set_status(0);
-    response->set_msg("ok");
+    response->set_msg("success");
 
     jarvis::okr o;
     if (!parse_param_from_http_req(cntl, response, &o)) {
         return;
     }
     if (o.id()) {
-        const auto sql = "delete from " + table() + " where `id` = " + std::to_string(o.id());
-        bool suc = make_sql_ins()->Execute(sql);
-        if (!suc)  {
-            response->set_status(1);
-            response->set_msg("delete from table fail");
+        mysql::DeleteGenerator g(o);
+        g.where("id = " + std::to_string(o.id()));
+        std::unique_ptr<mysql::Result> res(_db->Execute(g.sql()));
+        if (res->code)  {
+            response->set_status(res->code);
+            response->set_msg(res->msg);
         }
     }
 }
