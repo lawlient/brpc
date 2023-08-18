@@ -1,7 +1,7 @@
 #pragma once
 
-#include "mysql.h"
 #include "mysql_instance.h"
+#include "sql_generator.h"
 
 #include "table.pb.h"
 #include "jarvis.pb.h"
@@ -18,17 +18,6 @@ namespace jarvis {
 
 static const int32_t kOwnerUid = 0; /* It is me */
 
-
-static inline std::shared_ptr<mysql::MysqlWrapper> make_sql_ins() { 
-    auto* cfg = basis::text_config::TextConfig::GetInstance();
-    const auto& mysql_config = cfg->cfg().mysql();
-    mysql::MysqlOption mysql_option;
-    mysql_option.url    = mysql_config.url();
-    mysql_option.user   = mysql_config.user();
-    mysql_option.passwd = mysql_config.passwd();
-    mysql_option.schema = mysql_config.schema();
-    return std::make_shared<mysql::MysqlWrapper>(mysql_option);
-}
 
 template<class R, class P>
 bool parse_param_from_http_req(brpc::Controller* cntl, R* response, P* param) {

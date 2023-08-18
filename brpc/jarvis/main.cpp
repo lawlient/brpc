@@ -21,7 +21,6 @@
  * */
 
 #include "jarvis.h"
-#include "mysql.h"
 #include "redis_client.h"
 
 #include <log/asynclog.h>

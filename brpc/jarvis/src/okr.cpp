@@ -1,5 +1,4 @@
 #include "jarvis.h"
-#include "mysql.h"
 #include "util.h"
 
 #include <config/config.h>

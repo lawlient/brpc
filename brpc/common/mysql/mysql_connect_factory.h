@@ -1,17 +1,25 @@
 #pragma once
 
-#include "mysql.h"
+#include "mysql_option.h"
 
-#include "mysql_connect.h"
-
+#include <cppconn/driver.h>
 
 
 namespace mysql {
 
+class Connection;
+
 
 class ConnectFactory {
-public: 
-    virtual Connection *make() const = 0;
+public:
+    ConnectFactory() = delete;
+    explicit ConnectFactory(const MysqlOption& opt) : _option(opt) {}
+    virtual Connection *create() const = 0;
+
+    const MysqlOption& option() const { return _option; }
+
+private:
+    const MysqlOption& _option;
 };
 
 
@@ -20,11 +28,9 @@ class CppConnConnectFactory : public ConnectFactory {
 public:
     CppConnConnectFactory(const MysqlOption& opt);
 
-    virtual Connection *make() const override;
-
+    virtual Connection *create() const override;
 
 private:
-    const MysqlOption& koption;
     sql::Driver *m_driver;      // cppconn 的驱动
 };
 

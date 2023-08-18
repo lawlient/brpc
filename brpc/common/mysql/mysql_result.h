@@ -1,8 +1,8 @@
 #pragma once
 
-#include <cppconn/resultset.h>
-
 #include <google/protobuf/message.h>
+
+#include <cppconn/resultset.h>
 
 #include <string>
 #include <vector>

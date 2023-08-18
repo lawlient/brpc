@@ -2,9 +2,6 @@
 
 #include <butil/logging.h>
 
-#include <cppconn/resultset.h>
-
-using namespace google::protobuf;
 
 namespace mysql {
 
@@ -29,6 +26,7 @@ void Result::Parse(sql::ResultSet *res, const google::protobuf::Message& proto) 
 
     try {
         while (res->next()) {
+            using namespace google::protobuf;
             google::protobuf::Message* raw = proto.New();
             const auto* refl = raw->GetReflection();
 

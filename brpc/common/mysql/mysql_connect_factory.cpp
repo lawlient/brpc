@@ -1,27 +1,25 @@
 #include "mysql_connect_factory.h"
-
-#include <cppconn/driver.h>
-#include <cppconn/exception.h>
-#include <cppconn/resultset.h>
-#include <cppconn/statement.h>
+#include "mysql_connect.h"
 
 namespace mysql {
 
 
-CppConnConnectFactory::CppConnConnectFactory(const MysqlOption& opt) : koption(opt) {
+CppConnConnectFactory::CppConnConnectFactory(const MysqlOption& opt)
+    : ConnectFactory(opt) 
+{
     m_driver = get_driver_instance();
 }
 
-Connection *CppConnConnectFactory::make() const {
+Connection *CppConnConnectFactory::create() const {
+    const auto& koption = option();
     sql::Connection *conn = m_driver->connect(koption.url, koption.user, koption.passwd);
     if (!conn) return nullptr;
     conn->setSchema(koption.schema);
     Connection *c = new CppConnConnection(conn);
+    c->SetFactory(this);
     c->Active();
     return c;
 }
-
-
 
 
     

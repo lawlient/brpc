@@ -5,7 +5,10 @@
 namespace mysql {
 
 
-MysqlInstance::MysqlInstance() {}
+MysqlInstance::MysqlInstance() {
+    _option.reset(new MysqlOption());
+}
+
 MysqlInstance::MysqlInstance(const MysqlOption& opt) {
     _option.reset(new MysqlOption(opt));
 }
@@ -13,10 +16,6 @@ MysqlInstance::MysqlInstance(const MysqlOption& opt) {
 
 bool MysqlInstance::Init() {
     if (_pool) return true;
-
-    if (!_option) {
-
-    }
 
     _factory.reset(new CppConnConnectFactory(*_option));
 

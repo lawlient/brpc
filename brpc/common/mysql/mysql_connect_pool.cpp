@@ -19,7 +19,7 @@ ConnectPool::ConnectPool(const ConnectFactory* f, const PoolOption* opt)
         _option = &kPoolOption;
     }
     for (int i = 0; i < _option->initsize; i++) {
-        m_pool.push(_factory->make());
+        m_pool.push(_factory->create());
     }
     nconnections = _option->initsize;
 }
@@ -44,7 +44,7 @@ std::shared_ptr<Connection> ConnectPool::get() {
     LOCK
     if (m_pool.empty()) {
         if (nconnections < _option->maxsize) {
-            auto conn = _factory->make();
+            auto conn = _factory->create();
             if (!conn) return nullptr;
             auto c = std::shared_ptr<Connection>(conn, collect);
             nconnections++;

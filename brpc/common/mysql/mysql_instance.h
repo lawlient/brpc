@@ -1,14 +1,18 @@
 #pragma once
 
-#include "mysql.h"
-#include "sql_generator.h"
-#include "mysql_connect_pool.h"
 #include "mysql_connect_factory.h"
-#include "mysql_result.h"
+#include "mysql_connect_pool.h"
+#include "mysql_connect.h"
 
 
+#include <google/protobuf/message.h>
+
+#include<memory>
+#include<string>
 
 namespace mysql {
+
+class Result;
 
 
 class MysqlInstance {
@@ -27,13 +31,6 @@ private:
     std::unique_ptr<ConnectPool> _pool;
     std::unique_ptr<ConnectFactory> _factory;
 };
-
-
-
-
-
-
-
 
 
 

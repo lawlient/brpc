@@ -13,19 +13,7 @@ static inline std::string table() {
 
 static void get_financial_record_size(int32_t* total) {
     *total = 0;
-    std::unique_ptr<sql::ResultSet> res;
-    std::ostringstream cmd;
-    cmd << "select count(*) from "  << table() << " where status = 0";
-    res.reset(make_sql_ins()->ExecuteQuery(cmd.str()));
-    if (!res) return;
-
-    try {
-        while (res->next()) {
-            *total = res->getInt(1);
-        }
-    } catch(std::exception& e) {
-        LOG(ERROR) << "what: " << e.what();
-    }
+    // TODO
 }
 
 /* 记录数不断追加，分页展示, 按id倒序，即最新数据在前 */
