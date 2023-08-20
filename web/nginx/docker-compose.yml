@@ -7,10 +7,12 @@ services:
         build: .
         ports:
             - "80:80"
+            - "81:81"
             - "8080:80"
         restart: unless-stopped
         networks:
             - jarvisnet
+            - vanblognet
         volumes:
             - "/etc/localtime:/etc/localtime:ro"
             - "/data:/data"
@@ -19,4 +21,7 @@ services:
 networks:
     jarvisnet:
         name: jarvis_default
+        external: true
+    vanblognet:
+        name: vanblog_default
         external: true
