@@ -2,6 +2,7 @@ version: "3"
 
 services:
   vanblog:
+    container_name: "xlog"
     # 阿里云镜像源
     # image: registry.cn-beijing.aliyuncs.com/mereith/van-blog:latest
     image: mereith/van-blog:latest

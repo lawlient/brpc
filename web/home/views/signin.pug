@@ -1,0 +1,28 @@
+extends layout
+
+block head 
+    link(rel='stylesheet', href='https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css')
+    link(rel='stylesheet', href='/stylesheets/signin.css')
+    script(src='/javascripts/signin.js')
+
+block content
+    .text-center
+        form(class="form-signin" method="POST" action="/api/auth/signin")
+            #error
+                if error
+                    p.text-danger Error!!!
+            - var h1Classes = ['h3', 'mb-3', 'font-weight-normal']
+            //h1(class=h1Classes) Please sign in
+            label( for="inputEmail" class="sr-only") Name
+            input(type="text" name="username" id="inputEmail" class="form-control" placeholder="Name" required autofocus)
+            label(for="inputPassword" class="sr-only") Password
+            input(type="password" name="password" id="inputPassword" class="form-control" placeholder="Password" required)
+            - var divClasses=['checkbox', 'mb-3'];
+            div(class=divClasses)
+                label
+                    input(type="checkbox" value="remember-me")
+                    span Remember me
+            - var buttonClass=['btn', 'btn-lg', 'btn-primary', 'btn-block'];
+            button(class=buttonClass type="submit") Sign in
+            - var pClasses=['mt-5', 'mb-3', 'text-muted'];
+            p(class=pClasses) © 2023-2024

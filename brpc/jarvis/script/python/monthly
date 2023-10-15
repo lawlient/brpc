@@ -1,0 +1,196 @@
+#! /usr/bin/python3
+#! -*- encoding:utf-8 -*-
+
+import requests
+import json
+import datetime
+import calendar
+import os
+import subprocess
+import matplotlib.ticker as ticker
+import matplotlib.gridspec as gridspec
+import matplotlib.pyplot as plt
+
+import smtplib
+from email.mime.text import MIMEText
+from email.header import Header
+from email.mime.base import MIMEBase
+from email.mime.multipart import MIMEMultipart
+from email.mime.image import MIMEImage
+
+DAILYPNG="./day.png"
+TOTALPNG="./total.png"
+ 
+
+def getdaytask(d, data):
+    dstr=d.strftime('%Y-%m-%d')
+    url = "http://localhost/jarvis/Jarvis/GetTask?status=1&date="+dstr
+    response = requests.get(url)
+    if (response.status_code != 200):
+        return 
+    body = json.loads(response.text)
+    tasks = body["data"]["items"]
+    i = t = b = s = r = 0
+    for tsk in tasks:
+        if (tsk["classify"] == 0):
+             i += tsk["acthour"]
+        elif (tsk["classify"] == 1):
+             t += tsk["acthour"]
+        elif (tsk["classify"] == 2):
+             b += tsk["acthour"]
+        elif (tsk["classify"] == 3):
+             s += tsk["acthour"]
+        elif (tsk["classify"] == 4):
+             r += tsk["acthour"]
+    
+    data["day"].append(dstr)
+    data["I"].append(i)
+    data["T"].append(t)
+    data["B"].append(b)
+    data["S"].append(s)
+    data["R"].append(r)
+    data["O"].append(24 - i - t - b - s - r)
+    return
+
+# 时间字符串往后一天
+def nextday(d):
+    tmp = datetime.datetime.strptime(d, "%Y-%m-%d")
+    tmp = tmp + datetime.timedelta(days=1)
+    d   = tmp.strftime("%Y-%m-%d")
+    return d
+
+
+# 将生成的图片以邮件发送至邮箱
+def send2me():
+    smtpserver="smtp.163.com"
+    username = "jiuanx2011@163.com"
+    ret, passwd = subprocess.getstatusoutput('bash secret -d ~/.config/jarvis/secret.gpg')
+    if ret != 0:
+        print("get passwd fail")
+        return
+
+    # 创建MIMEMultipart对象，表示邮件的整体
+    msg=MIMEMultipart('related')  
+
+    msg['Subject']='Monthly Report'
+    msg['From']='jiuanx2011@163.com'
+    msg['To']='jiuanx2011@163.com'
+
+    # 创建邮件正文
+    body=MIMEText('<html><body> '
+                  'This is a monthly report from Jarvis.'
+                  ' <br> '
+                  '<img src="cid:cid1" alt="Time">'
+                  '<img src="cid:cid2" alt="Total">'
+                  '</body></html>', 'html', 'utf-8') 
+    msg.attach(body)
+
+    with open(DAILYPNG, "rb") as fp:
+        img=MIMEImage(fp.read())
+    
+    img.add_header("Content-ID", "cid1")
+    msg.attach(img)
+
+    with open(TOTALPNG, "rb") as fp2:
+        img2=MIMEImage(fp2.read())
+    
+    img2.add_header("Content-ID", "cid2")
+    msg.attach(img2)
+
+    server=smtplib.SMTP_SSL(smtpserver, port=465)
+    server.login(username, passwd)
+    server.sendmail(msg['From'], msg['To'], msg.as_string())
+    server
+    print("Email send successfully.")
+    
+
+daydata = { 
+    'day' : [],
+    'I' : [],
+    'T' : [],
+    'B' : [],
+    'S' : [],
+    'R' : [],
+    'O' : []
+} 
+
+now = datetime.datetime.now()
+#d = firstdayofmonth = datetime.datetime(now.year, now.month, 1)
+d = firstdayofmonth = datetime.datetime(now.year, 8, 1)
+lastdayofmonth = datetime.datetime(now.year, now.month, calendar.monthrange(now.year, now.month)[1])
+for i in range(0, 32):
+    if d <= lastdayofmonth:
+        getdaytask(d, data=daydata)
+        d = d + datetime.timedelta(days=1)
+
+
+#DEBUG
+# for i in range(0, len(daydata['day'])):
+#     print(daydata['day'][i], daydata['I'][i], daydata['T'][i], daydata['B'][i], daydata['S'][i], daydata['R'][i], daydata['O'][i])
+#     d = d + datetime.timedelta(days=1)
+
+
+# 绘制折线图
+fig, ax = plt.subplots(figsize = (16,9), dpi = 80)
+
+# ax.spines["left"].set_visible(False)
+# ax.spines["top"].set_visible(False)
+# ax.spines["right"].set_visible(False)
+
+
+ax.plot(daydata['day'], daydata['I'], daydata['T'], daydata['B'], daydata['S'], daydata['R'], daydata['O'], marker="o", mfc="white", ms=5)
+ 
+ax.xaxis.set_major_locator(ticker.MultipleLocator(2))
+
+ax.grid(ls = "--", lw = 0.5, color = "#4E616C")
+
+ax.xaxis.set_tick_params(length = 2, color = "#4E616C", labelcolor = "#4E616C", labelsize = 6)
+ax.yaxis.set_tick_params(length = 2, color = "#4E616C", labelcolor = "#4E616C", labelsize = 6)
+ 
+ax.spines["bottom"].set_edgecolor("#4E616C")
+
+# 添加标题和坐标轴标签
+plt.title('Time')
+plt.xlabel('day')
+plt.xticks(rotation=270)
+plt.ylabel('hour')
+ 
+# 显示图形
+plt.show()
+plt.savefig(DAILYPNG)
+
+
+plt.close()
+
+
+c=['I', 'T', 'B', 'S', 'R', 'O']
+
+ct=[]
+ct.append(sum(daydata["I"]))
+ct.append(sum(daydata["T"]))
+ct.append(sum(daydata["B"]))
+ct.append(sum(daydata["S"]))
+ct.append(sum(daydata["R"]))
+totalO = 0
+for other in daydata["O"]:
+    if (other != 24):       # 判定为当天没有记录，忽略
+        totalO += other
+ct.append(totalO)
+
+# 饼图属性设置
+colors = ['#FF9999', '#FFE888', '#FFCC99', '#CCFF99', '#99FF99', '#CC99FF']
+
+# 绘制饼图
+plt.pie(ct, labels=c, colors=colors, autopct='%1.1f%%', startangle=90)
+ 
+# 设置饼图为圆形（非椭圆）
+plt.axis('equal')
+
+plt.savefig(TOTALPNG)
+
+plt.close()
+
+send2me()
+
+os.remove(DAILYPNG)
+os.remove(TOTALPNG)

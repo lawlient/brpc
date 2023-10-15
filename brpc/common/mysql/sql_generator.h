@@ -1,5 +1,7 @@
 #pragma once
 
+#include "util/util.h"
+
 #include <google/protobuf/message.h>
 
 #include <string>
@@ -30,7 +32,12 @@ public:
             case FieldDescriptor::Type::TYPE_INT32: { os << field->name() << " = " << refl->GetInt32(raw, field); break; }
             case FieldDescriptor::Type::TYPE_FIXED64: { os << field->name() << " = " << refl->GetUInt64(raw, field); break; }
             case FieldDescriptor::Type::TYPE_FIXED32: { os << field->name() << " = " << refl->GetUInt32(raw, field); break; }
-            case FieldDescriptor::Type::TYPE_STRING: { os << field->name() << " = " << "\"" << refl->GetString(raw, field) << "\""; break; }
+            case FieldDescriptor::Type::TYPE_STRING: { 
+                std::string esc;
+                basis::util::escape(refl->GetString(raw, field), &esc); 
+                os << field->name() << " = " << "\"" << esc << "\"";
+                break;
+            }
             default: break;
         }
         return os;

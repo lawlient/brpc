@@ -35,3 +35,17 @@ create table `jusers` (
 There is a string key named '**Token**' stored in redis and the value is generated from a timestamp string with sha256.
 
 Actually, login status checking is done by whether the value's length is 64bytes or not.
+
+
+------
+
+# Reflection
+
+Actually, login is an authentication problem, the common solutions are those:
+
+- JWT
+- Token
+- Session
+- OAuth
+
+My solution is not professional.

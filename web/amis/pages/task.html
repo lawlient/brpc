@@ -55,6 +55,12 @@ body,
                             },
                             "links": [
                                 {
+                                    "label": "首页",
+                                    "to": "./nav",
+                                    "customText": "home",
+                                    "customLevel": "info"
+                                },
+                                {
                                     "label": "活动管理",
                                     "to": "./task",
                                     "customText": "task",
@@ -73,6 +79,9 @@ body,
                                     "customLevel": "danger"
                                 }
                             ]
+                        },
+                        {
+                            type: 'divider'
                         },
                         {
                             type: 'tabs',
@@ -156,7 +165,7 @@ body,
                                                                 label: '耗时'
                                                             },
                                                             {
-                                                                type: 'select',
+                                                                type: 'button-group-select',
                                                                 name: 'priority',
                                                                 value: 1,
                                                                 label: '优先级',
@@ -187,7 +196,7 @@ body,
                                                                 ]
                                                             },
                                                             {
-                                                                type: 'select',
+                                                                type: 'button-group-select',
                                                                 name: 'classify',
                                                                 value: 0,
                                                                 label: '时间类型',
@@ -200,7 +209,7 @@ body,
                                                                 ]
                                                             },
                                                             {
-                                                                type: 'select',
+                                                                type: 'button-group-select',
                                                                 name: 'status',
                                                                 value: 0,
                                                                 label: '状态',
@@ -224,7 +233,6 @@ body,
                                         ],
                                         api: {
                                             url: "${hostname}/${uri}/GetTask?status=0&date=${day}",
-                                            
                                         },
                                         columns: [
                                             {
@@ -256,7 +264,7 @@ body,
                                                 name: 'priority',
                                                 label: '优先级',
                                                 quickEdit: {
-                                                    type: 'select',
+                                                    type: 'button-group-select',
                                                     options: [
                                                         { value: 0, label: "P0" },
                                                         { value: 1, label: "P1" },
@@ -275,15 +283,14 @@ body,
                                             {
                                                 name: 'completion',
                                                 label: '完成度',
-                                                type: 'progress',
-                                                quickEdit: {
-                                                    type: 'input-number'
-                                                }
+                                                type: 'tpl',
+                                                tpl: '${completion|division:100|percent}',
+                                                quickEdit: true,
                                             },
-                                            { 
+                                            {
                                                 name: 'classify',
                                                 label: '时间类型',
-                                                type: 'mapping', 
+                                                type: 'mapping',
                                                 map: {
                                                     0: "<span class='label label-success'>I</span>",
                                                     1: "<span class='label label-info'>T</span>",
@@ -292,7 +299,7 @@ body,
                                                     4: "<span class='label label-default'>R</span>",
                                                 },
                                                 quickEdit: {
-                                                    type: 'select',
+                                                    type: 'button-group-select',
                                                     options: [
                                                         { value: 0, label: "I" },
                                                         { value: 1, label: "T" },
@@ -306,13 +313,31 @@ body,
                                                 name: 'status',
                                                 label: '状态',
                                                 type: "mapping",
-                                                map : {
-                                                    0: "<span class='label label-info'>todo</span>",
-                                                    1: "<span class='label label-success'>done</span>",
-                                                    2: "<span class='label label-default'>discard</span>",
+                                                map: {
+                                                    0: {
+                                                        type: 'tag',
+                                                        //label: "todo",
+                                                        displayMode: 'status',
+                                                        color: 'active',
+                                                        icon: 'fa fa-square-o',
+                                                    },
+                                                    1: {
+                                                        type: 'tag',
+                                                        // label: "done",
+                                                        displayMode: 'status',
+                                                        color: 'success',
+                                                        icon: 'fa fa-check-square-o',
+                                                    },
+                                                    2: {
+                                                        type: 'tag',
+                                                        // label: "discard",
+                                                        displayMode: 'status',
+                                                        color: 'inactive',
+                                                        icon: 'fa fa-times-rectangle-o',
+                                                    }
                                                 },
                                                 quickEdit: {
-                                                    type: 'select',
+                                                    type: 'button-group-select',
                                                     options: [
                                                         { label: "todo", value: 0 },
                                                         { label: "done", value: 1 },
@@ -326,9 +351,10 @@ body,
                                                 buttons: [
                                                     {
                                                         type: 'button',
-                                                        label: '保存',
+                                                        tooltip: '保存',
+                                                        icon: 'fa fa-save',
                                                         actionType: 'ajax',
-                                                        level: '',
+                                                        //level: '',
                                                         api: {
                                                             method: 'post',
                                                             url: '${hostname}/${uri}/UpdTask',
@@ -340,8 +366,9 @@ body,
                                                     },
                                                     {
                                                         type: 'button',
-                                                        label: '编辑',
-                                                        level: 'primary',
+                                                        tooltip: '编辑',
+                                                        icon: 'fa fa-pencil',
+                                                        //level: 'primary',
                                                         actionType: 'dialog',
                                                         dialog: {
                                                             title: '编辑',
@@ -382,7 +409,7 @@ body,
                                                                             label: '耗时'
                                                                         },
                                                                         {
-                                                                            type: 'select',
+                                                                            type: 'button-group-select',
                                                                             name: 'priority',
                                                                             label: '优先级',
                                                                             options: [
@@ -411,7 +438,7 @@ body,
                                                                             ]
                                                                         },
                                                                         {
-                                                                            type: 'select',
+                                                                            type: 'button-group-select',
                                                                             name: 'classify',
                                                                             label: '时间类型',
                                                                             options: [
@@ -423,7 +450,7 @@ body,
                                                                             ]
                                                                         },
                                                                         {
-                                                                            type: 'select',
+                                                                            type: 'button-group-select',
                                                                             name: 'status',
                                                                             label: '状态',
                                                                             options: [
@@ -444,9 +471,10 @@ body,
                                                     },
                                                     {
                                                         type: 'button',
-                                                        label: "删除",
+                                                        tooltip: "删除",
+                                                        icon: 'fa fa-times text-danger',
                                                         actionType: 'ajax',
-                                                        level: 'secondary',
+                                                        //level: 'secondary',
                                                         confirmText: "Data will lost, are you sure?",
                                                         api: {
                                                             method: 'post',
@@ -535,7 +563,7 @@ body,
                                                 name: 'priority',
                                                 label: '优先级',
                                                 quickEdit: {
-                                                    type: 'select',
+                                                    type: 'button-group-select',
                                                     options: [
                                                         { value: 0, label: "P0" },
                                                         { value: 1, label: "P1" },
@@ -554,10 +582,9 @@ body,
                                             {
                                                 name: 'completion',
                                                 label: '完成度',
-                                                type: 'progress',
-                                                quickEdit: {
-                                                    type: 'input-number'
-                                                }
+                                                type: 'tpl',
+                                                tpl: '${completion|division:100|percent}',
+                                                quickEdit: true,
                                             },
                                             { 
                                                 name: 'classify',
@@ -571,7 +598,7 @@ body,
                                                     4: "<span class='label label-default'>R</span>",
                                                 },
                                                 quickEdit: {
-                                                    type: 'select',
+                                                    type: 'button-group-select',
                                                     options: [
                                                         { value: 0, label: "I" },
                                                         { value: 1, label: "T" },
@@ -585,13 +612,31 @@ body,
                                                 name: 'status',
                                                 label: '状态',
                                                 type: "mapping",
-                                                map : {
-                                                    0: "<span class='label label-info'>todo</span>",
-                                                    1: "<span class='label label-success'>done</span>",
-                                                    2: "<span class='label label-default'>discard</span>",
+                                                map: {
+                                                    0: {
+                                                        type: 'tag',
+                                                        //label: "todo",
+                                                        displayMode: 'status',
+                                                        color: 'active',
+                                                        icon: 'fa fa-square-o',
+                                                    },
+                                                    1: {
+                                                        type: 'tag',
+                                                        // label: "done",
+                                                        displayMode: 'status',
+                                                        color: 'success',
+                                                        icon: 'fa fa-check-square-o',
+                                                    },
+                                                    2: {
+                                                        type: 'tag',
+                                                        // label: "discard",
+                                                        displayMode: 'status',
+                                                        color: 'inactive',
+                                                        icon: 'fa fa-times-rectangle-o',
+                                                    }
                                                 },
                                                 quickEdit: {
-                                                    type: 'select',
+                                                    type: 'button-group-select',
                                                     options: [
                                                         { label: "todo", value: 0 },
                                                         { label: "done", value: 1 },
@@ -605,9 +650,10 @@ body,
                                                 buttons: [
                                                     {
                                                         type: 'button',
-                                                        label: '保存',
+                                                        tooltip: '保存',
+                                                        icon: 'fa fa-save',
                                                         actionType: 'ajax',
-                                                        level: '',
+                                                        //level: '',
                                                         api: {
                                                             method: 'post',
                                                             url: '${hostname}/${uri}/UpdTask',
@@ -619,8 +665,9 @@ body,
                                                     },
                                                     {
                                                         type: 'button',
-                                                        label: '编辑',
-                                                        level: 'primary',
+                                                        tooltip: '编辑',
+                                                        icon: 'fa fa-pencil',
+                                                        //level: 'primary',
                                                         actionType: 'dialog',
                                                         dialog: {
                                                             title: '编辑',
@@ -661,7 +708,7 @@ body,
                                                                             label: '耗时'
                                                                         },
                                                                         {
-                                                                            type: 'select',
+                                                                            type: 'button-group-select',
                                                                             name: 'priority',
                                                                             label: '优先级',
                                                                             options: [
@@ -690,7 +737,7 @@ body,
                                                                             ]
                                                                         },
                                                                         {
-                                                                            type: 'select',
+                                                                            type: 'button-group-select',
                                                                             name: 'classify',
                                                                             label: '时间类型',
                                                                             options: [
@@ -702,7 +749,7 @@ body,
                                                                             ]
                                                                         },
                                                                         {
-                                                                            type: 'select',
+                                                                            type: 'button-group-select',
                                                                             name: 'status',
                                                                             label: '状态',
                                                                             options: [
@@ -723,9 +770,10 @@ body,
                                                     },
                                                     {
                                                         type: 'button',
-                                                        label: "删除",
+                                                        tooltip: "删除",
+                                                        icon: 'fa fa-times text-danger',
                                                         actionType: 'ajax',
-                                                        level: 'secondary',
+                                                        //level: 'secondary',
                                                         confirmText: "Data will lost, are you sure?",
                                                         api: {
                                                             method: 'post',
@@ -740,58 +788,6 @@ body,
                                         ]
                                     }
                                 },
-                                {  
-                                    title: 'SCHEDULE',
-                                    hash: 'schedule manager',
-                                    schedules:[
-                                        {
-                                            'startTime': '2023-08-09 00:00:00',
-                                            'endTime': '2023-08-09 23:59:00',
-                                            'content': '2023-08-09 00:00:00'
-                                        }
-                                    ],
-                                    body: [
-                                        {
-                                            type: 'calendar',
-                                            id: 'schedule-crud',
-                                            name: 'schedule-crud',
-                                            largeMode: true,
-                                            debug:true,
-                                            onEvent : {
-                                                change: {
-                                                    actions: [
-                                                        {
-                                                            actionType: 'ajax',
-                                                            args: {
-                                                                api: {
-                                                                    method: 'get',
-                                                                    url: "${hostname}/${uri}/GetTask",
-                                                                    data: {
-                                                                        date: "${DATETOSTR(value, 'YYYY-MM-DD')}"
-                                                                    },
-                                                                }
-                                                            },
-                                                            outputVar: "resul"
-                                                        },
-                                                        {
-                                                            actionType: 'setValue',
-                                                            componentId: 'schedule-crud',
-                                                            args: {
-                                                                schedules: {
-                                                                    "${resul}": {
-                                                                        startTime: "${ctime}",
-                                                                        endTime: "${mtime}",
-                                                                        content: "${task}",
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-                                                    ]
-                                                }
-                                            },
-                                        }
-                                    ]
-                                }
                             ]
                         }
                     ]

@@ -1,0 +1,29 @@
+extends layout.pug
+
+block head
+  link(rel='stylesheet', href='/stylesheets/entry.css')
+
+block content
+
+  section 
+    .container
+      .header
+        h2 Entrance
+        .input-container
+          input(id="entryinput", type="text", placeholder="new entrance title")
+          button#add Add
+
+  section
+      .container
+          each e in entrys
+            .entry
+              label.title #{e.title}
+              input(class="desc", type="text", name="description", value=""+e.description) 
+              input(class="url", type="url", name="url", value=""+e.url)
+              button(type="button", class="update") Save
+              button(type="button", class="delete") Delete
+
+
+  script
+    include ../public/javascripts/entry.js
+

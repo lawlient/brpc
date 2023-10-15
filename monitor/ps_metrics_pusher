@@ -1,0 +1,21 @@
+#!/bin/bash
+
+metrics=`mktemp` || exit 1
+
+# 1. cpu
+z=$(ps --sort=-pcpu aux | head -n20)
+while read -r z
+do 
+    awk '{print "cpu_usage{process=\""$11" "$12" "$13"\", pid=\""$2"\"}", $3z}' >> $metrics
+done  <<< "$z"
+
+# 2. mem
+z=$(ps --sort=-pmem aux | head -n20)
+while read -r z
+do
+    awk '{print "mem_usage{process=\""$11" "$12" "$13"\", pid=\""$2"\"}", $4z}' >> $metrics
+done  <<< "$z"
+
+cat $metrics  | curl  --data-binary @- http://localhost:9091/metrics/job/top/instance/machine
+
+trap 'rm -f "$metrics"' EXIT

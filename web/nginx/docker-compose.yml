@@ -9,6 +9,7 @@ services:
             - "80:80"
             - "81:81"
             - "8080:80"
+            - "443:80"
         restart: unless-stopped
         networks:
             - jarvisnet

@@ -9,8 +9,6 @@
 namespace jarvis {
 
 
-static inline std::string table() { return jarvis::okr::GetDescriptor()->name(); }
-
 /* 将select返回的数据改造成树结构, 通过递归实现广度优先遍历 */
 static void make_tree(std::vector<google::protobuf::Message*>& tl, ::jarvis::obj* n) {
     auto it = tl.begin();

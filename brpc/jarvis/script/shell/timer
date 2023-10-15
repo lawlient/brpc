@@ -73,7 +73,9 @@ function html_body() {
 
     # print every days' tasks in this week
     whichday=`date +%w`
+    [[ 0 -eq "$whichday" ]] && whichday=7
     offset=$((1 - $whichday))
+
     for i in `seq 7`
     do 
         day_table $(date -d "$offset days" +"%F")
@@ -115,7 +117,8 @@ function generate_html() {
 
     html_body $TMP
 
-    jarvis -m $TMP
+    grep table $TMP > /dev/null
+    [[ 0 -eq $? ]] && jarvis -m $TMP
 
     trap 'rm -f "$TMP"' EXIT
 }

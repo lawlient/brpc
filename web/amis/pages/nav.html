@@ -41,7 +41,6 @@ body,
                     body: {
                         "type": "nav",
                         "stacked": true,
-                        "className": "w-md",
                         "itemBadge": {
                             "mode": "ribbon",
                             "text": "${customText}",
@@ -51,20 +50,30 @@ body,
                         },
                         "links": [
                             {
+                                "label": "首页",
+                                "to": "/",
+                                "icon": "fa fa-home",
+                                "customText": "home",
+                                "customLevel": "info"
+                            },
+                            {
                                 "label": "活动管理",
                                 "to": "./task",
-                                "icon": "https://suda.cdn.bcebos.com/images%2F2021-01%2Fdiamond.svg",
-                                "active": true
+                                "icon": "fa fa-tasks",
+                                "customText": "tasks",
+                                "customLevel": "success"
                             },
                             {
                                 "label": "OKR管理",
                                 "to": "./okr",
+                                "icon": "fa fa-calendar-check-o",
                                 "customText": "okr",
-                                "customLevel": "info"
+                                "customLevel": "warning",
                             },
                             {
                                 "label": "财务管理",
                                 "to": "./financial",
+                                "icon": "fa fa-cny",
                                 "customText": "financial",
                                 "customLevel": "danger"
                             }

@@ -1,0 +1,22 @@
+doctype html
+html
+  head
+    link(rel='stylesheet', href='/stylesheets/layout.css')
+    title="Jan"
+    script(src="/javascripts/index.js")
+
+    block head
+      link(rel='stylesheet', href='/stylesheets/style.css')
+
+  body
+    header 
+      .container
+        .header 
+          img(id='logo', src="https://img2.baidu.com/it/u=650329638,1978586843&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500", alt="logo")
+          img(id='admin', src="https://img0.baidu.com/it/u=3331113984,3406777195&fm=253&fmt=auto&app=138&f=JPEG?w=501&h=500", alt='admin')
+
+    block content
+
+script(src='https://code.jquery.com/jquery-3.3.1.slim.min.js')
+script(src='https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js')
+script(src='https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js')

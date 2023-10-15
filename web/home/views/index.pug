@@ -1,0 +1,24 @@
+extends layout.pug
+
+block head
+  title= Jan
+  link(rel='stylesheet', href='/stylesheets/style.css')
+  link(rel="stylesheet", href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css")
+  script(src="/javascripts/index.js")
+
+block content
+
+  section 
+      .container
+          #quote
+              p#q #{quotes.q}
+              h3#author #{quotes.author}
+
+  section 
+      .container 
+          #entrys
+              each e in entrys
+                  .entry
+                      h2 #{e.title}
+                      p #{e.description}
+                      a(class="dsc", display="none", href=""+e.url) 

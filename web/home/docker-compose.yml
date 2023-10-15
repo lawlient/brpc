@@ -1,0 +1,29 @@
+# yaml 配置
+
+version: '3'
+services:
+    home:
+        container_name: "home"
+        image: node:latest
+        restart: unless-stopped
+        working_dir: "/root/"
+        entrypoint: npm run devstart
+        volumes:
+            - "/etc/localtime:/etc/localtime:ro"
+            - "./:/root"
+        ports:
+            - 3000:3000
+
+        depends_on:
+            - home-mongo
+        expose: 
+            - "3000"
+
+
+    home-mongo:
+        container_name: "home-mongo"
+        image: mongo:4.4.16
+        restart: unless-stopped
+        volumes:
+            - "/etc/localtime:/etc/localtime:ro"
+            - "/var/lib/home/mongodb/:/data/"
