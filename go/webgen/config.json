@@ -1,0 +1,13 @@
+{
+    "project" : "demo",
+    "output_dir": "/home/xujiuan/workspace",
+    "port": 1625,
+    "pm": "npm",
+    "template": "react",
+    "frontend_image": "node:18-alpine",
+    "backend_image" : "golang:alpine",
+    "frontend_port": 10106,
+    "backend_port": 10107,
+    "tailwindcss": true,
+    "ui": "primereact"
+}
