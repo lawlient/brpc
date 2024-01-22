@@ -1,0 +1,12 @@
+version: "3"
+
+services:
+  home:
+    container_name: "nav"
+    image: "mereith/van-nav:latest"
+    restart: unless-stopped
+    volumes: 
+      - "/var/lib/nav/data/:/app/data"
+    ports:
+      - "6412:6412"
+    

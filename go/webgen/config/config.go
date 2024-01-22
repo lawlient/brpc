@@ -40,14 +40,6 @@ func (config *Config) Root() string {
 }
 
 func (config *Config) Show() {
-	/// println("Project Name is ", config.Project)
-	/// println("root directory is ", config.Output)
-	/// println("server port is ", config.Port)
-	/// println("package manager is ", config.Pm)
-	/// println("template is ", config.Template)
-	/// println("frontend image is ", config.FrontendImg)
-	/// println("backend image is ", config.BackendImg)
-
 	v := reflect.ValueOf(*config)
 	values := make([]interface{}, v.NumField())
 	for i := 0; i < v.NumField(); i++ {

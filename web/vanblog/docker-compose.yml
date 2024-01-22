@@ -21,9 +21,9 @@ services:
         # Caddy 证书存储
       - /var/lib/vanblog/caddy/data:/root/.local/share/caddy
     ports:
-      # 前面的是映射到宿主机的端口号，改端口的话改前面的。
       - 6109:80
   mongo:
+    container_name: "blog-mongo"
     # 某些机器不支持 avx 会报错，所以默认用 v4 版本。有的话用最新的。
     image: mongo:4.4.16
     restart: always

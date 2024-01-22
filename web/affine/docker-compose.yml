@@ -1,0 +1,10 @@
+version: "3"
+
+services:
+  affine:
+    container_name: "affine"
+    image: ghcr.io/toeverything/affine-self-hosted:pre-alpha
+    ports:
+      - 10105:3000
+    tty: true
+

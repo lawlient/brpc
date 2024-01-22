@@ -1,0 +1,471 @@
+#!/usr/bin/bash
+
+file="okr.html"
+source html
+
+HEADER=('Work' 'Skill' 'Read' 'Life')
+ID=('work-crud' 'skill-crud' 'read-crud' 'life-crud')
+
+function body() {
+cat << EOF >> $file
+<body>
+
+<div id="root" class="app-wrapper"></div>
+<script src="../sdk/sdk.js"></script>
+<script type="text/javascript">
+    (function () {
+        let amis = amisRequire('amis/embed');
+        // 通过替换下面这个配置来生成不同页面
+        let amisJSON = {
+            type: 'service',
+            data : {
+                hostname: '$hostname',
+                uri: 'jarvis/Jarvis',
+                year: "\${DATETOSTR(TODAY(), 'YYYY')}",
+                month: "\${DATETOSTR(TODAY(), 'MM')}",
+            },
+            body: [
+EOF
+
+nav $file
+control
+list
+
+cat << EOF >> $file
+            ]
+        };
+        let amisScoped = amis.embed('#root', amisJSON);
+    })();
+</script>
+</body>
+</html>
+EOF
+}
+
+function setyear() {
+cat << EOF >> $file
+{
+    type: 'input-year',
+    value: "\${year}",
+    name: 'y',
+    inputFormat: 'YYYY年',
+    format: 'YYYY',
+    quickEdit: true,
+    onEvent : {
+        change: {
+            actions: [
+EOF
+
+for id in "${ID[@]}"
+do 
+cat << EOF >> $file
+                { actionType: 'reload', componentId: '$id', args: { year: '\${y}' } },
+EOF
+done
+
+cat << EOF >> $file
+            ]
+        }
+    },
+    columnRatio: 1
+},
+EOF
+}
+
+function setmonth() {
+cat << EOF >> $file
+{
+    type: 'input-month',
+    value: "\${month}",
+    name: 'month',
+    inputFormat: 'MM月',
+    format: 'MM',
+    quickEdit: true,
+    onEvent : {
+        change: {
+            actions: [
+EOF
+
+for id in "${ID[@]}"
+do
+cat << EOF >> $file
+                { actionType: 'reload', componentId: '$id', args: { month: '\${month}' } },
+EOF
+done
+
+cat << EOF >> $file
+            ]
+        }
+    },
+    columnRatio: 1
+},
+EOF
+}
+
+function add() {
+cat << EOF >> $file
+{
+    type: "button",
+    label: "添加",
+    level: "primary",
+    actionType: 'dialog',
+    dialog: {
+        title: '新建',
+        body:  {
+            type: 'form',
+            api: {
+                method: 'post',
+                url: '\${hostname}/\${uri}/AddOKR',
+                data: {
+                    'id': 0,
+                    '&': '\$$'
+                },
+            },
+            body: [
+                {
+                    type: 'input-text',
+                    name: 'event',
+                    label: '事项',
+                },
+                {
+                    type: 'input-date',
+                    name: 'start',
+                    label: '开始',
+                    inputFormat: "YYYY-MM-DD",
+                    format: "YYYY-MM-DD"
+                },
+                {
+                    type: 'input-date',
+                    name: 'end',
+                    label: '结束',
+                    inputFormat: "YYYY-MM-DD",
+                    format: "YYYY-MM-DD"
+                },
+                {
+                    type: 'input-number',
+                    name: 'est',
+                    precision: 2,
+                    label: '估时'
+                },
+                {
+                    type: 'input-number',
+                    name: 'act',
+                    value: 0,
+                    precision: 2,
+                    label: '耗时'
+                },
+                {
+                    type: 'input-number',
+                    name: 'parent',
+                    value: 0,
+                    label: '父节点ID'
+                },
+                {
+                    type: 'input-number',
+                    name: 'score',
+                    value: 0,
+                    label: '评分'
+                },
+                {
+                    type: 'select',
+                    name: 'classify',
+                    value: 0,
+                    label: '目标分类',
+                    options: [
+                        { label: "Work",  value: 0 },
+                        { label: "Skill", value: 1 },
+                        { label: "Read",  value: 2 },
+                        { label: "Life",  value: 3 },
+                    ]
+                },
+                {
+                    type: 'input-number',
+                    name: 'completion',
+                    label: '完成度',
+                    value: 0,
+                },
+                {
+                    type: 'input-rich-text',
+                    name: 'comments',
+                    label: '备注'
+                } 
+            ]
+        }
+    },
+    columnRatio: 1
+},
+
+EOF
+}
+
+function control() {
+cat << EOF >> $file
+{
+    type: 'group',
+    body: [
+EOF
+
+setyear
+setmonth
+add
+
+cat << EOF >> $file
+    ]
+},
+EOF
+}
+
+
+function one() {
+key=$1
+h=${HEADER[$1]}
+
+cat << EOF >> $file
+{
+    type: 'collapse',
+    key: '$key',
+    header: '$h',
+    body: {
+        type: 'crud',
+        id: '${ID[$1]}',
+        name: '${ID[$1]}',
+        className: 'm-t-sm',
+        columnsTogglable: false,
+        expandConfig: {
+            expand: 'all',
+        },
+        api: {
+            method: 'get',
+            url: '\${hostname}/\${uri}/GetOKR',
+            data: {
+                classify: ${key},
+                year: '\${year}',
+                month: '\${month}'
+            },
+            responseData: {
+                '&': '\$$',
+            }
+        },
+        columns: [
+            { name: 'id', label: 'ID', },
+            {
+                name: 'event',
+                label: '内容',
+                quickEdit: true,
+                popOverEnableOn: "\${comments}",
+                popOver: {
+                    mode: 'popOver',
+                    trigger: 'hover',
+                    position: 'left-top',
+                    body: {
+                        type: 'page',
+                        body: '\${comments|raw}'
+                    }
+                },
+            },
+            {
+                name: 'start',
+                label: '开始',
+                quickEdit: {
+                    type: 'input-date'
+                },
+            },
+            {
+                name: 'end',
+                label: '结束',
+                quickEdit: {
+                    type: 'input-date'
+                },
+            },
+            {
+                type: 'number',
+                name: 'est',
+                precision: 1,
+                label: '估时',
+                quickEdit: true,
+            },
+            {
+                type: 'number',
+                name: 'act',
+                precision: 1,
+                label: '耗时',
+                quickEdit: true,
+            },
+            {
+                name: 'completion',
+                label: '完成度',
+                type: 'tpl',
+                tpl: '\${completion|division:100|percent}',
+                quickEdit: true,
+            },
+            {
+                name: 'score',
+                label: '评分',
+                quickEdit: {
+                    type: 'input-number'
+                },
+            },
+            {
+                type: 'operation',
+                label: '操作',
+                buttons: [
+                    {
+                        type: 'button',
+                        icon: 'fa fa-save',
+                        actionType: 'ajax',
+                        // label: '保存',
+                        // level: '',
+                        actionType: 'ajax',
+                        api: {
+                            method: 'post',
+                            url: '\${hostname}/\${uri}/UpdOKR',
+                            data: {
+                                id: '\${id}',
+                                '&': '\$$'
+                            }
+                        }
+                    },
+                    {
+                        type: 'button',
+                        tooltip: '编辑',
+                        icon: 'fa fa-pencil',
+                        // label: '编辑',
+                        // level: 'primary',
+                        actionType: 'dialog',
+                        dialog: {
+                            title: '编辑',
+                            body: [
+                                {
+                                    type: 'form',
+                                    api: {
+                                        method: 'post',
+                                        url: '\${hostname}/\${uri}/UpdOKR',
+                                        data: {
+                                            id: '\${id}',
+                                            '&': '\$$',
+                                            ctime: '\${ctime}'
+                                        }
+                                    },
+                                    body: [
+                                        {
+                                            type: 'input-text',
+                                            name: 'event',
+                                            label: '内容'
+                                        },
+                                        {
+                                            type: 'input-date',
+                                            name: 'start',
+                                            label: '开始',
+                                            format: "YYYY-MM-DD"
+                                        },
+                                        {
+                                            type: 'input-date',
+                                            name: 'end',
+                                            label: '结束',
+                                            format: "YYYY-MM-DD"
+                                        },
+                                        {
+                                            type: 'input-number',
+                                            name: 'est',
+                                            precision: 2,
+                                            label: '估时'
+                                        },
+                                        {
+                                            type: 'input-number',
+                                            name: 'act',
+                                            precision: 2,
+                                            label: '耗时'
+                                        },
+                                        {
+                                            type: 'input-number',
+                                            name: 'parent',
+                                            label: '父目标'
+                                        },
+                                        {
+                                            type: 'input-number',
+                                            name: 'score',
+                                            label: '评分'
+                                        },
+                                        {
+                                            type: 'select',
+                                            name: 'classify',
+                                            label: '目标类型',
+                                            options: [
+                                                { label: "Work", value: 0 },
+                                                { label: "Skill", value: 1 },
+                                                { label: "Read", value: 2 },
+                                                { label: "Life", value: 3 },
+                                            ]
+                                        },
+                                        {
+                                            type: 'input-number',
+                                            name: 'completion',
+                                            label: '完成度'
+                                        },
+                                        {
+                                            type: 'input-rich-text',
+                                            name: 'comments',
+                                            label: '备注'
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        type: 'button',
+                        tooltip: "删除",
+                        icon: 'fa fa-times text-danger',
+                        // label: "删除",
+                        // level: 'secondary',
+                        actionType: 'ajax',
+                        confirmText: "Data will lost, are you sure?",
+                        api: {
+                            method: 'post',
+                            url: '\${hostname}/\${uri}/DelOKR',
+                            data: {
+                                id: '\${id}'
+                            }
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+},
+EOF
+}
+
+function list() {
+cat << EOF >> $file
+{
+    type: 'collapse-group',
+    activeKey: [],
+    accordion: true,
+    body: [
+EOF
+
+for i in 0 1 2 3
+do 
+    one $i
+done
+
+
+cat << EOF >> $file
+    ]
+},
+EOF
+}
+
+
+# ------------- main ----------------
+
+head $file
+body
+
+mv $file ../pages/
+
+
+
+
+

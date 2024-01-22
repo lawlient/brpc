@@ -193,3 +193,61 @@ ls
 pwd
 npm install react react-dom
 exit
+curl 0:3001
+exit
+npm run devstart
+cat package.json 
+gs .
+npm i --save-dev @types/react-dom
+npm run devstart
+
+npm run devstart
+cd ui/
+ls
+npx create-react-app admin
+ls
+cd admin/
+ls
+vim package.json 
+cat package.json 
+ls
+grep 3000 -w
+grep 3000 -wr
+grep 3000 -wr
+ls
+cd src/
+grep 3000 -nrw
+cd ../
+cat package.json 
+ls
+cat README.md 
+ls
+cd src/
+ls
+npm start
+ls
+cd ../../
+ls
+cd ../
+ls
+npm run stop
+ps aux
+cd ui/
+ls
+cd admin/
+ls
+npm run start
+ps aux
+cd
+pwd
+cls
+ls
+npm run devstart
+ps aux
+exit
+ls
+ls
+cd ui/
+cd admin/
+npm run start
+exit

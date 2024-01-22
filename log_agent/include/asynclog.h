@@ -24,7 +24,7 @@
 #define LOG_MAGIC      27
 #define PATH_LEN       128
 #define MODUSIZE       (1 << 10)
-#define LOG_LINE_LEN   (1 << 10)
+#define LOG_LINE_LEN   (1 << 16)
 
 #define LOG_PREFIX "/data/log/"
 

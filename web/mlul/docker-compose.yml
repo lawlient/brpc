@@ -1,0 +1,17 @@
+# yaml 配置
+
+version: '3'
+services:
+    mlul:
+        container_name: "mlul"
+        build: .
+        restart: unless-stopped
+        working_dir: "/app/"
+        entrypoint: ./mlul
+        volumes:
+            - "/data/music:/app/music"
+            - "/var/lib/mlul/data:/app/data"
+        ports:
+            - 12827:12827
+        
+        tty: true

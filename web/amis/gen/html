@@ -1,0 +1,87 @@
+#!/usr/bin/bash
+
+export hostname="https://unicorn-champion-mullet.ngrok-free.app"
+
+function head() {
+page=$1
+cat << EOF > $page
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8" />
+    <title>OKR</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <link rel="icon" href="$hostname/ftp/Pictures/jarvis/an.icon" />
+    <link rel="stylesheet" href="../sdk/sdk.css" />
+    <link rel="stylesheet" href="../sdk/helper.css" />
+    <link rel="stylesheet" href="../sdk/iconfont.css" />
+    <!-- 这是默认主题所需的，如果是其他主题则不需要 -->
+    <!-- 从 1.1.0 开始 sdk.css 将不支持 IE 11，如果要支持 IE11 请引用这个 css，并把前面那个删了 -->
+    <!-- <link rel="stylesheet" href="sdk-ie11.css" /> -->
+    <!-- 不过 amis 开发团队几乎没测试过 IE 11 下的效果，所以可能有细节功能用不了，如果发现请报 issue -->
+
+    <style>
+        html,
+        body,
+        .app-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            margin: 0 auto;
+            padding: 0;
+        }
+    </style>
+</head>
+
+EOF
+
+}
+
+function nav() {
+page=$1
+
+cat << EOF >> $page
+                        {
+                            "type": 'nav',
+                            "stacked": false,
+                            "itemBadge": {
+                                "mode": "ribbon",
+                                "text": "\${customText}",
+                                "position": "top-left",
+                                "visibleOn": "this.customText",
+                                "level": "\${customLevel}"
+                            },
+                            "links": [
+                                {
+                                    "label": "首页",
+                                    "to": "./nav",
+                                    "customText": "home",
+                                    "customLevel": "info"
+                                },
+                                {
+                                    "label": "活动管理",
+                                    "to": "./task",
+                                    "customText": "task",
+                                    "customLevel": "success"
+                                },
+                                {
+                                    "label": "OKR管理",
+                                    "to": "./okr",
+                                    "customText": "okr",
+                                    "customLevel": "info"
+                                },
+                                {
+                                    "label": "财务管理",
+                                    "to": "./financial",
+                                    "customText": "financial",
+                                    "customLevel": "danger"
+                                }
+                            ]
+                        },
+                        {
+                            type: 'divider'
+                        },
+EOF
+}

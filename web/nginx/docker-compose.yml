@@ -7,16 +7,20 @@ services:
         build: .
         ports:
             - "80:80"
-            - "81:81"
-            - "8080:80"
             - "443:80"
         restart: unless-stopped
         networks:
             - jarvisnet
             - vanblognet
+            - navnet
+            - docsifynet
+            - yraidnet
+            - wikijs
         volumes:
             - "/etc/localtime:/etc/localtime:ro"
-            - "/data:/data"
+            - "/data/code/web/nginx/conf:/etc/nginx/conf.d:ro"
+            - "/data/:/data/"
+
         tty: true
 
 networks:
@@ -25,4 +29,16 @@ networks:
         external: true
     vanblognet:
         name: vanblog_default
+        external: true
+    navnet:
+        name: nav_default
+        external: true
+    docsifynet:
+        name: docsify_default
+        external: true
+    yraidnet:
+        name: yraid_default
+        external: true
+    wikijs:
+        name: wikijs_default
         external: true

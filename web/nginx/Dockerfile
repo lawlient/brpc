@@ -5,5 +5,3 @@ RUN sed -i 's/deb.debian.org/mirrors.ustc.edu.cn/g' /etc/apt/sources.list.d/debi
 
 RUN apt update && \
     apt install -y lsof dnsutils procps iputils-ping net-tools
-
-COPY ./conf /etc/nginx/conf.d/

@@ -1,0 +1,48 @@
+version: "3.2"
+services:
+
+  outline:
+    container_name: outline
+    image: outlinewiki/outline:0.74.0
+    env_file: ./docker.env
+    ports:
+      - "20100:3000"
+    volumes:
+      - /var/lib/outline/outline:/var/lib/outline/data
+    depends_on:
+      - postgres
+      - redis
+
+  redis:
+    container_name: outline-redis
+    image: redis
+    env_file: ./docker.env
+    ports:
+      - "6379:6379"
+    # volumes:
+    #   - ./redis.conf:/redis.conf
+    # command: ["redis-server", "/redis.conf"]
+    command: ["redis-server"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 30s
+      retries: 3
+
+  postgres:
+    container_name: outline-postgres
+    image: postgres
+    env_file: ./docker.env
+    ports:
+      - "5432:5432"
+    volumes:
+      - /var/lib/outline/postgressql:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    environment:
+      POSTGRES_USER: 'jovan'
+      POSTGRES_PASSWORD: '0ut1ine'
+      POSTGRES_DB: 'outline'

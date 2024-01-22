@@ -20,7 +20,7 @@ func main() {
 	g.Generate(&config)
 
 	if _, err := os.Stat(config.Root() + "/ui"); errors.Is(err, os.ErrNotExist) {
-		os.RemoveAll(config.Output)
+		os.RemoveAll(config.Root())
 		fmt.Println("/$ Generate failed, clear everything.")
 		return
 	}

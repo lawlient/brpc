@@ -1,0 +1,12 @@
+version: "3"
+services:
+  docsify:
+    container_name: "docsify"
+    build: .
+    working_dir: /app/data
+    entrypoint: docsify serve .
+    restart: unless-stopped
+    volumes:
+      - "/data/docs:/app/data"
+    tty: true
+
