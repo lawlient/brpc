@@ -66,7 +66,7 @@ func (g *UIGenerator) startContainer() error {
 }
 
 func (g *UIGenerator) createApp() {
-	g.sdk.Exec2("npm config set registry https://registry.npm.taobao.org")
+	g.sdk.Exec2("npm config set registry https://registry.npmmirror.com")
 
 	// 此处耗时不定，取决于网络情况
 	g.sdk.Exec2("npm create vite@latest ui -- --template react")
@@ -75,6 +75,7 @@ func (g *UIGenerator) createApp() {
 		// create 超时
 		return
 	}
+
 	g.sdk.Exec2("cd ui && npm install")
 
 	g.sdk.Exec2("cd ui && npm install --save react-router-dom")

@@ -6,6 +6,7 @@ import (
 	"os"
 	"text/template"
 	"webgen/docker"
+	"webgen/util"
 
 	"github.com/docker/docker/api/types/container"
 )
@@ -42,12 +43,15 @@ func (g *ServerGenerator) generate() error {
 
 func (g *ServerGenerator) startContainer() error {
 	config := container.Config{
-		// User:       util.User(),				 /* go mod tidy need root permission */
+		User:       util.User(), /* 默认需要root权限 */
 		Image:      g.g.config.BackendImg,
 		Cmd:        []string{"/bin/sh"},
 		WorkingDir: "/app/server",
-		Env:        []string{"GOPROXY=https://goproxy.cn"}, // 加速go get
-		Tty:        true,
+		Env: []string{
+			"GOPROXY=https://goproxy.cn", // 加速go get
+			"GOCACHE=/app/server/.cache", // 默认路径/.cache需要sudo权限
+		},
+		Tty: true,
 	}
 
 	hostconfig := container.HostConfig{
