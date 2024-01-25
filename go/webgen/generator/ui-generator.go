@@ -89,7 +89,7 @@ func (g *UIGenerator) createApp() {
 	}
 
 	if g.g.config.UI == "joyui" {
-		g.sdk.Exec2("cd ui && npm install @mui/joy @emotion/react @emotion/styled")
+		g.sdk.Exec2("cd ui && npm install @mui/joy @emotion/react @emotion/styled  @mui/icons-material @mui/material")
 	} else if g.g.config.UI == "primereact" {
 		g.sdk.Exec2("cd ui && npm install primereact")
 	} else {
