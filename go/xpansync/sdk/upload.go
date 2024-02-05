@@ -4,8 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
+	"strings"
 
 	openapiclient "xpansync/openxpanapi"
 	"xpansync/util"
@@ -52,21 +54,30 @@ func (sdk *sdk) FileUpload(src string, dsc string) {
 		return
 	} else {
 		req.Isdir = 0
-		data, err := os.ReadFile(src)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "stat %s failed, err:%v", src, err)
+		if stat.Size() > (4 << 30) {
+			fmt.Fprintf(os.Stderr, "file size react limit 4GB")
 			return
 		}
-
-		req.Size = int32(stat.Size()) // int32
-		if req.Size > (4 << 20) {
-			fmt.Fprintf(os.Stderr, "file size react limit 4MB")
-			return
-		}
-		req.BlockList = "[\"" + util.Md5String(data) + "\"]" // string
 	}
-	req.Autoinit = int32(1) // int32
-	req.Rtype = int32(3)    // overwrite
+	req.Size = int32(stat.Size()) // int32
+	req.Autoinit = int32(1)       // int32
+	req.Rtype = int32(3)          // overwrite
+
+	blocks := make([]string, 0)
+	for {
+		buf := make([]byte, 4<<20)
+		n, err := file.Read(buf)
+		if err != nil && err != io.EOF {
+			fmt.Fprintf(os.Stderr, "read file fail,err:%v\n", err)
+			return
+		}
+		if n == 0 {
+			break
+		}
+		blocks = append(blocks, "\""+util.Md5String(buf)+"\"")
+	}
+
+	req.BlockList = "[" + strings.Join(blocks, ",") + "]" // string
 
 	sdk.fileprecreate(&req)
 	sdk.superfile2(&req, src)
@@ -110,7 +121,6 @@ func (sdk *sdk) fileprecreate(req *UploadRequest) {
 // 分片上传
 func (sdk *sdk) superfile2(req *UploadRequest, name string) {
 	accessToken := sdk.config.AccessToken // string
-	partseq := "0"                        // string
 	path := req.Path
 	uploadid := req.ID
 	type_ := "tmpfile"
@@ -123,20 +133,35 @@ func (sdk *sdk) superfile2(req *UploadRequest, name string) {
 	configuration := openapiclient.NewConfiguration()
 	//configuration.Debug = true
 	api_client := openapiclient.NewAPIClient(configuration)
-	resp, r, err := api_client.FileuploadApi.Pcssuperfile2(context.Background()).AccessToken(accessToken).Partseq(partseq).Path(path).Uploadid(uploadid).Type_(type_).File(file).Execute()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error when calling `FileuploadApi.Pcssuperfile2``: %v\n", err)
-		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
-	}
-	// response from `Pcssuperfile2`: string
-	fmt.Fprintf(os.Stdout, "Response from `FileuploadApi.Pcssuperfile2`: %v\n", resp)
 
-	bodyBytes, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "err: %v\n", r)
-	}
+	blocks := make([]string, 0)
+	loop := 0
+	for {
+		buf := make([]byte, 4<<20)
+		n, err := file.Read(buf)
+		if err != nil && err != io.EOF {
+			fmt.Fprintf(os.Stderr, "read file fail,err:%v\n", err)
+			return
+		}
+		if n == 0 {
+			break
+		}
+		resp, r, err := api_client.FileuploadApi.Pcssuperfile2(context.Background()).AccessToken(accessToken).Partseq(partseq).Path(path).Uploadid(uploadid).Type_(type_).File(file).Execute()
 
-	fmt.Println(string(bodyBytes))
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error when calling `FileuploadApi.Pcssuperfile2``: %v\n", err)
+			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+		}
+		// response from `Pcssuperfile2`: string
+		fmt.Fprintf(os.Stdout, "Response from `FileuploadApi.Pcssuperfile2`: %v\n", resp)
+
+		bodyBytes, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "err: %v\n", r)
+		}
+
+		fmt.Println(string(bodyBytes))
+	}
 }
 
 // 合并文件
