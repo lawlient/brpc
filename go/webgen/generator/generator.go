@@ -41,8 +41,8 @@ func (g *Generator) init() {
 	g.templates = make(map[string]string)
 	g.templates["readme.tmpl"] = "README.md"
 	g.templates["dockerfile.tmpl"] = "Dockerfile"
-	g.templates["docker-compose.dev.tmpl"] = "docker-compose.dev.yml"
 	g.templates["docker-compose.tmpl"] = "docker-compose.yml"
+	g.templates["docker-compose.pro.tmpl"] = "docker-compose.pro.yml"
 
 	g.server.g = g
 	g.ui.g = g

@@ -1,21 +1,36 @@
-# 正式环境配置
+# 开发环境配置
 
-version: '3'
+version: "3"
 services:
-    {{.Project}}:
-        container_name: {{.Project}}
-        build: 
-          context: .
-          args:
-            BASEPATH: / # base path for ui and server, cannot change on the fly cause of embedding ui
-        #restart: unless-stopped
-        working_dir: "/app/"
+    ui:
+        container_name: "{{.Project}}_ui"
+        build: ./ui/
+        restart: unless-stopped
         environment:
-            GIN_MODE: release
-        entrypoint: "{{.Project}} --port={{.Port}}"
-        volumes:
-            - "./.data:/app/.data"
+            TZ: "Asia/Shanghai"
         ports:
-            - {{.Port}}:{{.Port}}
-        
+            - "{{.FrontendPort}}:5173"
+        volumes: 
+            - "./:/app"
+            - "/etc/localtime:/etc/localtime:ro"
+        working_dir: "/app/ui/"
+        entrypoint: "/bin/sh entrypoint.sh"
+        tty: true
+        depends_on:
+            - server
+
+    server:
+        container_name: "{{.Project}}_server"
+        build: ./server/
+        restart: unless-stopped
+        environment:
+            BASEPATH: "/"
+            GOPROXY: https://goproxy.cn
+        ports:
+            - "{{.BackendPort}}:1625"
+        volumes:
+            - "./:/app"
+            - "/etc/localtime:/etc/localtime:ro"
+        working_dir: "/app/server"
+        entrypoint: "/bin/sh entrypoint.sh"
         tty: true
