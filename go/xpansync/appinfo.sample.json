@@ -1,0 +1,10 @@
+{
+    "AppID": "your appid",
+    "AppKey": "your appkey",
+    "SecretKey": "your secretkey",
+    "SignKey": "your signkey",
+    "RedirectUri": "oob",
+    "Code": "",
+    "AccessToken": ""
+}
+

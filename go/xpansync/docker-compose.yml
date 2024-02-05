@@ -1,0 +1,15 @@
+# xpansync
+version: "3"
+
+services:
+  xpansync:
+    container_name: "xpansync"
+    image: "golang:alpine"
+    restart: "unless-stopped"
+    working_dir: /app
+    ports:
+      - "1425:1425"
+    volumes:
+      - "./:/app/"
+    entrypoint: "/bin/sh"
+    tty: true
