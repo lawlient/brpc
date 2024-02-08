@@ -74,10 +74,13 @@ func (sdk *sdk) FileUpload(src string, dsc string) {
 		if n == 0 {
 			break
 		}
-		blocks = append(blocks, "\""+util.Md5String(buf)+"\"")
+        fmt.Fprintf(os.Stdout, "data is %s\n", buf)
+        blocks = append(blocks, "\""+util.Md5String(buf[:n])+"\"")
 	}
 
 	req.BlockList = "[" + strings.Join(blocks, ",") + "]" // string
+
+    fmt.Fprintf(os.Stdout , "block is %v\n", req.BlockList)
 
 	sdk.fileprecreate(&req)
 	sdk.superfile2(&req, src)
@@ -134,7 +137,6 @@ func (sdk *sdk) superfile2(req *UploadRequest, name string) {
 	//configuration.Debug = true
 	api_client := openapiclient.NewAPIClient(configuration)
 
-	blocks := make([]string, 0)
 	loop := 0
 	for {
 		buf := make([]byte, 4<<20)
@@ -146,6 +148,22 @@ func (sdk *sdk) superfile2(req *UploadRequest, name string) {
 		if n == 0 {
 			break
 		}
+
+        tmpfile, err := ioutil.TempFile("", "temp")
+        if err != nil {
+            fmt.Fprintf(os.Stderr, "create tmp file fail, err:%v\n", err)
+            return
+        }
+        defer tmpfile.Close()
+
+        _, err = tmpfile.Write(buf)
+        if err != nil {
+            fmt.Fprintf(os.Stderr, "create tmp file fail, err:%v\n", err)
+            return
+        }
+
+		partseq := "0"
+        fmt.Fprintf(os.Stdout, "loop is %v\n", loop)
 		resp, r, err := api_client.FileuploadApi.Pcssuperfile2(context.Background()).AccessToken(accessToken).Partseq(partseq).Path(path).Uploadid(uploadid).Type_(type_).File(file).Execute()
 
 		if err != nil {
@@ -161,6 +179,7 @@ func (sdk *sdk) superfile2(req *UploadRequest, name string) {
 		}
 
 		fmt.Println(string(bodyBytes))
+		loop++
 	}
 }
 

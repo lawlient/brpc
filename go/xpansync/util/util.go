@@ -3,6 +3,7 @@ package util
 import (
 	"crypto/md5"
 	"fmt"
+	"strconv"
 )
 
 func Byte2IEC(b int64) string {
@@ -24,4 +25,16 @@ func Md5String(data []byte) string {
 	hash := md5.Sum(data)
 	md5str := fmt.Sprintf("%x", hash)
 	return md5str
+}
+
+func Itoa(num int) string {
+	return strconv.Itoa(num)
+}
+
+func Atoi(num string) int {
+	i, err := strconv.Atoi(num)
+	if err != nil {
+		return 0
+	}
+	return i
 }
