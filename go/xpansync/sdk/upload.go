@@ -74,13 +74,12 @@ func (sdk *sdk) FileUpload(src string, dsc string) {
 		if n == 0 {
 			break
 		}
-        fmt.Fprintf(os.Stdout, "data is %s\n", buf)
-        blocks = append(blocks, "\""+util.Md5String(buf[:n])+"\"")
+		blocks = append(blocks, "\""+util.Md5String(buf[:n])+"\"")
 	}
 
 	req.BlockList = "[" + strings.Join(blocks, ",") + "]" // string
 
-    fmt.Fprintf(os.Stdout , "block is %v\n", req.BlockList)
+	fmt.Fprintf(os.Stdout, "block is %v\n", req.BlockList)
 
 	sdk.fileprecreate(&req)
 	sdk.superfile2(&req, src)
@@ -131,10 +130,9 @@ func (sdk *sdk) superfile2(req *UploadRequest, name string) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	defer file.Close()
 
 	configuration := openapiclient.NewConfiguration()
-	//configuration.Debug = true
+	// configuration.Debug = true
 	api_client := openapiclient.NewAPIClient(configuration)
 
 	loop := 0
@@ -149,22 +147,28 @@ func (sdk *sdk) superfile2(req *UploadRequest, name string) {
 			break
 		}
 
-        tmpfile, err := ioutil.TempFile("", "temp")
-        if err != nil {
-            fmt.Fprintf(os.Stderr, "create tmp file fail, err:%v\n", err)
-            return
-        }
-        defer tmpfile.Close()
+		tmpfile, err := ioutil.TempFile(".", "temp-*.txt")
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "create tmp file fail, err:%v\n", err)
+			return
+		}
 
-        _, err = tmpfile.Write(buf)
-        if err != nil {
-            fmt.Fprintf(os.Stderr, "create tmp file fail, err:%v\n", err)
-            return
-        }
+		_, err = tmpfile.Write(buf[:n])
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "write tmp file fail, err:%v\n", err)
+			return
+		}
+		tmpname := tmpfile.Name()
+		tmpfile.Close()
+		superfile, err := os.Open(tmpname)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "write tmp file fail, err:%v\n", err)
+			return
+		}
+		defer superfile.Close()
 
-		partseq := "0"
-        fmt.Fprintf(os.Stdout, "loop is %v\n", loop)
-		resp, r, err := api_client.FileuploadApi.Pcssuperfile2(context.Background()).AccessToken(accessToken).Partseq(partseq).Path(path).Uploadid(uploadid).Type_(type_).File(file).Execute()
+		partseq := util.Itoa(loop)
+		resp, r, err := api_client.FileuploadApi.Pcssuperfile2(context.Background()).AccessToken(accessToken).Partseq(partseq).Path(path).Uploadid(uploadid).Type_(type_).File(superfile).Execute()
 
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error when calling `FileuploadApi.Pcssuperfile2``: %v\n", err)
@@ -181,6 +185,7 @@ func (sdk *sdk) superfile2(req *UploadRequest, name string) {
 		fmt.Println(string(bodyBytes))
 		loop++
 	}
+	defer file.Close()
 }
 
 // 合并文件
@@ -195,6 +200,8 @@ func (sdk *sdk) filecreate(req *UploadRequest) {
 
 	configuration := openapiclient.NewConfiguration()
 	api_client := openapiclient.NewAPIClient(configuration)
+
+	fmt.Fprintf(os.Stdout, "path:%s\n isdil:%v\n size:%d\n", path, isdir, size)
 	resp, r, err := api_client.FileuploadApi.Xpanfilecreate(context.Background()).AccessToken(accessToken).Path(path).Isdir(isdir).Size(size).Uploadid(uploadid).BlockList(blockList).Rtype(rtype).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `FileuploadApi.Xpanfilecreate``: %v\n", err)

@@ -59,5 +59,6 @@ func main() {
 	// sdk.FileSearch()
 	// sdk.FileList()
 
-	sdk.FileUpload("./demo.txt", "/jarvis/demo.txt")
+    src := ""
+	sdk.FileUpload(src, "/jarvis/"+src)
 }
