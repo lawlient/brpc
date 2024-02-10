@@ -14,3 +14,11 @@ services:
     volumes:
       - /var/lib/wiki/database.sqlite:/wiki/database.sqlite
     tty: true
+    networks:
+      - pronet
+
+networks:
+  pronet:
+    name: pro_net
+    external: true
+

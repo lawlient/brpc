@@ -9,4 +9,12 @@ services:
     volumes:
       - "/data/docs:/app/data"
     tty: true
+    networks:
+      - pronet
+
+
+networks:
+  pronet:
+    name: pro_net
+    external: true
 

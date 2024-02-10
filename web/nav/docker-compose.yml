@@ -9,4 +9,11 @@ services:
       - "/var/lib/nav/data/:/app/data"
     ports:
       - "6412:6412"
+    networks:
+      - pronet
+
+networks:
+  pronet:
+    name: pro_net
+    external: true
     

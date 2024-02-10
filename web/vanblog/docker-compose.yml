@@ -22,6 +22,8 @@ services:
       - /var/lib/vanblog/caddy/data:/root/.local/share/caddy
     ports:
       - 6109:80
+    networks:
+      - pronet
   mongo:
     container_name: "blog-mongo"
     # 某些机器不支持 avx 会报错，所以默认用 v4 版本。有的话用最新的。
@@ -31,3 +33,10 @@ services:
       TZ: "Asia/Shanghai"
     volumes:
       - /var/lib/vanblog/mongo:/data/db
+    networks:
+      - pronet
+
+networks:
+  pronet:
+    name: pro_net
+    external: true

@@ -10,12 +10,7 @@ services:
             - "443:80"
         restart: unless-stopped
         networks:
-            - jarvisnet
-            - vanblognet
-            - navnet
-            - docsifynet
-            - yraidnet
-            - wikijs
+            - pronet
         volumes:
             - "/etc/localtime:/etc/localtime:ro"
             - "/data/code/web/nginx/conf:/etc/nginx/conf.d:ro"
@@ -24,21 +19,6 @@ services:
         tty: true
 
 networks:
-    jarvisnet:
-        name: jarvis_default
-        external: true
-    vanblognet:
-        name: vanblog_default
-        external: true
-    navnet:
-        name: nav_default
-        external: true
-    docsifynet:
-        name: docsify_default
-        external: true
-    yraidnet:
-        name: yraid_default
-        external: true
-    wikijs:
-        name: wikijs_default
+    pronet:
+        name: pro_net
         external: true
