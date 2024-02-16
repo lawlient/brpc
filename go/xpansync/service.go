@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 	"xpansync/sdk"
 )
 
@@ -61,4 +62,21 @@ func (s *Service) UploadFiles() error {
 	}
 
 	return nil
+}
+
+func (s *Service) Run() {
+	ticker := time.NewTicker(5 * time.Minute)
+	defer ticker.Stop()
+	alive := time.NewTicker(3 * time.Second)
+	defer alive.Stop()
+
+	for {
+		select {
+		case <-ticker.C:
+			s.UploadFiles()
+		case <-alive.C:
+			fmt.Fprintf(os.Stdout, "I am running, %s\n", time.Now().Format("2006-01-02 15:04:05"))
+		}
+	}
+
 }

@@ -1,6 +1,10 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"net/http"
+	"os"
+)
 
 type precreateReturnType struct {
 	Path       string        `json:"path"`
@@ -58,5 +62,14 @@ func main() {
 	// sdk.FileSearch()
 	// sdk.FileList()
 
-	service.UploadFiles()
+	go service.Run()
+
+	http.HandleFunc("/", hello)
+	if err := http.ListenAndServe(":9527", nil); err != nil {
+		fmt.Fprintf(os.Stderr, "start http server fail, err:%v\n", err)
+	}
+}
+
+func hello(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "Hello, World!")
 }
