@@ -11,5 +11,6 @@ services:
       - "1425:1425"
     volumes:
       - "./:/app/"
+      - "/etc/localtime:/etc/localtime:ro"
     entrypoint: "/bin/sh"
     tty: true

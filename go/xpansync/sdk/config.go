@@ -15,6 +15,7 @@ type config struct {
 	Code           string `json:"Code"`
 	AccessToken    string `json:"AccessToken"`
 	UploadFilelist string `json:"UploadFilelist"`
+	LogFilename    string `json:"LogFilename"`
 }
 
 func (sdk *Sdk) InitConfig(path string) error {

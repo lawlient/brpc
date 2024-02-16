@@ -21,7 +21,6 @@ func (sdk *Sdk) getAccessCode() (string, error) {
 	args = append(args, "device_id="+sdk.Config.AppID)
 
 	url := api + strings.Join(args, "&")
-	fmt.Println(url)
 	resp, err := http.Get(url)
 	if err != nil {
 		fmt.Println(err)

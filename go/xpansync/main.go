@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"os"
 )
 
 type precreateReturnType struct {
@@ -66,7 +65,7 @@ func main() {
 
 	http.HandleFunc("/", hello)
 	if err := http.ListenAndServe(":9527", nil); err != nil {
-		fmt.Fprintf(os.Stderr, "start http server fail, err:%v\n", err)
+		service.Log().Println("start http server fail, err:", err)
 	}
 }
 

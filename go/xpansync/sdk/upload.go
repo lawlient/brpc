@@ -3,6 +3,7 @@ package sdk
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -35,28 +36,26 @@ type precreateReturnType struct {
 
 // src: 本地待上传文件
 // dsc: 网盘绝对路径
-func (sdk *Sdk) FileUpload(src string, dsc string) {
+func (sdk *Sdk) FileUpload(src string, dsc string) error {
 	file, err := os.Open(src)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "open %s failed, err:%v", src, err)
-		return
+		return err
 	}
 	stat, err := file.Stat()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "stat %s failed, err:%v", src, err)
-		return
+		return err
 	}
 	var req UploadRequest
 	req.Path = dsc // string
 	if stat.IsDir() {
 		req.Isdir = 1
-		fmt.Fprintf(os.Stderr, "dir is not supported now, coming soon")
-		return
+		return errors.New("dir is not supported now, coming soon")
 	} else {
 		req.Isdir = 0
 		if stat.Size() > (4 << 30) {
-			fmt.Fprintf(os.Stderr, "file size react limit 4GB")
-			return
+			return errors.New("file size react limit 4GB")
 		}
 	}
 	req.Size = int32(stat.Size()) // int32
@@ -68,8 +67,7 @@ func (sdk *Sdk) FileUpload(src string, dsc string) {
 		buf := make([]byte, 4<<20)
 		n, err := file.Read(buf)
 		if err != nil && err != io.EOF {
-			fmt.Fprintf(os.Stderr, "read file fail,err:%v\n", err)
-			return
+			return err
 		}
 		if n == 0 {
 			break
@@ -81,13 +79,20 @@ func (sdk *Sdk) FileUpload(src string, dsc string) {
 
 	fmt.Fprintf(os.Stdout, "block is %v\n", req.BlockList)
 
-	sdk.fileprecreate(&req)
-	sdk.superfile2(&req, src)
-	sdk.filecreate(&req)
+	if err := sdk.fileprecreate(&req); err != nil {
+		return err
+	}
+	if err := sdk.superfile2(&req, src); err != nil {
+		return err
+	}
+	if err := sdk.filecreate(&req); err != nil {
+		return err
+	}
+	return nil
 }
 
 // 创建上传任务
-func (sdk *Sdk) fileprecreate(req *UploadRequest) {
+func (sdk *Sdk) fileprecreate(req *UploadRequest) error {
 	accessToken := sdk.Config.AccessToken // string
 	path := req.Path                      // string
 	isdir := req.Isdir                    // int32
@@ -114,21 +119,21 @@ func (sdk *Sdk) fileprecreate(req *UploadRequest) {
 	p := &precreateReturnType{}
 	if err := json.Unmarshal([]byte(string(bodyBytes)), p); err != nil {
 		fmt.Fprintf(os.Stderr, "unmarshal precreate response fail, err:%v\n", err)
-		return
+		return err
 	}
 	req.ID = p.Uploadid
-	fmt.Fprintf(os.Stdout, "uploadid: %s\n", req.ID)
+	return nil
 }
 
 // 分片上传
-func (sdk *Sdk) superfile2(req *UploadRequest, name string) {
+func (sdk *Sdk) superfile2(req *UploadRequest, name string) error {
 	accessToken := sdk.Config.AccessToken // string
 	path := req.Path
 	uploadid := req.ID
 	type_ := "tmpfile"
 	file, err := os.Open(name)
 	if err != nil {
-		fmt.Println(err)
+		return err
 	}
 
 	configuration := openapiclient.NewConfiguration()
@@ -140,8 +145,7 @@ func (sdk *Sdk) superfile2(req *UploadRequest, name string) {
 		buf := make([]byte, 4<<20)
 		n, err := file.Read(buf)
 		if err != nil && err != io.EOF {
-			fmt.Fprintf(os.Stderr, "read file fail,err:%v\n", err)
-			return
+			return err
 		}
 		if n == 0 {
 			break
@@ -149,21 +153,18 @@ func (sdk *Sdk) superfile2(req *UploadRequest, name string) {
 
 		tmpfile, err := ioutil.TempFile(".", "temp-*.txt")
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "create tmp file fail, err:%v\n", err)
-			return
+			return err
 		}
 
 		_, err = tmpfile.Write(buf[:n])
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "write tmp file fail, err:%v\n", err)
-			return
+			return err
 		}
 		tmpname := tmpfile.Name()
 		tmpfile.Close()
 		superfile, err := os.Open(tmpname)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "write tmp file fail, err:%v\n", err)
-			return
+			return err
 		}
 		defer superfile.Close()
 
@@ -191,10 +192,11 @@ func (sdk *Sdk) superfile2(req *UploadRequest, name string) {
 		}
 	}
 	defer file.Close()
+	return nil
 }
 
 // 合并文件
-func (sdk *Sdk) filecreate(req *UploadRequest) {
+func (sdk *Sdk) filecreate(req *UploadRequest) error {
 	accessToken := sdk.Config.AccessToken // string
 	path := req.Path                      // string
 	isdir := req.Isdir                    // int32
@@ -215,10 +217,10 @@ func (sdk *Sdk) filecreate(req *UploadRequest) {
 	// response from `Xpanfilecreate`: Filecreateresponse
 	fmt.Fprintf(os.Stdout, "Response from `FileuploadApi.Xpanfilecreate`: %v\n", resp)
 
-	bodyBytes, err := ioutil.ReadAll(r.Body)
+	_, err = ioutil.ReadAll(r.Body)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "err: %v\n", r)
 	}
 
-	fmt.Println(string(bodyBytes))
+	return nil
 }

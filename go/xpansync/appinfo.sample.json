@@ -6,5 +6,6 @@
     "RedirectUri": "oob",
     "Code": "",
     "AccessToken": "",
-    "UploadFilelist": ""
+    "UploadFilelist": "",
+    "LogFilename": ""
 }

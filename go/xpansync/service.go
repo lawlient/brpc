@@ -2,15 +2,17 @@ package main
 
 import (
 	"bufio"
-	"fmt"
+	"log"
 	"os"
 	"strings"
 	"time"
 	"xpansync/sdk"
+	"xpansync/xlog"
 )
 
 type Service struct {
-	sdk *sdk.Sdk
+	sdk    *sdk.Sdk
+	Logger *xlog.Xloger
 }
 
 func NewService() (*Service, error) {
@@ -21,6 +23,8 @@ func NewService() (*Service, error) {
 
 	service := &Service{}
 	service.sdk = sdk
+	service.Logger = &xlog.Xloger{}
+	service.Logger.Init(service.sdk.Config.LogFilename)
 	return service, nil
 }
 
@@ -33,7 +37,7 @@ func (s *Service) UploadFiles() error {
 	name := s.sdk.Config.UploadFilelist
 	file, err := os.Open(name)
 	if err != nil {
-		fmt.Println(err)
+		s.Log().Println(err)
 		return err
 	}
 
@@ -50,33 +54,41 @@ func (s *Service) UploadFiles() error {
 			src = strings.Replace(src, "~", HOME, 1)
 		}
 		if src[0] != '/' {
-			fmt.Fprintf(os.Stderr, "can not recognize %s\n", src)
+			s.Log().Println("can not recognize " + src)
 			continue
 		}
 		dsc := strings.Replace(src[1:], "/", "0x27", -1 /*all*/)
 		if len(dsc) == 0 {
-			fmt.Fprintf(os.Stderr, "src:%s dsc:%s\n", src, dsc)
+			s.Log().Println("src:", src, " dsc:", dsc)
 			continue
 		}
-		s.sdk.FileUpload(src, "/jarvis/"+dsc)
+		err := s.sdk.FileUpload(src, "/jarvis/"+dsc)
+		if err != nil {
+			s.Log().Println(err)
+		} else {
+			s.Log().Println("upload ", src, " success.")
+		}
 	}
 
 	return nil
 }
 
 func (s *Service) Run() {
-	ticker := time.NewTicker(5 * time.Minute)
-	defer ticker.Stop()
+	uploader := time.NewTicker(12 * time.Hour)
+	defer uploader.Stop()
 	alive := time.NewTicker(3 * time.Second)
 	defer alive.Stop()
 
 	for {
 		select {
-		case <-ticker.C:
+		case <-uploader.C:
 			s.UploadFiles()
 		case <-alive.C:
-			fmt.Fprintf(os.Stdout, "I am running, %s\n", time.Now().Format("2006-01-02 15:04:05"))
+			s.Log().Println("I am running")
 		}
 	}
+}
 
+func (s *Service) Log() *log.Logger {
+	return s.Logger.Logger
 }
