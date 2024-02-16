@@ -5,6 +5,6 @@
     "SignKey": "your signkey",
     "RedirectUri": "oob",
     "Code": "",
-    "AccessToken": ""
+    "AccessToken": "",
+    "UploadFilelist": ""
 }
-

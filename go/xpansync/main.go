@@ -1,8 +1,6 @@
 package main
 
-import (
-	"xpansync/sdk"
-)
+import "fmt"
 
 type precreateReturnType struct {
 	Path       string        `json:"path"`
@@ -32,8 +30,9 @@ type deviceReturnType struct {
 }
 
 func main() {
-	sdk, err := sdk.NewSdk(".appinfo.json")
+	service, err := NewService()
 	if err != nil {
+		fmt.Println(err)
 		return
 	}
 
@@ -59,6 +58,5 @@ func main() {
 	// sdk.FileSearch()
 	// sdk.FileList()
 
-    src := ""
-	sdk.FileUpload(src, "/jarvis/"+src)
+	service.UploadFiles()
 }

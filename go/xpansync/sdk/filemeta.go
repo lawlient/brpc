@@ -8,8 +8,8 @@ import (
 	openapiclient "xpansync/openxpanapi"
 )
 
-func (sdk *sdk) FileImageList() {
-	accessToken := sdk.config.AccessToken // string
+func (sdk *Sdk) FileImageList() {
+	accessToken := sdk.Config.AccessToken // string
 	web := "1"                            // string |  (optional)
 	parentPath := "/"                     // string |  (optional)
 	recursion := "1"                      // string |  (optional)
@@ -36,8 +36,8 @@ func (sdk *sdk) FileImageList() {
 	fmt.Fprintf(os.Stdout, "Response from `FileinfoApi.Xpanfileimagelist`: %v\n", resp)
 }
 
-func (sdk *sdk) FileDocList() {
-	accessToken := sdk.config.AccessToken // string
+func (sdk *Sdk) FileDocList() {
+	accessToken := sdk.Config.AccessToken // string
 	web := "1"                            // string |  (optional)
 	parentPath := "/"                     // string |  (optional)
 	page := int32(1)                      // int32 |  (optional)
@@ -64,8 +64,8 @@ func (sdk *sdk) FileDocList() {
 	fmt.Fprintf(os.Stdout, "Response from `FileinfoApi.Xpanfiledoclist`: %v\n", resp)
 }
 
-func (sdk *sdk) FileSearch() {
-	accessToken := sdk.config.AccessToken // string |
+func (sdk *Sdk) FileSearch() {
+	accessToken := sdk.Config.AccessToken // string |
 	web := "1"                            // string |  (optional)
 	num := "2"                            // string |  (optional)
 	page := "1"                           // string |  (optional)
@@ -91,8 +91,8 @@ func (sdk *sdk) FileSearch() {
 	fmt.Fprintf(os.Stdout, "Response from `FileinfoApi.Xpanfilesearch`: %v\n", resp)
 }
 
-func (sdk *sdk) FileList() {
-	accessToken := sdk.config.AccessToken // string |
+func (sdk *Sdk) FileList() {
+	accessToken := sdk.Config.AccessToken // string |
 	folder := "0"                         // string |  (optional)
 	web := "web"                          // string |  (optional)
 	start := "0"                          // string |  (optional)

@@ -7,16 +7,17 @@ import (
 )
 
 type config struct {
-	AppID       string `json:"AppID"`
-	AppKey      string `json:"AppKey"`
-	SecretKey   string `json:"SecretKey"`
-	SignKey     string `json:"SignKey"`
-	RedirectUri string `json:"RedirectUri`
-	Code        string `json:"Code"`
-	AccessToken string `json:"AccessToken"`
+	AppID          string `json:"AppID"`
+	AppKey         string `json:"AppKey"`
+	SecretKey      string `json:"SecretKey"`
+	SignKey        string `json:"SignKey"`
+	RedirectUri    string `json:"RedirectUri`
+	Code           string `json:"Code"`
+	AccessToken    string `json:"AccessToken"`
+	UploadFilelist string `json:"UploadFilelist"`
 }
 
-func (sdk *sdk) InitConfig(path string) error {
+func (sdk *Sdk) InitConfig(path string) error {
 	buf, err := ioutil.ReadFile(path)
 	if err != nil {
 		fmt.Println(err)
@@ -30,7 +31,7 @@ func (sdk *sdk) InitConfig(path string) error {
 		return err
 	}
 
-	sdk.config = config
+	sdk.Config = config
 
 	return nil
 }

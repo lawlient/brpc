@@ -1,11 +1,11 @@
 package sdk
 
-type sdk struct {
-	config *config
+type Sdk struct {
+	Config *config
 }
 
-func NewSdk(configfile string) (*sdk, error) {
-	sdk := &sdk{}
+func NewSdk(configfile string) (*Sdk, error) {
+	sdk := &Sdk{}
 
 	if err := sdk.InitConfig(configfile); err != nil {
 		return nil, err

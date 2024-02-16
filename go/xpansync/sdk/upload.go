@@ -35,7 +35,7 @@ type precreateReturnType struct {
 
 // src: 本地待上传文件
 // dsc: 网盘绝对路径
-func (sdk *sdk) FileUpload(src string, dsc string) {
+func (sdk *Sdk) FileUpload(src string, dsc string) {
 	file, err := os.Open(src)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "open %s failed, err:%v", src, err)
@@ -87,8 +87,8 @@ func (sdk *sdk) FileUpload(src string, dsc string) {
 }
 
 // 创建上传任务
-func (sdk *sdk) fileprecreate(req *UploadRequest) {
-	accessToken := sdk.config.AccessToken // string
+func (sdk *Sdk) fileprecreate(req *UploadRequest) {
+	accessToken := sdk.Config.AccessToken // string
 	path := req.Path                      // string
 	isdir := req.Isdir                    // int32
 	size := req.Size                      // int32
@@ -121,8 +121,8 @@ func (sdk *sdk) fileprecreate(req *UploadRequest) {
 }
 
 // 分片上传
-func (sdk *sdk) superfile2(req *UploadRequest, name string) {
-	accessToken := sdk.config.AccessToken // string
+func (sdk *Sdk) superfile2(req *UploadRequest, name string) {
+	accessToken := sdk.Config.AccessToken // string
 	path := req.Path
 	uploadid := req.ID
 	type_ := "tmpfile"
@@ -184,13 +184,18 @@ func (sdk *sdk) superfile2(req *UploadRequest, name string) {
 
 		fmt.Println(string(bodyBytes))
 		loop++
+
+		// delete temp file
+		if err := os.Remove(tmpname); err != nil {
+			fmt.Fprintf(os.Stderr, "delete %s fail, err:%v\n", tmpname, err)
+		}
 	}
 	defer file.Close()
 }
 
 // 合并文件
-func (sdk *sdk) filecreate(req *UploadRequest) {
-	accessToken := sdk.config.AccessToken // string
+func (sdk *Sdk) filecreate(req *UploadRequest) {
+	accessToken := sdk.Config.AccessToken // string
 	path := req.Path                      // string
 	isdir := req.Isdir                    // int32
 	size := req.Size                      // int32
@@ -201,7 +206,7 @@ func (sdk *sdk) filecreate(req *UploadRequest) {
 	configuration := openapiclient.NewConfiguration()
 	api_client := openapiclient.NewAPIClient(configuration)
 
-	fmt.Fprintf(os.Stdout, "path:%s\n isdil:%v\n size:%d\n", path, isdir, size)
+	fmt.Fprintf(os.Stdout, "path:%s\nisdir:%v\nsize:%d\n", path, isdir, size)
 	resp, r, err := api_client.FileuploadApi.Xpanfilecreate(context.Background()).AccessToken(accessToken).Path(path).Isdir(isdir).Size(size).Uploadid(uploadid).BlockList(blockList).Rtype(rtype).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `FileuploadApi.Xpanfilecreate``: %v\n", err)
