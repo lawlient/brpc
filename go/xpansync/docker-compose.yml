@@ -4,13 +4,22 @@ version: "3"
 services:
   xpansync:
     container_name: "xpansync"
-    image: "golang:alpine"
+    build: .
     restart: "unless-stopped"
     working_dir: /app
+    environment:
+      GOPROXY: https://goproxy.cn
     ports:
       - "1425:1425"
     volumes:
-      - "./:/app/"
       - "/etc/localtime:/etc/localtime:ro"
-    entrypoint: "/bin/sh"
+      - /var/lib:/var/lib
+    entrypoint: "/app/xpansync"
     tty: true
+    networks:
+      - apolloconfig
+
+networks:
+  apolloconfig:
+    name: apollo_default
+    external: true

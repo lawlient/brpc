@@ -10,6 +10,7 @@ import (
 	"os"
 	"strings"
 
+	"xpansync/apollo"
 	openapiclient "xpansync/openxpanapi"
 	"xpansync/util"
 )
@@ -36,7 +37,7 @@ type precreateReturnType struct {
 
 // src: 本地待上传文件
 // dsc: 网盘绝对路径
-func (sdk *Sdk) FileUpload(src string, dsc string) error {
+func FileUpload(src string, dsc string) error {
 	file, err := os.Open(src)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "open %s failed, err:%v", src, err)
@@ -79,27 +80,27 @@ func (sdk *Sdk) FileUpload(src string, dsc string) error {
 
 	fmt.Fprintf(os.Stdout, "block is %v\n", req.BlockList)
 
-	if err := sdk.fileprecreate(&req); err != nil {
+	if err := fileprecreate(&req); err != nil {
 		return err
 	}
-	if err := sdk.superfile2(&req, src); err != nil {
+	if err := superfile2(&req, src); err != nil {
 		return err
 	}
-	if err := sdk.filecreate(&req); err != nil {
+	if err := filecreate(&req); err != nil {
 		return err
 	}
 	return nil
 }
 
 // 创建上传任务
-func (sdk *Sdk) fileprecreate(req *UploadRequest) error {
-	accessToken := sdk.Config.AccessToken // string
-	path := req.Path                      // string
-	isdir := req.Isdir                    // int32
-	size := req.Size                      // int32
-	autoinit := req.Autoinit              // int32
-	blockList := req.BlockList            // string
-	rtype := req.Rtype                    // int32 | rtype (optional)
+func fileprecreate(req *UploadRequest) error {
+	accessToken := apollo.AccessToken()
+	path := req.Path           // string
+	isdir := req.Isdir         // int32
+	size := req.Size           // int32
+	autoinit := req.Autoinit   // int32
+	blockList := req.BlockList // string
+	rtype := req.Rtype         // int32 | rtype (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	api_client := openapiclient.NewAPIClient(configuration)
@@ -126,8 +127,8 @@ func (sdk *Sdk) fileprecreate(req *UploadRequest) error {
 }
 
 // 分片上传
-func (sdk *Sdk) superfile2(req *UploadRequest, name string) error {
-	accessToken := sdk.Config.AccessToken // string
+func superfile2(req *UploadRequest, name string) error {
+	accessToken := apollo.AccessToken()
 	path := req.Path
 	uploadid := req.ID
 	type_ := "tmpfile"
@@ -196,14 +197,14 @@ func (sdk *Sdk) superfile2(req *UploadRequest, name string) error {
 }
 
 // 合并文件
-func (sdk *Sdk) filecreate(req *UploadRequest) error {
-	accessToken := sdk.Config.AccessToken // string
-	path := req.Path                      // string
-	isdir := req.Isdir                    // int32
-	size := req.Size                      // int32
-	uploadid := req.ID                    // string
-	blockList := req.BlockList            // string
-	rtype := req.Rtype                    // int32 | rtype (optional)
+func filecreate(req *UploadRequest) error {
+	accessToken := apollo.AccessToken()
+	path := req.Path           // string
+	isdir := req.Isdir         // int32
+	size := req.Size           // int32
+	uploadid := req.ID         // string
+	blockList := req.BlockList // string
+	rtype := req.Rtype         // int32 | rtype (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	api_client := openapiclient.NewAPIClient(configuration)

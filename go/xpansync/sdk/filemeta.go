@@ -6,17 +6,19 @@ import (
 	"io/ioutil"
 	"os"
 	openapiclient "xpansync/openxpanapi"
+
+	"xpansync/apollo"
 )
 
-func (sdk *Sdk) FileImageList() {
-	accessToken := sdk.Config.AccessToken // string
-	web := "1"                            // string |  (optional)
-	parentPath := "/"                     // string |  (optional)
-	recursion := "1"                      // string |  (optional)
-	page := int32(1)                      // int32 |  (optional)
-	num := int32(1)                       // int32 |  (optional)
-	order := "time"                       // string |  (optional)
-	desc := "1"                           // string |  (optional)
+func FileImageList() {
+	accessToken := apollo.AccessToken()
+	web := "1"        // string |  (optional)
+	parentPath := "/" // string |  (optional)
+	recursion := "1"  // string |  (optional)
+	page := int32(1)  // int32 |  (optional)
+	num := int32(1)   // int32 |  (optional)
+	order := "time"   // string |  (optional)
+	desc := "1"       // string |  (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	api_client := openapiclient.NewAPIClient(configuration)
@@ -36,15 +38,15 @@ func (sdk *Sdk) FileImageList() {
 	fmt.Fprintf(os.Stdout, "Response from `FileinfoApi.Xpanfileimagelist`: %v\n", resp)
 }
 
-func (sdk *Sdk) FileDocList() {
-	accessToken := sdk.Config.AccessToken // string
-	web := "1"                            // string |  (optional)
-	parentPath := "/"                     // string |  (optional)
-	page := int32(1)                      // int32 |  (optional)
-	num := int32(1)                       // int32 |  (optional)
-	recursion := "1"                      // string |  (optional)
-	order := "time"                       // string |  (optional)
-	desc := "1"                           // string |  (optional)
+func FileDocList() {
+	accessToken := apollo.AccessToken()
+	web := "1"        // string |  (optional)
+	parentPath := "/" // string |  (optional)
+	page := int32(1)  // int32 |  (optional)
+	num := int32(1)   // int32 |  (optional)
+	recursion := "1"  // string |  (optional)
+	order := "time"   // string |  (optional)
+	desc := "1"       // string |  (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	api_client := openapiclient.NewAPIClient(configuration)
@@ -64,14 +66,14 @@ func (sdk *Sdk) FileDocList() {
 	fmt.Fprintf(os.Stdout, "Response from `FileinfoApi.Xpanfiledoclist`: %v\n", resp)
 }
 
-func (sdk *Sdk) FileSearch() {
-	accessToken := sdk.Config.AccessToken // string |
-	web := "1"                            // string |  (optional)
-	num := "2"                            // string |  (optional)
-	page := "1"                           // string |  (optional)
-	dir := "/"                            // string |  (optional)
-	recursion := "1"                      // string |  (optional)
-	key := "txt"                          // string |
+func FileSearch() {
+	accessToken := apollo.AccessToken()
+	web := "1"       // string |  (optional)
+	num := "2"       // string |  (optional)
+	page := "1"      // string |  (optional)
+	dir := "/"       // string |  (optional)
+	recursion := "1" // string |  (optional)
+	key := "txt"     // string |
 
 	configuration := openapiclient.NewConfiguration()
 	api_client := openapiclient.NewAPIClient(configuration)
@@ -91,15 +93,15 @@ func (sdk *Sdk) FileSearch() {
 	fmt.Fprintf(os.Stdout, "Response from `FileinfoApi.Xpanfilesearch`: %v\n", resp)
 }
 
-func (sdk *Sdk) FileList() {
-	accessToken := sdk.Config.AccessToken // string |
-	folder := "0"                         // string |  (optional)
-	web := "web"                          // string |  (optional)
-	start := "0"                          // string |  (optional)
-	limit := int32(2)                     // int32 |  (optional)
-	dir := "/"                            // string |  (optional)
-	order := "time"                       // string |  (optional)
-	desc := int32(1)                      // int32 |  (optional)
+func FileList() {
+	accessToken := apollo.AccessToken()
+	folder := "0"     // string |  (optional)
+	web := "web"      // string |  (optional)
+	start := "0"      // string |  (optional)
+	limit := int32(2) // int32 |  (optional)
+	dir := "/"        // string |  (optional)
+	order := "time"   // string |  (optional)
+	desc := int32(1)  // int32 |  (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	api_client := openapiclient.NewAPIClient(configuration)
