@@ -28,8 +28,12 @@ func Start() {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println("初始化Apollo配置成功")
 	client = cli
+	fmt.Println("初始化Apollo配置成功")
+}
+
+func Client() agollo.Client {
+	return client
 }
 
 func GetString(ns, key string) string {

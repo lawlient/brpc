@@ -42,3 +42,7 @@ func UploadFiles() string {
 func UploadSpec() string {
 	return GetString(ns, "UploadSpec")
 }
+
+func ChanifyAddr() string {
+	return GetString(ns, "ChanifyAddr")
+}

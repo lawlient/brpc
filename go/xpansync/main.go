@@ -6,6 +6,7 @@ import (
 
 	"xpansync/apollo"
 	"xpansync/sdk"
+	"xpansync/xlog"
 )
 
 func main() {
@@ -31,7 +32,7 @@ func main() {
 	http.HandleFunc("/user", sdk.Userinfo)
 	http.HandleFunc("/quota", sdk.Quota)
 	if err := http.ListenAndServe(":1425", nil); err != nil {
-		service.Log().Println("start http server fail, err:", err)
+		xlog.Logger.Error("start http server fail, err:", err)
 	}
 }
 

@@ -2,11 +2,12 @@ package main
 
 import (
 	"bufio"
-	"log"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
+	"github.com/apolloconfig/agollo/v4/storage"
 	"github.com/robfig/cron"
 
 	"xpansync/apollo"
@@ -15,13 +16,11 @@ import (
 )
 
 type Service struct {
-	Logger *xlog.Xloger
+	c *cron.Cron
 }
 
 func NewService() (*Service, error) {
 	service := &Service{}
-	service.Logger = &xlog.Xloger{}
-	service.Logger.Init("/var/lib/xpansync/main.log")
 	return service, nil
 }
 
@@ -33,6 +32,7 @@ func NewService() (*Service, error) {
 func (s *Service) uploadFiles() error {
 	scanner := bufio.NewScanner(strings.NewReader(apollo.UploadFiles()))
 	HOME := os.Getenv("HOME")
+	nofifymsg := ""
 	for scanner.Scan() {
 		src := scanner.Text()
 		if len(src) == 0 {
@@ -42,45 +42,88 @@ func (s *Service) uploadFiles() error {
 			src = strings.Replace(src, "~", HOME, 1)
 		}
 		if src[0] != '/' {
-			s.Log().Println("can not recognize " + src)
+			xlog.Logger.Warn("can not recognize " + src)
 			continue
 		}
 		dsc := strings.Replace(src[1:], "/", "0x27", -1 /*all*/)
 		if len(dsc) == 0 {
-			s.Log().Println("src:", src, " dsc:", dsc)
+			xlog.Logger.Info("src:", src, " dsc:", dsc)
 			continue
 		}
 		err := sdk.FileUpload(src, "/jarvis/"+dsc)
 		if err != nil {
-			s.Log().Println(err)
+			xlog.Logger.Error(err.Error())
 		} else {
-			s.Log().Println("upload ", src, " success.")
+			xlog.Logger.Info("upload ", src, " success.")
+			nofifymsg += "- [x] " + src + "\n"
 		}
 	}
 
+	ChanifyText(nofifymsg)
 	return nil
 }
 
 func (s *Service) Run() {
-	c := cron.New()
-	spec := apollo.UploadSpec()
-	c.AddFunc(spec, func() {
-		s.uploadFiles()
-	})
-	c.Start()
-	s.Log().Println(spec)
+	go addChangeListener(s)
+
+	s.ResetCron()
 
 	alive := time.NewTicker(3 * time.Second)
 	defer alive.Stop()
 	for {
 		select {
 		case <-alive.C:
-			s.Log().Println("I am running")
+			xlog.LogRotate()
 		}
 	}
 
 }
 
-func (s *Service) Log() *log.Logger {
-	return s.Logger.Logger
+func (s *Service) ResetCron() {
+	spec := apollo.UploadSpec()
+	if _, err := cron.Parse(spec); err != nil {
+		xlog.Logger.Error("parse spec error", "spec", spec)
+		return
+	}
+	if s.c != nil {
+		s.c.Stop()
+	}
+	s.c = cron.New()
+
+	s.c.AddFunc(spec, func() {
+		s.uploadFiles()
+	})
+	s.c.Start()
+
+	entrysize := len(s.c.Entries())
+	xlog.Logger.Info("register cron.", "spec", spec, "entrysize", entrysize)
+}
+
+// Listen apollo config changed event
+type CustomChangeListener struct {
+	wg      sync.WaitGroup
+	service *Service
+}
+
+func (c *CustomChangeListener) OnChange(ev *storage.ChangeEvent) {
+	//write your code here
+	for key, value := range ev.Changes {
+		xlog.Logger.Info("apollo config changed", "key", key, "value", value)
+		if key == "UploadSpec" {
+			c.service.ResetCron()
+		}
+	}
+	c.wg.Done()
+}
+
+func (c *CustomChangeListener) OnNewestChange(event *storage.FullChangeEvent) {
+	//write your code here
+}
+
+func addChangeListener(s *Service) {
+	c2 := &CustomChangeListener{}
+	c2.wg.Add(5)
+	c2.service = s
+	apollo.Client().AddChangeListener(c2)
+	c2.wg.Wait()
 }

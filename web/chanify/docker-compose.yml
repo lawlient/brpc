@@ -1,0 +1,18 @@
+version: "3"
+
+services:
+  chanify:
+    container_name: "chanify"
+    image: wizjin/chanify:dev
+    restart: unless-stopped
+    volumes:
+      - /var/lib/chanify/data:/data
+      - /var/lib/chanify/config.yml:/root/.chanify.yml
+      - /etc/localtime:/etc/localtime:ro
+    tty: true
+    networks:
+      - pronet
+
+networks:
+  pronet:
+    name: pro_net

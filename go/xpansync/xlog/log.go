@@ -1,19 +1,51 @@
 package xlog
 
 import (
-	"log"
+	"log/slog"
 	"os"
+	"time"
+
+	"xpansync/util"
 )
 
-type Xloger struct {
-	Logger *log.Logger
+var Logger *slog.Logger
+
+const logfilename = "/var/lib/xpansync/main.log"
+
+func init() {
+	reset()
 }
 
-func (xlog *Xloger) Init(name string) {
-	logfile, err := os.OpenFile(name, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+func LogRotate() {
+	info, err := os.Stat(logfilename)
 	if err != nil {
-		panic(err)
+		reset()
+		return
 	}
 
-	xlog.Logger = log.New(logfile, "", log.LstdFlags|log.Lshortfile)
+	if info.Size() > 4*1024*1024 {
+		now := string(time.Now().Unix())
+		err = os.Rename(logfilename, logfilename+"."+now)
+		if err == nil {
+			reset()
+			return
+		}
+
+		Logger.Error("rename log file fail.", "error", err.Error())
+		return
+	}
+	Logger.Info("logger works fine.", "size", util.Byte2IEC(info.Size()))
+}
+
+func reset() {
+	logfile, err := os.OpenFile(logfilename, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		logfile = os.Stderr
+	}
+
+	Logger = slog.New(slog.NewJSONHandler(logfile, &slog.HandlerOptions{
+		AddSource: true,
+		Level:     slog.LevelDebug,
+	}))
+
 }

@@ -1,0 +1,31 @@
+# DOWNLOAD FROM GITHUB SOURCE
+
+server:
+    host: 0.0.0.0   # 监听IP地址
+    port: 8080      # 监听端口
+    endpoint: http://my.server/path # 入口URL
+    name: Node name # 节点名称
+    secret: <secret code> # 无状态服务器使用的密钥
+    datapath: <data path> # 有状态服务器使用的数据存储路径
+#   pluginpath: <plugin path> # Lua 插件路径
+    dburl: mysql://root:test@tcp(127.0.0.1:3306)/chanify?charset=utf8mb4&parseTime=true&loc=Local # 有状态服务器使用的数据库链接
+    http:
+        - readtimeout: 10s  # Http 读取超时时间设置为 10 秒
+        - writetimeout: 10s # Http 写回超时时间设置为 10 秒
+    register:
+        enable: false # 关闭注册
+        whitelist: # 白名单
+            - <user id 1>
+            - <user id 2>
+#   plugin:
+#       webhook:
+#           - name: github  # POST http://my.server/path/v1/webhook/github/<token>
+#             file: webhook/github.lua # <pluginpath>/webhook/github.lua
+#             env:
+#               secret_token: "secret token"
+
+client: # 作为客户端发送消息时使用
+    sound: 1    # 是否有提示音
+    endpoint: <default node server endpoint>
+    token: <default token>
+    interruption-level: <interruption level>
