@@ -5,6 +5,7 @@ services:
   apollo-portal:
     container_name: "apollo-portal"
     image: "apolloconfig/apollo-portal"
+    restart: unless-stopped
     ports: 
       - 20101:8070
     environment:
@@ -25,6 +26,7 @@ services:
   apollo-portal-mysql:
     container_name: "apollo-portal-mysql"
     image: "mysql:8.0"
+    restart: unless-stopped
     environment:
       TZ: Asia/Shanghai
       #MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
@@ -42,6 +44,7 @@ services:
   apollo-dev-admin-service:
     container_name: "apollo-dev-admin-service"
     image: "apolloconfig/apollo-adminservice"
+    restart: unless-stopped
     environment:
       TZ: Asia/Shanghai
       SPRING_DATASOURCE_URL: "jdbc:mysql://apollo-dev-mysql:3306/ApolloConfigDB?characterEncoding=utf8"
@@ -56,6 +59,7 @@ services:
   apollo-dev-config-service:
     container_name: "apollo-dev-config-service"
     image: "apolloconfig/apollo-configservice"
+    restart: unless-stopped
     environment:
       TZ: Asia/Shanghai
       SPRING_DATASOURCE_URL: "jdbc:mysql://apollo-dev-mysql:3306/ApolloConfigDB?characterEncoding=utf8"
@@ -69,6 +73,7 @@ services:
   apollo-dev-mysql:
     container_name: "apollo-dev-mysql"
     image: "mysql:8.0"
+    restart: unless-stopped
     environment:
       TZ: Asia/Shanghai
       #MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
@@ -85,6 +90,7 @@ services:
   apollo-pro-admin-service:
     container_name: "apollo-pro-admin-service"
     image: "apolloconfig/apollo-adminservice"
+    restart: unless-stopped
     environment:
       TZ: Asia/Shanghai
       SPRING_DATASOURCE_URL: "jdbc:mysql://apollo-pro-mysql:3306/ApolloConfigDB?characterEncoding=utf8"
@@ -99,6 +105,7 @@ services:
   apollo-pro-config-service:
     container_name: "apollo-pro-config-service"
     image: "apolloconfig/apollo-configservice"
+    restart: unless-stopped
     environment:
       TZ: Asia/Shanghai
       SPRING_DATASOURCE_URL: "jdbc:mysql://apollo-pro-mysql:3306/ApolloConfigDB?characterEncoding=utf8"
@@ -112,6 +119,7 @@ services:
   apollo-pro-mysql:
     container_name: "apollo-pro-mysql"
     image: "mysql:8.0"
+    restart: unless-stopped
     environment:
       TZ: Asia/Shanghai
       #MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
