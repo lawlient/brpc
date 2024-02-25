@@ -1,0 +1,25 @@
+# download from https://github.com/louislam/dockge/blob/master/compose.yaml
+version: "3.8"
+services:
+  dockge:
+    container_name: dockge
+    image: louislam/dockge:1
+    restart: unless-stopped
+    ports:
+      # Host Port : Container Port
+      - 20102:5001
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/dockge/data:/app/data
+        
+      # If you want to use private registries, you need to share the auth file with Dockge:
+      # - /root/.docker/:/root/.docker
+
+      # Stacks Directory
+      # ⚠️ READ IT CAREFULLY. If you did it wrong, your data could end up writing into a WRONG PATH.
+      # ⚠️ 1. FULL path only. No relative path (MUST)
+      # ⚠️ 2. Left Stacks Path === Right Stacks Path (MUST)
+      - /data/code/web:/data/code/web
+    environment:
+      # Tell Dockge where is your stacks directory
+      - DOCKGE_STACKS_DIR=/data/code/web

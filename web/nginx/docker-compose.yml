@@ -1,24 +1,21 @@
 # yaml 配置
 
-version: '3'
+version: "3"
 services:
-    gateway:
-        container_name: "gateway"
-        build: .
-        ports:
-            - "80:80"
-            - "443:80"
-        restart: unless-stopped
-        networks:
-            - pronet
-        volumes:
-            - "/etc/localtime:/etc/localtime:ro"
-            - "/data/code/web/nginx/conf:/etc/nginx/conf.d:ro"
-            - "/data/:/data/"
-
-        tty: true
-
+  gateway:
+    container_name: gateway
+    image: nginx:latest
+    ports:
+      - 80:80
+      - 443:80
+    restart: unless-stopped
+    networks:
+      - pro_net
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /data/code/web/nginx/conf:/etc/nginx/conf.d:ro
+      - /data/:/data/
+    tty: true
 networks:
-    pronet:
-        name: pro_net
-        external: true
+  pro_net:
+    external: true
