@@ -3,6 +3,7 @@ package xlog
 import (
 	"log/slog"
 	"os"
+	"strconv"
 	"time"
 
 	"xpansync/util"
@@ -24,7 +25,7 @@ func LogRotate() {
 	}
 
 	if info.Size() > 4*1024*1024 {
-		now := string(time.Now().Unix())
+		now := strconv.FormatInt(time.Now().Unix(), 10)
 		err = os.Rename(logfilename, logfilename+"."+now)
 		if err == nil {
 			reset()

@@ -365,7 +365,7 @@ type ApiXpanfilelistRequest struct {
 	start *string
 	limit *int32
 	order *string
-	desc *int32
+	desc *string
 	web *string
 	showempty *int32
 }
@@ -394,7 +394,7 @@ func (r ApiXpanfilelistRequest) Order(order string) ApiXpanfilelistRequest {
 	r.order = &order
 	return r
 }
-func (r ApiXpanfilelistRequest) Desc(desc int32) ApiXpanfilelistRequest {
+func (r ApiXpanfilelistRequest) Desc(desc string) ApiXpanfilelistRequest {
 	r.desc = &desc
 	return r
 }
@@ -535,8 +535,8 @@ type ApiXpanfilesearchRequest struct {
 	accessToken *string
 	key *string
 	web *string
-	num *string
-	page *string
+	num *int32
+	page *int32
 	dir *string
 	recursion *string
 }
@@ -553,11 +553,11 @@ func (r ApiXpanfilesearchRequest) Web(web string) ApiXpanfilesearchRequest {
 	r.web = &web
 	return r
 }
-func (r ApiXpanfilesearchRequest) Num(num string) ApiXpanfilesearchRequest {
+func (r ApiXpanfilesearchRequest) Num(num int32) ApiXpanfilesearchRequest {
 	r.num = &num
 	return r
 }
-func (r ApiXpanfilesearchRequest) Page(page string) ApiXpanfilesearchRequest {
+func (r ApiXpanfilesearchRequest) Page(page int32) ApiXpanfilesearchRequest {
 	r.page = &page
 	return r
 }

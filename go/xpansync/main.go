@@ -16,12 +16,6 @@ func main() {
 		return
 	}
 
-	// 文件列表
-	// sdk.FileImageList()
-	// sdk.FileDocList()
-	// sdk.FileSearch()
-	// sdk.FileList()
-
 	apollo.Start()
 
 	go service.Run()
@@ -31,6 +25,8 @@ func main() {
 	http.HandleFunc("/token", sdk.MyOauthTokenAuthorizationCode)
 	http.HandleFunc("/user", sdk.Userinfo)
 	http.HandleFunc("/quota", sdk.Quota)
+	http.HandleFunc("/filelist", sdk.Filelist)
+	http.HandleFunc("/upload", sdk.Upload)
 	if err := http.ListenAndServe(":1425", nil); err != nil {
 		xlog.Logger.Error("start http server fail, err:", err)
 	}

@@ -7,12 +7,14 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"strings"
 
 	"xpansync/apollo"
 	openapiclient "xpansync/openxpanapi"
 	"xpansync/util"
+	"xpansync/xlog"
 )
 
 // https://pan.baidu.com/union/doc/3ksg0s9r7
@@ -40,12 +42,12 @@ type precreateReturnType struct {
 func FileUpload(src string, dsc string) error {
 	file, err := os.Open(src)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "open %s failed, err:%v", src, err)
+		xlog.Logger.Error("open file failed.", "file", src, "errmsg", err)
 		return err
 	}
 	stat, err := file.Stat()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "stat %s failed, err:%v", src, err)
+		xlog.Logger.Error("stat file failed.", "file", src, "errmsg", err)
 		return err
 	}
 	var req UploadRequest
@@ -56,7 +58,7 @@ func FileUpload(src string, dsc string) error {
 	} else {
 		req.Isdir = 0
 		if stat.Size() > (4 << 30) {
-			return errors.New("file size react limit 4GB")
+			return errors.New("file size reach limit 4GB")
 		}
 	}
 	req.Size = int32(stat.Size()) // int32
@@ -224,4 +226,11 @@ func filecreate(req *UploadRequest) error {
 	}
 
 	return nil
+}
+
+func Upload(w http.ResponseWriter, r *http.Request) {
+	root := apollo.CloudRoot()
+	src := r.Header.Get("src")
+	err := FileUpload(src, root+src)
+	fmt.Fprintf(w, "%s\n", err.Error())
 }

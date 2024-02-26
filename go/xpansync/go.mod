@@ -2,7 +2,10 @@ module xpansync
 
 go 1.21.4
 
-require github.com/apolloconfig/agollo/v4 v4.3.1
+require (
+	github.com/apolloconfig/agollo/v4 v4.3.1
+	github.com/robfig/cron v1.2.0
+)
 
 require (
 	github.com/fsnotify/fsnotify v1.4.9 // indirect

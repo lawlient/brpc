@@ -3,8 +3,8 @@ version: "3"
 
 services:
   xpansync:
-    container_name: "xpansync_dev"
-    image: golang:alpine
+    container_name: "xpansync"
+    build: .
     restart: "unless-stopped"
     working_dir: /app
     environment:
@@ -12,16 +12,15 @@ services:
 
       # apollo properties config relative
       APOLLO_CONFIG_APPID: xpansync
-      APOLLO_CONFIG_CLUSTER: dev
-      APOLLO_CONFIG_ADDR: http://apollo-dev-config-service:8080
+      APOLLO_CONFIG_CLUSTER: pro
+      APOLLO_CONFIG_ADDR: http://apollo-pro-config-service:8080
       APOLLO_CONFIG_NAMESPACE: application
     ports:
       - "1425:1425"
     volumes:
       - "/etc/localtime:/etc/localtime:ro"
-      - "./:/app"
-    entrypoint: "go run ."
-    #entrypoint: "/bin/sh"
+      - /var/lib:/var/lib
+    entrypoint: "/app/xpansync"
     tty: true
     networks:
       - apolloconfig

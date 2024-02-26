@@ -3,6 +3,7 @@ package util
 import (
 	"crypto/md5"
 	"fmt"
+	"os/exec"
 	"strconv"
 )
 
@@ -37,4 +38,14 @@ func Atoi(num string) int {
 		return 0
 	}
 	return i
+}
+
+func TargzPackage(dsc, src string) error {
+	cmd := exec.Command("tar", "-zcf", dsc, src)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		fmt.Println(out)
+		return err
+	}
+	return nil
 }
