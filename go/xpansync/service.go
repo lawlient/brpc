@@ -118,9 +118,9 @@ func upload3(folder string, notifymsg *string) {
 		return nil
 	})
 	if err != nil {
-		*notifymsg += folder + " fail"
+		*notifymsg += folder + " fail\n"
 	} else {
-		*notifymsg += folder + " success"
+		*notifymsg += folder + " success\n"
 	}
 }
 

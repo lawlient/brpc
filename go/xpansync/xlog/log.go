@@ -5,8 +5,6 @@ import (
 	"os"
 	"strconv"
 	"time"
-
-	"xpansync/util"
 )
 
 var Logger *slog.Logger
@@ -24,7 +22,7 @@ func LogRotate() {
 		return
 	}
 
-	if info.Size() > 4*1024*1024 {
+	if info.Size() > 4000000 {
 		now := strconv.FormatInt(time.Now().Unix(), 10)
 		err = os.Rename(logfilename, logfilename+"."+now)
 		if err == nil {
@@ -35,7 +33,6 @@ func LogRotate() {
 		Logger.Error("rename log file fail.", "error", err.Error())
 		return
 	}
-	Logger.Info("logger works fine.", "size", util.Byte2IEC(info.Size()))
 }
 
 func reset() {
