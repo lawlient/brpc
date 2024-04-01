@@ -20,10 +20,8 @@ services:
       - /var/lib:/var/lib
     entrypoint: /app/xpansync
     tty: true
-    networks:
-      - apolloconfig
     
 networks:
-  apolloconfig:
-    name: apollo_default
-    external: true
+  default:
+    external:
+      name: pro_net

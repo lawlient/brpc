@@ -1,0 +1,37 @@
+# APPNICENAME=Stash
+# APPDESCRIPTION=An organizer for your porn, written in Go
+version: "3.4"
+services:
+  stash:
+    image: stashapp/stash:latest
+    container_name: stash
+    restart: unless-stopped
+    ## the container's port must be the same with the STASH_PORT in the environment section
+    ports:
+      - 9999:9999
+    ## If you intend to use stash's DLNA functionality uncomment the below network mode and comment out the above ports section
+    # network_mode: host
+    logging:
+      driver: json-file
+      options:
+        max-file: "10"
+        max-size: 2m
+    environment:
+      - STASH_STASH=/data/
+      - STASH_GENERATED=/generated/
+      - STASH_METADATA=/metadata/
+      - STASH_CACHE=/cache/
+      - STASH_PORT=9999
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/lib/stashapp/config:/root/.stash
+      - /var/lib/stashapp/data:/data
+      - /var/lib/stashapp/metadata:/metadata
+      - /var/lib/stashapp/cache:/cache
+      - /var/lib/stashapp/blobs:/blobs
+      - /var/lib/stashapp/generated:/generated
+    networks:
+      - pro_net
+networks:
+  pro_net:
+    external: true
