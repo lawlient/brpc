@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"xpansync/apollo"
+	"xpansync/sdk"
 )
 
 func ChanifyText(msg string) {
-	chanify_addr := apollo.ChanifyAddr()
+	chanify_addr := sdk.GetChanifyAddr()
 	if len(chanify_addr) == 0 {
 		return
 	}

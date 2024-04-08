@@ -1,6 +1,7 @@
 package xlog
 
 import (
+	"fmt"
 	"log/slog"
 	"os"
 	"strconv"
@@ -12,6 +13,7 @@ var Logger *slog.Logger
 const logfilename = "/var/lib/xpansync/main.log"
 
 func init() {
+	fmt.Println("log init")
 	reset()
 }
 
@@ -38,7 +40,7 @@ func LogRotate() {
 func reset() {
 	logfile, err := os.OpenFile(logfilename, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
-		logfile = os.Stderr
+		logfile = os.Stdout
 	}
 
 	Logger = slog.New(slog.NewJSONHandler(logfile, &slog.HandlerOptions{

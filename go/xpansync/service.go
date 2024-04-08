@@ -1,15 +1,15 @@
 package main
 
 import (
+	"net/http"
 	"os"
 	"path/filepath"
-	"sync"
 	"time"
 
-	"github.com/apolloconfig/agollo/v4/storage"
+	"github.com/gin-gonic/gin"
 	"github.com/robfig/cron"
 
-	"xpansync/apollo"
+	"xpansync/db"
 	"xpansync/sdk"
 	"xpansync/util"
 	"xpansync/xlog"
@@ -32,9 +32,10 @@ func NewService() (*Service, error) {
 // case 4: path is folder, type is package ==> upload tar.gz package
 func (s *Service) cronUploadFiles() {
 	notifymsg := ""
-	for _, x := range *apollo.UploadFiles() {
-		path := x.Path   // file or folder
-		method := x.Type // origin or package
+
+	for _, x := range sdk.Tasklist() {
+		path := x.FF    // file or folder
+		method := x.How // origin or package
 
 		st, err := os.Stat(path)
 		if err != nil {
@@ -81,7 +82,7 @@ func (s *Service) cronUploadFiles() {
 }
 
 func upload1(file string, notifymsg *string) {
-	dsc := apollo.CloudRoot() + "/" + file
+	dsc := sdk.GetCloudRoot() + "/" + file
 	err := sdk.FileUpload(file, dsc)
 	if err != nil {
 		xlog.Logger.Error(err.Error())
@@ -111,7 +112,7 @@ func upload2(file string, notifymsg *string) {
 func upload3(folder string, notifymsg *string) {
 	err := filepath.Walk(folder, func(path string, info os.FileInfo, err error) error {
 		if !info.IsDir() {
-			dsc := apollo.CloudRoot() + "/" + path
+			dsc := sdk.GetCloudRoot() + "/" + path
 			err := sdk.FileUpload(path, dsc)
 			return err
 		}
@@ -141,10 +142,6 @@ func upload4(folder string, notifymsg *string) {
 }
 
 func (s *Service) Run() {
-	if apollo.Client() != nil {
-		go addChangeListener(s)
-	}
-
 	s.ResetCron()
 
 	alive := time.NewTicker(3 * time.Second)
@@ -162,7 +159,7 @@ func (s *Service) ResetCron() {
 	if s.c != nil {
 		s.c.Stop()
 	}
-	spec := apollo.UploadSpec()
+	spec := sdk.GetCron()
 	if len(spec) == 0 {
 		xlog.Logger.Info("no cron spec")
 		return
@@ -182,31 +179,36 @@ func (s *Service) ResetCron() {
 	xlog.Logger.Info("register cron.", "spec", spec, "entrysize", entrysize)
 }
 
-// Listen apollo config changed event
-type CustomChangeListener struct {
-	wg      sync.WaitGroup
-	service *Service
-}
-
-func (c *CustomChangeListener) OnChange(ev *storage.ChangeEvent) {
-	//write your code here
-	for key, value := range ev.Changes {
-		xlog.Logger.Info("apollo config changed", "key", key, "value", value)
-		if key == "UploadSpec" {
-			c.service.ResetCron()
-		}
+func Setting(c *gin.Context) {
+	setting, err := db.INS.GetAllSetting()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"msg": err.Error(),
+		})
+		return
 	}
-	c.wg.Done()
+	c.JSON(http.StatusOK, gin.H{
+		"data": setting,
+	})
+
 }
 
-func (c *CustomChangeListener) OnNewestChange(event *storage.FullChangeEvent) {
-	//write your code here
-}
+func SetSetting(c *gin.Context) {
+	var set db.Setting
+	if err := c.ShouldBindJSON(&set); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{})
+	}
+	// reset cron
+	settings := []db.Setting{set}
+	err := db.INS.SetSetting(settings)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"msg": err.Error(),
+		})
+		return
+	}
 
-func addChangeListener(s *Service) {
-	c2 := &CustomChangeListener{}
-	c2.wg.Add(5)
-	c2.service = s
-	(*apollo.Client()).AddChangeListener(c2)
-	c2.wg.Wait()
+	c.JSON(http.StatusOK, gin.H{
+		"msg": "OK",
+	})
 }

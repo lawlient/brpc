@@ -1,0 +1,21 @@
+version: "3"
+
+services:
+  xpansyncui:
+    container_name: xpansyncui
+    image: node:latest
+    volumes:
+      - ./:/app/
+    ports:
+      - 1524:5173
+    networks: 
+      - dev_net
+    working_dir: /app
+    entrypoint: npm run dev -- --host
+    tty: true
+
+networks:
+  dev_net:
+    external: true
+
+

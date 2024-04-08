@@ -9,11 +9,13 @@ import (
 	"os"
 	"strings"
 
-	"xpansync/apollo"
+	"xpansync/db"
 	openapiclient "xpansync/openxpanapi"
+
+	"github.com/gin-gonic/gin"
 )
 
-const hostname = "http://openapi.baidu.com/oauth/2.0"
+const hostname = "https://openapi.baidu.com/oauth/2.0"
 
 type authReturnType struct {
 	ExpiresIn     int    `json:"expires_in"`
@@ -24,40 +26,36 @@ type authReturnType struct {
 	Scope         string `json:"scope"`
 }
 
-func GetAccessCode(w http.ResponseWriter, r *http.Request) {
+func GetAccessCode(c *gin.Context) {
 	api := hostname + "/authorize?"
 	args := []string{}
 	args = append(args, "response_type=code")
-	args = append(args, "client_id="+apollo.AppKey())
-	args = append(args, "redirect_uri="+apollo.RedirectUri())
+	args = append(args, "client_id="+getAppKey())
+	args = append(args, "redirect_uri="+"oob")
 	args = append(args, "scope=basic,netdisk")
-	args = append(args, "device_id="+apollo.AppID())
+	args = append(args, "device_id="+getAppID())
 
 	url := api + strings.Join(args, "&")
-	resp, err := http.Get(url)
-	if err != nil {
-		fmt.Fprintf(w, "%s", err.Error())
-		return
-	}
-
-	defer resp.Body.Close()
-	_, err = ioutil.ReadAll(resp.Body)
-	if err != nil {
-		fmt.Fprintf(w, "%s", err.Error())
-		return
-	}
-	fmt.Fprintf(w, "%s\n", url)
+	c.JSON(http.StatusOK, gin.H{
+		"data": url,
+	})
 }
 
-func MyOauthTokenAuthorizationCode(w http.ResponseWriter, req *http.Request) {
-	code := req.Header.Get("Code")
-	clientId := apollo.AppKey()
-	clientSecret := apollo.SecretKey()
-	redirectUri := apollo.RedirectUri()
+func MyOauthTokenAuthorizationCode(c *gin.Context) {
+	var reqbody struct {
+		Code string
+	}
+	if err := c.ShouldBindJSON(&reqbody); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{})
+		return
+	}
+	clientId := getAppKey()
+	clientSecret := getSecretKey()
+	redirectUri := "oob"
 
 	configuration := openapiclient.NewConfiguration()
 	api_client := openapiclient.NewAPIClient(configuration)
-	resp, r, err := api_client.AuthApi.OauthTokenCode2token(context.Background()).Code(code).ClientId(clientId).ClientSecret(clientSecret).RedirectUri(redirectUri).Execute()
+	resp, r, err := api_client.AuthApi.OauthTokenCode2token(context.Background()).Code(reqbody.Code).ClientId(clientId).ClientSecret(clientSecret).RedirectUri(redirectUri).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `AuthApi.OauthTokenCode2token``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -72,9 +70,29 @@ func MyOauthTokenAuthorizationCode(w http.ResponseWriter, req *http.Request) {
 
 	p := &authReturnType{}
 	if err := json.Unmarshal(bodyBytes, p); err != nil {
-		fmt.Fprintf(w, "%s", err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"msg": err.Error(),
+		})
 		return
 	}
 
-	fmt.Fprintf(w, "%s\n", p.AccessToken)
+	var setting db.Setting
+	setting.Key = "AccessToken"
+	setting.Value = p.AccessToken
+	err = db.INS.SetSetting([]db.Setting{setting})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"msg": err.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"data": p.AccessToken,
+	})
+}
+
+func GetCurrentToken(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"data": getToken(),
+	})
 }

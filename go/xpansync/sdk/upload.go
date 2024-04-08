@@ -11,7 +11,6 @@ import (
 	"os"
 	"strings"
 
-	"xpansync/apollo"
 	openapiclient "xpansync/openxpanapi"
 	"xpansync/util"
 	"xpansync/xlog"
@@ -96,7 +95,7 @@ func FileUpload(src string, dsc string) error {
 
 // 创建上传任务
 func fileprecreate(req *UploadRequest) error {
-	accessToken := apollo.AccessToken()
+	accessToken := getToken()
 	path := req.Path           // string
 	isdir := req.Isdir         // int32
 	size := req.Size           // int32
@@ -130,7 +129,7 @@ func fileprecreate(req *UploadRequest) error {
 
 // 分片上传
 func superfile2(req *UploadRequest, name string) error {
-	accessToken := apollo.AccessToken()
+	accessToken := getToken()
 	path := req.Path
 	uploadid := req.ID
 	type_ := "tmpfile"
@@ -200,7 +199,7 @@ func superfile2(req *UploadRequest, name string) error {
 
 // 合并文件
 func filecreate(req *UploadRequest) error {
-	accessToken := apollo.AccessToken()
+	accessToken := getToken()
 	path := req.Path           // string
 	isdir := req.Isdir         // int32
 	size := req.Size           // int32
@@ -229,7 +228,7 @@ func filecreate(req *UploadRequest) error {
 }
 
 func Upload(w http.ResponseWriter, r *http.Request) {
-	root := apollo.CloudRoot()
+	root := GetCloudRoot()
 	src := r.Header.Get("src")
 	err := FileUpload(src, root+src)
 	fmt.Fprintf(w, "%s\n", err.Error())
