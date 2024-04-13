@@ -3,8 +3,8 @@ package db
 import (
 	"database/sql"
 	"embed"
-	"fmt"
 	"strings"
+	"time"
 
 	"xpansync/xlog"
 
@@ -37,7 +37,6 @@ func init() {
 		}
 		return s, nil
 	}
-	fmt.Println("dri size", len(drivers))
 }
 
 func (s *sqlite) initSchema() error {
@@ -53,6 +52,14 @@ func (s *sqlite) initSchema() error {
 		return err
 	}
 	return tx.Commit()
+}
+
+func (s *sqlite) Close() {
+	if s.db != nil {
+		s.db.Close()
+		s.db = nil
+		xlog.Logger.Info("Close sqlite database")
+	}
 }
 
 func (s *sqlite) GetAllSetting() ([]Setting, error) {
@@ -128,10 +135,131 @@ func (s *sqlite) UpsertTask(t *Task) error {
 	return err
 }
 
-func (s *sqlite) Close() {
-	if s.db != nil {
-		s.db.Close()
-		s.db = nil
-		xlog.Logger.Info("Close sqlite database")
+func (s *sqlite) GetUser(u *User) ([]*User, error) {
+	where := []string{"1 = 1"}
+	args := []any{}
+
+	if u.ID != 0 {
+		where, args = append(where, "id = ?"), append(args, u.ID)
 	}
+	if u.Username != "" {
+		where, args = append(where, "username = ?"), append(args, u.Username)
+	}
+
+	sql := `
+        select id, username, passwd, avatar, role
+        from users where ` + strings.Join(where, " and ") + `
+        order by id desc
+    `
+
+	rows, err := s.db.Query(sql, args...)
+	if err != nil {
+		xlog.Logger.Error("SQL ERROR", "sql", sql, "Errmsg", err.Error())
+		return nil, err
+	}
+
+	list := make([]*User, 0)
+	for rows.Next() {
+		var tmp User
+		if err := rows.Scan(
+			&tmp.ID,
+			&tmp.Username,
+			&tmp.Password,
+			&tmp.Avatar,
+			&tmp.Role,
+		); err != nil {
+			xlog.Logger.Error("Scan row error", "ErrMsg", err)
+			return nil, err
+		}
+
+		list = append(list, &tmp)
+	}
+	return list, nil
+}
+
+func (s *sqlite) AddUser(u *User) (*User, error) {
+	fields := []string{"username", "passwd", "avatar", "role"}
+	placeholders := []string{"?", "?", "?", "?"}
+	args := []any{u.Username, u.Password, u.Avatar, u.Role}
+
+	sql := `insert into users (` + strings.Join(fields, ", ") + `) values (` + strings.Join(placeholders, ",") + `)
+    RETURNING id, username, passwd, avatar, role`
+
+	if err := s.db.QueryRow(sql, args...).Scan(
+		&u.ID,
+		&u.Username,
+		&u.Password,
+		&u.Avatar,
+		&u.Role,
+	); err != nil {
+		xlog.Logger.Error("SQL EXEC ERROR", "sql", sql, "ErrMsg", err)
+		return nil, err
+	}
+	return u, nil
+}
+
+func (s *sqlite) ModUser(u *User) (*User, error) {
+	fields := []string{}
+	args := []any{}
+
+	if u.Username != "" {
+		fields, args = append(fields, "username = ?"), append(args, u.Username)
+	}
+	if u.Password != "" {
+		fields, args = append(fields, "passwd = ?"), append(args, u.Password)
+	}
+	if u.Avatar != "" {
+		fields, args = append(fields, "avatar = ?"), append(args, u.Avatar)
+	}
+	if u.Role != "" {
+		fields, args = append(fields, "role = ?"), append(args, u.Role)
+	}
+	fields, args = append(fields, "update_time = ?"), append(args, time.Now().Format("2006-01-02 15 04 05"))
+
+	sql := `
+        update users set ` + strings.Join(fields, ", ") + `
+        where id = ?
+        RETURNING id, username, passwd, avatar, role
+    `
+	args = append(args, u.ID)
+
+	if err := s.db.QueryRow(sql, args...).Scan(
+		&u.ID,
+		&u.Username,
+		&u.Password,
+		&u.Avatar,
+		&u.Role,
+	); err != nil {
+		xlog.Logger.Error("SQL Error", "sql", sql, "ErrMsg", err)
+		return nil, err
+	}
+	return u, nil
+}
+
+func (s *sqlite) DelUser(uid int) error {
+	sql := "delete from users where id = ?"
+	affect, err := s.db.Exec(sql, uid)
+	if err != nil {
+		xlog.Logger.Error("SQL ERROR", "sql", sql, "ErrMsg", err)
+		return err
+	}
+
+	if _, err := affect.RowsAffected(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *sqlite) UserCount() (int, error) {
+	sql := "select count(*) from users"
+	var size = 0
+	if err := s.db.QueryRow(sql).Scan(
+		&size,
+	); err != nil {
+		xlog.Logger.Error("EXEC ERROR", "sql", sql, "ErrMsg", err)
+		return 0, err
+	}
+
+	return size, nil
 }

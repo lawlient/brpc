@@ -8,39 +8,44 @@ import Root from './Root.jsx';
 import Tasks from './pages/Tasks.jsx';
 import Disk from "./pages/Disk.jsx";
 import User from "./pages/User.jsx";
+import Signin from "./pages/Signin.jsx";
 
 
 const router = createBrowserRouter([
   {
-    path: import.meta.env.BASE_URL,
+    path: '/xpansyncui/',
     element: <App />,
     children: [
       {
-        path: "/",
+        path: "",
         element: <Root />,
         children: [
           {
-            path: "/",
+            path: "",
             element: <Disk />,
           },
           {
-            path: "/disk",
+            path: "disk",
             element: <Disk />,
           },
           {
-            path: "/tasks",
+            path: "tasks",
             element: <Tasks />
           },
           {
-            path: "/setting",
+            path: "setting",
             element: <Setting />
           },
           {
-            path: "/admin",
+            path: "admin",
             element: <User />
           },
         ]
-      }
+      },
+      {
+        path: "auth/signin",
+        element: <Signin />,
+      },
     ]
   }
 ]);

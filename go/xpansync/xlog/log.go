@@ -1,7 +1,6 @@
 package xlog
 
 import (
-	"fmt"
 	"log/slog"
 	"os"
 	"strconv"
@@ -13,7 +12,6 @@ var Logger *slog.Logger
 const logfilename = "/var/lib/xpansync/main.log"
 
 func init() {
-	fmt.Println("log init")
 	reset()
 }
 

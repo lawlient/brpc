@@ -4,7 +4,7 @@ version: "3"
 services:
   xpansync:
     container_name: "xpansync"
-    image: golang:alpine
+    build: .
     restart: "unless-stopped"
     working_dir: /app
     environment:
@@ -14,8 +14,7 @@ services:
     volumes:
       - "/etc/localtime:/etc/localtime:ro"
       - "/var/lib:/var/lib"
-      - "./:/app"
-    entrypoint: "/bin/sh"
+    entrypoint: "/app/xpansync"
     tty: true
     networks:
       - pro_net

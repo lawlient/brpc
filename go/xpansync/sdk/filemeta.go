@@ -27,9 +27,9 @@ type FileRequest struct {
 	ShowEmpty   int32  `json:"show_empty"`
 }
 
-func NewFileRequest() *FileRequest {
+func NewFileRequest(token string) *FileRequest {
 	req := &FileRequest{}
-	req.AccessToken = getToken()
+	req.AccessToken = token
 	req.Web = "1"            // string |  (optional) 为1时返回文档预览地址lodocpreview
 	req.ParentPath = "/"     // string |  (optional) 目录名称，以/开头的绝对路径, 默认为/ , 路径包含中文时需要UrlEncode编码
 	req.Recursion = "1"      // string |  (optional) 是否递归，0为否，1为是. 递归是指：当目录下有文件夹，可以获取到文件夹下面的文档
@@ -139,7 +139,7 @@ func FileList(req *FileRequest) (string, error) {
 }
 
 func Filelist(w http.ResponseWriter, r *http.Request) {
-	req := NewFileRequest()
+	req := NewFileRequest("" /*todo: token*/)
 	req.ParentPath = r.Header.Get("dir")
 	body, _ := FileList(req)
 	xlog.Logger.Info("success", "request", req)

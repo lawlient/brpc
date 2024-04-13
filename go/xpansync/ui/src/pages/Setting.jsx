@@ -12,7 +12,11 @@ export default function Setting() {
 
     useEffect(() => {
         get_setting().then(res => {
-            setConfigs(res.data.data)
+            let _list = res.data.data
+            _list = _list.filter((v) => {
+                return v.Key != "AccessToken"
+            })
+            setConfigs(_list)
         })
     }, [])
 

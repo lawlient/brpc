@@ -9,13 +9,13 @@ services:
     ports:
       - 1524:5173
     networks: 
-      - dev_net
+      - pro_net
     working_dir: /app
     entrypoint: npm run dev -- --host
     tty: true
 
 networks:
-  dev_net:
+  pro_net:
     external: true
 
 
