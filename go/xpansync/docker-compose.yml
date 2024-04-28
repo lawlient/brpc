@@ -3,7 +3,7 @@ version: "3"
 
 services:
   xpansync:
-    container_name: "xpansync"
+    container_name: xpansync
     image: golang:alpine
     restart: "unless-stopped"
     working_dir: /app
@@ -15,11 +15,12 @@ services:
       - "/etc/localtime:/etc/localtime:ro"
       - "/var/lib:/var/lib"
       - "./:/app"
-    entrypoint: "/bin/sh"
+    entrypoint: "go run ."
     tty: true
     networks:
       - pro_net
 
 networks:
   pro_net:
+    name: pro_net
     external: true

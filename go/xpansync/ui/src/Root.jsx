@@ -5,7 +5,6 @@ import { useEffect, useRef, useState } from 'react';
 import { Menu } from 'primereact/menu';
 import { useNavigate } from 'react-router-dom'
 import { Avatar } from 'primereact/avatar';
-import { Divider } from 'primereact/divider';
 
 
 export default function Root() {
@@ -16,24 +15,20 @@ export default function Root() {
 
   const [logo] = useState("")
 
+  const layout = useRef()
   const sidebar = useRef()
   const content = useRef()
   useEffect(() => {
     let path = window.location.href
-    let isroot = true;
+    let focus = 0;
     for (let index = 0; index < navs.length; index++) {
       let node = document.getElementById(navs[index].to)
+      node.style.backgroundColor = "inherit";     
       if (path.endsWith(navs[index].to)) {
-        node.style.backgroundColor = 'var(--surface-200)';
-        isroot = false;
-      } else {
-        node.style.backgroundColor = "white";     
+        focus = index;
       }
     }
-    if (isroot) {
-      let node = document.getElementById(navs[0].to)
-      node.style.backgroundColor = 'var(--surface-200)';
-    }
+    document.getElementById(navs[focus].to).style.backgroundColor = 'light-dark(var(--surface-300), var(--surface-600))';
   }, [window.location.href])
 
 
@@ -80,8 +75,12 @@ export default function Root() {
     content.current.classList.toggle("toggle-content")
   }
 
+  const toggleScheme = () => {
+    layout.current.classList.toggle('dark')
+  }
+
   return (
-    <>
+    <div className='layout' ref={layout}>
       <div className='sidebar' ref={sidebar}>
         <div className='sidebar-head'>
           <img src={logo || import.meta.env.BASE_URL+"/public/logo.svg"} alt="logo" />
@@ -92,14 +91,15 @@ export default function Root() {
       </div>
       <main className='content' ref={content}>
         <div className='content-head'>
-          <button className="toggle-button" onClick={toggleSidebar} ><i className='pi pi-bars' ></i></button>
+          <button onClick={toggleSidebar} ><i className='pi pi-bars' ></i></button>
+          <button onClick={toggleScheme} ><i className='pi pi-moon' ></i></button>
           <Avatar image="" />
         </div>
         <div>
           <Outlet />
         </div>
       </main>
-    </>
+    </div>
   )
 }
 

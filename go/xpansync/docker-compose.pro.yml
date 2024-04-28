@@ -21,4 +21,5 @@ services:
 
 networks:
   pro_net:
+    name: pro_net
     external: true

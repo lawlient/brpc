@@ -1,9 +1,11 @@
+import "./User.css"
 import { Card } from "primereact/card";
 import { useEffect, useState } from "react";
 import { userlist } from "../api/api";
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
-import { Tag } from "primereact/tag"
+import { DataView } from "primereact/dataview";
+import { Avatar } from "primereact/avatar";
+import { Tag } from "primereact/tag";
+import { UserEditButton } from "../component/UserEditButton";
 
 export default function User() {
     const [list, setList] = useState([])
@@ -13,15 +15,24 @@ export default function User() {
         })
     }, [])
 
-    return (
-        <Card  >
-            <DataTable value={list} key={"id"} >
-                <Column field="username" header="Name" ></Column>
-                <Column field="role" header="Role" body={(e) => {
-                    return <Tag value={e.role} severity={"primary"} ></Tag>
-                }}></Column>
-            </DataTable>
+    const userTemp = (en, idx) => {
+        return (
+            <div className="user-item">
+                <Avatar image={en.avatar} shape="circle"/>
+                <h3>{en.username}</h3>
+                <Tag color="primary" value={en.role} />
+                <UserEditButton lists={list} setLists={setList} idx={idx} />
+            </div>
+        )
+    }
 
-        </Card>
+    return (
+        <div className="user-list">
+        {
+            list.map((en, idx) => {
+                return userTemp(en, idx)
+            })
+        }
+        </div>
     )
 }

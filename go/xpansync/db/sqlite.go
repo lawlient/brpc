@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"embed"
 	"strings"
-	"time"
 
 	"xpansync/xlog"
 
@@ -205,16 +204,15 @@ func (s *sqlite) ModUser(u *User) (*User, error) {
 	if u.Username != "" {
 		fields, args = append(fields, "username = ?"), append(args, u.Username)
 	}
-	if u.Password != "" {
-		fields, args = append(fields, "passwd = ?"), append(args, u.Password)
-	}
+	// if u.Password != "" {
+	// 	fields, args = append(fields, "passwd = ?"), append(args, u.Password)
+	// }
 	if u.Avatar != "" {
 		fields, args = append(fields, "avatar = ?"), append(args, u.Avatar)
 	}
 	if u.Role != "" {
 		fields, args = append(fields, "role = ?"), append(args, u.Role)
 	}
-	fields, args = append(fields, "update_time = ?"), append(args, time.Now().Format("2006-01-02 15 04 05"))
 
 	sql := `
         update users set ` + strings.Join(fields, ", ") + `
