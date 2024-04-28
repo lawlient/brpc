@@ -1,0 +1,29 @@
+version: "3.8"
+services:
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:latest
+    restart: unless-stopped
+    volumes:
+      - /var/lib/grafana:/var/lib/grafana
+    networks:
+      - pro_net
+    environment:
+      - GF_SERVER_ROOT_URL=https://jovan.vip.cpolar.cn/grafana
+    depends_on:
+      - grafanadb
+  grafanadb:
+    container_name: grafana-mysql
+    image: mysql:latest
+    restart: unless-stopped
+    volumes:
+      - /var/lib/grafana/db/mysql:/var/lib/mysql
+    networks:
+      - pro_net
+    environment:
+      TZ: Asia/Shanghai
+      #MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+      MYSQL_ROOT_PASSWORD: grafanadb
+networks:
+  pro_net:
+    external: true

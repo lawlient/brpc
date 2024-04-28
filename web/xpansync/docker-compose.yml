@@ -3,16 +3,11 @@ version: "3"
 services:
   xpansync:
     container_name: xpansync
-    image: jovanx/xpansync
+    image: jovanx/xpansync:1.0
     restart: unless-stopped
     working_dir: /app
     environment:
       GOPROXY: https://goproxy.cn
-      # apollo properties config relative
-      APOLLO_CONFIG_APPID: xpansync
-      APOLLO_CONFIG_CLUSTER: pro
-      APOLLO_CONFIG_ADDR: http://apollo-pro-config-service:8080
-      APOLLO_CONFIG_NAMESPACE: application
     ports:
       - 1425:1425
     volumes:
@@ -20,8 +15,8 @@ services:
       - /var/lib:/var/lib
     entrypoint: /app/xpansync
     tty: true
-    
+    networks:
+      - pro_net
 networks:
-  default:
-    external:
-      name: pro_net
+  pro_net:
+    external: true
