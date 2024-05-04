@@ -3,22 +3,20 @@
 version: "3"
 services:
   wiki:
-    container_name: "wikijs"
-    image: "ghcr.io/requarks/wiki:2"
-    restart: unless-stopped
+    container_name: wikijs
+    image: ghcr.io/requarks/wiki:2
+    #restart: unless-stopped
     ports:
       - 20100:3000
     environment:
       DB_TYPE: sqlite
-      DB_FILEPATH: "/wiki/database.sqlite"
+      DB_FILEPATH: /wiki/database.sqlite
     volumes:
       - /var/lib/wiki/database.sqlite:/wiki/database.sqlite
     tty: true
     networks:
       - pronet
-
 networks:
   pronet:
     name: pro_net
     external: true
-

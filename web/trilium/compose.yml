@@ -1,0 +1,21 @@
+# Running `docker-compose up` will create/use the "trilium-data" directory in the user home
+# Run `TRILIUM_DATA_DIR=/path/of/your/choice docker-compose up` to set a different directory
+
+version: "2.1"
+services:
+  trilium:
+    container_name: trilium
+    image: zadam/trilium
+    #restart: unless-stopped
+    environment:
+      - TRILIUM_DATA_DIR=/home/node/trilium-data
+    ports:
+      - 10103:8080
+    volumes:
+      - /var/lib/trilium:/home/node/trilium-data
+    networks:
+      - pronet
+networks:
+  pronet:
+    name: pro_net
+    external: true

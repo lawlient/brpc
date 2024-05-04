@@ -1,0 +1,20 @@
+# file: docker-compose.yml
+# built-for: 0.10.0
+version: "3"
+services:
+  note-mark:
+    image: ghcr.io/enchant97/note-mark-aio
+    #restart: unless-stopped
+    volumes:
+      - /var/lib/note-mark:/data
+    environment:
+      # !!! REPLACE These !!!
+      JWT_SECRET: bXktc2VjcmV0
+      CORS_ORIGINS: https://jovan.vip.cpolar.cn/notemark
+    ports:
+      - 10102:8000
+    networks:
+      - pro_net
+networks:
+  pro_net:
+    external: true

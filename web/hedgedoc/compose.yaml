@@ -1,0 +1,41 @@
+# https://github.com/hedgedoc/hedgedoc/issues/1024
+# that issues fixed my login 302 error
+version: "3"
+services:
+  database:
+    image: postgres:13.4-alpine
+    container_name: hedgedoc-database
+    environment:
+      - POSTGRES_USER=hedgedoc
+      - POSTGRES_PASSWORD=hedgedoc
+      - POSTGRES_DB=hedgedoc
+    volumes:
+      - /var/lib/hedgedoc/database:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - pro_net
+  app:
+    # Make sure to use the latest release from https://hedgedoc.org/latest-release
+    image: quay.io/hedgedoc/hedgedoc:1.9.9
+    container_name: hedgedoc
+    environment:
+      - CMD_DB_URL=postgres://hedgedoc:hedgedoc@database:5432/hedgedoc
+      - CMD_DOMAIN=jovan.vip.cpolar.cn
+      - CMD_URL_PATH=hedgedoc
+      - CMD_URL_ADDPORT=false
+      - CMD_PROTOCOL_USESSL=true
+      - CMD_ALLOW_ANONYMOUS=true
+      - CMD_EMAIL=true
+      - CMD_ALLOW_EMAIL_REGISTER=false
+    volumes:
+      - /var/lib/hedgedoc/uploads:/hedgedoc/public/uploads
+      #ports:
+      #- 3000:3000
+    restart: unless-stopped
+    depends_on:
+      - database
+    networks:
+      - pro_net
+networks:
+  pro_net:
+    external: true
