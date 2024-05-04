@@ -3,7 +3,7 @@ version: "3"
 services:
   xpansync:
     container_name: xpansync
-    image: jovanx/xpansync:1.0
+    image: jovanx/xpansync:latest
     restart: unless-stopped
     working_dir: /app
     environment:

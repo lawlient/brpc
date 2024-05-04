@@ -5,7 +5,6 @@ services:
   xpansync:
     container_name: xpansync
     image: golang:alpine
-    restart: "unless-stopped"
     working_dir: /app
     environment:
       GOPROXY: https://goproxy.cn

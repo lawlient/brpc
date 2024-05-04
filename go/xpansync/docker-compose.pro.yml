@@ -5,7 +5,6 @@ services:
   xpansync:
     container_name: "xpansync"
     build: .
-    restart: "unless-stopped"
     working_dir: /app
     environment:
       GOPROXY: https://goproxy.cn
@@ -16,10 +15,3 @@ services:
       - "/var/lib:/var/lib"
     entrypoint: "/app/xpansync"
     tty: true
-    networks:
-      - pro_net
-
-networks:
-  pro_net:
-    name: pro_net
-    external: true
