@@ -25,6 +25,7 @@ export default function Signin() {
         signin(info).then(res => {
             localStorage.setItem("__token__", res.data.token)
             localStorage.setItem("__username__", info.username)
+            localStorage.setItem("__avatar__", info.avatar)
             axios.defaults.headers["Authorization"] = localStorage.getItem("__token__")
             nav(import.meta.env.BASE_URL+"/")
         })

@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { DataTable } from 'primereact/datatable'
 import { Column } from "primereact/column"
+import { InputText } from "primereact/inputtext"
 import { Tag } from "primereact/tag"
 import { Dropdown } from "primereact/dropdown"
 import { updtask } from "../api/api"

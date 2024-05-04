@@ -9,38 +9,28 @@ import { Avatar } from 'primereact/avatar';
 
 export default function Root() {
   const n = useNavigate()
-  const nav = (p) => {
-    n(import.meta.env.BASE_URL+p)
-  }
+  const nav = (p) => { n(import.meta.env.BASE_URL+p) }
 
   const [logo] = useState("")
 
   const layout = useRef()
   const sidebar = useRef()
   const content = useRef()
-  useEffect(() => {
-    let path = window.location.href
-    let focus = 0;
-    for (let index = 0; index < navs.length; index++) {
-      let node = document.getElementById(navs[index].to)
-      node.style.backgroundColor = "inherit";     
-      if (path.endsWith(navs[index].to)) {
-        focus = index;
-      }
-    }
-    document.getElementById(navs[focus].to).style.backgroundColor = 'light-dark(var(--surface-300), var(--surface-600))';
-  }, [window.location.href])
-
-
   const navtemp = (e) => {
-    return (
+    return focus === e.to ? 
+      <div className='menuitem' id={e.to}>
+        <a className="menuitem-content-selected menuitem-content" onClick={() => { nav(e.to) }}>
+          <i className={e.icon} ></i>
+          <span >{e.label}</span>
+        </a>
+      </div>
+      : 
       <div className='menuitem' id={e.to}>
         <a className="menuitem-content" onClick={() => { nav(e.to) }}>
           <i className={e.icon} ></i>
           <span >{e.label}</span>
         </a>
       </div>
-    )
   }
 
   const navs = [
@@ -69,6 +59,7 @@ export default function Root() {
       template: navtemp,
     },
   ]
+  const [focus, setFocus] = useState(navs[0].to)
 
   const toggleSidebar = () => {
     sidebar.current.classList.toggle("toggle-sidebar")
@@ -78,6 +69,16 @@ export default function Root() {
   const toggleScheme = () => {
     layout.current.classList.toggle('dark')
   }
+
+  useEffect(() => {
+    for (var index = 0; index < navs.length; index++) {
+      if (window.location.href.endsWith(navs[index].to)) {
+        setFocus(navs[index].to)
+        break
+      }
+    }
+  }, [window.location.href])
+
 
   return (
     <div className='layout' ref={layout}>
@@ -93,7 +94,7 @@ export default function Root() {
         <div className='content-head'>
           <button onClick={toggleSidebar} ><i className='pi pi-bars' ></i></button>
           <button onClick={toggleScheme} ><i className='pi pi-moon' ></i></button>
-          <Avatar image="" />
+          <Avatar shape="circle" icon="pi pi-user" image={localStorage.getItem("__avatar__")} />
         </div>
         <div>
           <Outlet />

@@ -58,4 +58,5 @@ export function signin(u) { return axios.post("/auth/login", u) }
 export function signup(u) { return axios.post("/auth/signup", u) }
 
 export function userlist() { return axios.post("/api/userlist") }
+export function getuser(u) { return axios.post("/api/user/", u) }
 export function upduser(u) { return axios.post("/api/user/upd", u)}
