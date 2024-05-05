@@ -84,7 +84,7 @@ export default function Root() {
     <div className='layout' ref={layout}>
       <div className='sidebar' ref={sidebar}>
         <div className='sidebar-head'>
-          <img src={logo || import.meta.env.BASE_URL+"/public/logo.svg"} alt="logo" />
+          <img src={logo || import.meta.env.BASE_URL+"logo.svg"} alt="logo" />
           <div>xpansync</div>
         </div>
         <hr  style={{margin:'0 0 20px', borderTop:'1px solid black'}}/>

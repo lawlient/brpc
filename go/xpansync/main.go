@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	"xpansync/core"
+
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
@@ -11,6 +13,11 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 		return
+	}
+
+	if gin.Mode() == gin.ReleaseMode {
+		fmt.Println("Release Mode")
+		service.Engine().Use(embedFrontend())
 	}
 
 	service.Start()

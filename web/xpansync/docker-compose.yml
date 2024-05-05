@@ -8,6 +8,8 @@ services:
     working_dir: /app
     environment:
       GOPROXY: https://goproxy.cn
+      GIN_MODE: release
+      BASEURL: /xpansync/
     ports:
       - 1425:1425
     volumes:

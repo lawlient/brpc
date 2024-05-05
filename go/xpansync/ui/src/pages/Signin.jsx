@@ -12,8 +12,8 @@ export default function Signin() {
         "username": "",
         "password": "",
     })
-    const [logo] = useState(import.meta.env.BASE_URL + "public/vite.svg")
-    const nav = useNavigate()
+    const n = useNavigate()
+    const nav = (p) => { n(import.meta.env.BASE_URL+p) }
 
     const [first, setFirst] = useState(false)
     useEffect(() => {
@@ -25,9 +25,9 @@ export default function Signin() {
         signin(info).then(res => {
             localStorage.setItem("__token__", res.data.token)
             localStorage.setItem("__username__", info.username)
-            localStorage.setItem("__avatar__", info.avatar)
             axios.defaults.headers["Authorization"] = localStorage.getItem("__token__")
-            nav(import.meta.env.BASE_URL+"/")
+            console.log("Welcome " + info.username)
+            nav("/")
         })
     }
 
@@ -38,7 +38,8 @@ export default function Signin() {
             localStorage.setItem("__token__", res.data.token)
             localStorage.setItem("__username__", info.username)
             axios.defaults.headers["Authorization"] = localStorage.getItem("__token__")
-            nav(import.meta.env.BASE_URL+"/")
+            console.log("Welcome " + info.username)
+            nav("/")
         })
     }
 

@@ -28,7 +28,7 @@ const init_user = async () => {
 
 const router = createBrowserRouter([
   {
-    path: '/xpansyncui/',
+    path: import.meta.env.BASE_URL,
     element: <App />,
     children: [
       {
@@ -59,7 +59,7 @@ const router = createBrowserRouter([
         ]
       },
       {
-        path: "auth/signin",
+        path: "signin",
         element: <Signin />,
       },
     ]
