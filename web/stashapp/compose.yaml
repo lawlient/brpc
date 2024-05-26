@@ -5,7 +5,7 @@ services:
   stash:
     image: stashapp/stash:latest
     container_name: stash
-    restart: unless-stopped
+    #restart: unless-stopped
     ## the container's port must be the same with the STASH_PORT in the environment section
     ports:
       - 9999:9999

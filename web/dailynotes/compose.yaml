@@ -1,0 +1,20 @@
+services:
+  dailynotes:
+    #image: m0ngr31/dailynotes
+    build: .
+    container_name: dailynotes
+    restart: unless-stopped
+    user: 0:0
+    environment:
+      BASE_URL: "/daily/"
+    #ports:
+    #  - 5000:5000
+    volumes:
+      - /var/lib/dailynotes/config/:/app/config/
+    networks:
+      - pro_net
+
+networks:
+  pro_net:
+    name: pro_net
+    external: true

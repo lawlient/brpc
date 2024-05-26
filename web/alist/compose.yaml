@@ -1,0 +1,21 @@
+version: "3.3"
+services:
+  alist:
+    image: xhofe/alist:latest
+    container_name: alist
+    volumes:
+      - /var/lib/alist:/opt/alist/data
+      - /data/music:/root/music
+      - /data/ftp:/root/ftp
+      #ports:
+      #- 10103:5244
+    environment:
+      - PUID=0
+      - PGID=0
+      - UMASK=022
+    restart: unless-stopped
+    networks:
+      - pro_net
+networks:
+  pro_net:
+    external: true

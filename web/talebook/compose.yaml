@@ -1,0 +1,29 @@
+services:
+  # main service
+  talebook:
+    restart: unless-stopped
+    image: talebook/talebook
+    container_name: talebook
+    volumes:
+      - /var/lib/talebook:/data
+    ports:
+      - 10101:80
+      #- "8443:443"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Shanghai
+      - SSR=OFF
+    networks:
+      - pro_net
+    # depends_on:
+    #   - douban-rs-api
+
+    # optional, for meta plugins
+    # please set "http://douban-rs-api" in settings
+    # douban-rs-api:
+    #   restart: always
+    #   image: ghcr.io/cxfksword/douban-api-rs
+networks:
+  pro_net:
+    external: true

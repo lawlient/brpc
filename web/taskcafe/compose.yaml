@@ -1,0 +1,35 @@
+services:
+  taskcafe:
+    image: taskcafe/taskcafe:latest
+    # build: .
+    container_name: taskcafe
+    ports:
+      - 10100:3333
+    depends_on:
+      - taskcafe-db
+    networks:
+      - pro_net
+    environment:
+      TASKCAFE_DATABASE_HOST: taskcafe-db
+      TASKCAFE_MIGRATE: "true"
+      #TASKCAFE_SERVER_HOSTNAME: ${TASKCAFE_HOSTNAME}
+    volumes:
+      - /var/lib/taskcafe/uploads:/root/uploads
+    restart: unless-stopped
+
+  taskcafe-db:
+    image: postgres:12.3-alpine
+    container_name: taskcafe-db
+    restart: unless-stopped
+    networks:
+      - pro_net
+    environment:
+      POSTGRES_USER: taskcafe
+      POSTGRES_PASSWORD: taskcafe_test
+      POSTGRES_DB: taskcafe
+    volumes:
+      - /var/lib/taskcafe/db:/var/lib/postgresql/data
+networks:
+  pro_net:
+    name: pro_net
+    external: true

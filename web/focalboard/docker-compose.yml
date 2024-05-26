@@ -1,0 +1,19 @@
+services:
+  focalboard:
+    image: mattermost/focalboard
+    container_name: focalboard
+    # ports:
+    #   - 8000:8000
+    user: 0:0
+    volumes:
+      - /var/lib/focalboard/:/opt/focalboard/
+    #restart: unless-stopped
+    networks:
+      - pro_net
+
+networks:
+  pro_net:
+    name: pro_net
+    external: true
+
+

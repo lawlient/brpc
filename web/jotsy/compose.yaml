@@ -1,0 +1,30 @@
+services:
+  skydb:
+    image: skytable/sdb:v0.7.6
+    container_name: jotsy-db
+    volumes:
+      - /var/lib/jotsy/skytable:/var/lib/skytable
+    networks:
+      - pro_net
+    command: skyd --noart -h 0.0.0.0 -p 2003
+
+  jotsy:
+    image: ohsayan/jotsy:latest
+    container_name: jotsy
+    environment:
+      - JOTSY_HOST=0.0.0.0
+      - JOTSY_PORT=2022
+      - JOTSY_SKY_HOST=jotsy-db
+      - JOTSY_SKY_PORT=2003
+      - JOTSY_DEPLOY_PROD=true
+    ports:
+      - 10101:2022
+    depends_on:
+      - skydb
+    networks:
+      - pro_net
+
+networks:
+  pro_net:
+    name: pro_net
+    external: true
