@@ -8,6 +8,7 @@ insert OR IGNORE into setting (key, value, description) values ("AppID", "", "Ba
 insert OR IGNORE into setting (key, value, description) values ("AppKey", "", "BaiduNetDisk AppKey");
 insert OR IGNORE into setting (key, value, description) values ("SecretKey", "", "BaiduNetDisk SecretKey");
 insert OR IGNORE into setting (key, value, description) values ("AccessToken", "", "BaiduNetDisk AccessToken");
+insert OR IGNORE into setting (key, value, description) values ("ExpiredAt", "", "BaiduNetDisk AccessToken Expired Timestamp");
 insert OR IGNORE into setting (key, value, description) values ("Root", "", "BaiduNetDisk Root directory");
 insert OR IGNORE into setting (key, value, description) values ("ChanifyAddr", "", "Chanify Notification Address");
 insert OR IGNORE into setting (key, value, description) values ("Cron", "", "Upload task's cron");

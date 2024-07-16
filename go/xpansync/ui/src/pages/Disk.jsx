@@ -1,62 +1,47 @@
 import "./Disk.css"
-import { Card } from "primereact/card";
 import { Avatar } from 'primereact/avatar'
 import { useEffect, useState } from "react";
 import { userinfo, getquota } from "../api/api";
-import { Chart } from 'primereact/chart';
 import { TokenPanel } from "../component/TokenPanel";
 
 
 
 export default function Disk() {
-    const [user, setUser] = useState({})
-    const [quota, setQuota] = useState({})
+  const [user, setUser] = useState({})
+  const [quota, setQuota] = useState({})
 
-    const toGB = (b) => { return Math.ceil(b / (1024 * 1024 * 1024)) }
+  const toGB = (b) => { return Math.ceil(b / (1024 * 1024 * 1024)) }
+  const barwidth = (quota) => {
+    return Math.floor(quota.used/quota.total * 100).toString() + "%" 
+  }
 
-    useEffect(() => {
-        userinfo().then(res => {
-            setUser(res.data.data)
-        })
-    }, [])
+  useEffect(() => {
+    userinfo().then(res => {
+      setUser(res.data.data)
+    })
+  }, [])
 
-    useEffect(() => {
-        getquota().then(res => {
-            const quota = res.data.data
-            const documentStyle = getComputedStyle(document.documentElement);
-            var data = {
-                labels : ["used", "free", ],
-                datasets: [
-                    {
-                        data: [toGB(quota.used), toGB(quota.total - quota.used)],
-                        backgroundColor: [
-                            documentStyle.getPropertyValue('--blue-500'), 
-                            documentStyle.getPropertyValue('--green-500')
-                        ],
-                        hoverBackgroundColor: [
-                            documentStyle.getPropertyValue('--blue-400'), 
-                            documentStyle.getPropertyValue('--green-400')
-                        ]
-                    }
-                ]
-            }
-            setQuota(data)
-        })
-    }, [])
+  useEffect(() => {
+    getquota().then(res => {
+      setQuota( res.data.data)
+      console.log( res.data.data)
+    })
+    console.log(quota)
+  }, [])
 
-    return (
-        <div  className="disk">
-
-            <Card className="owner-card">
-                <Avatar className="avatar" image={user.avatar_url} shape="Badge" size="xlarge" />
-                <p className="name">{user.baidu_name}</p>
-            </Card>
-            <Card title="Disk Quote" style={{display:'flex', flexDirection:'column', gap: '8px', justifyContent:'center', alignItems:'center'}}>
-                <Chart type="doughnut" data={quota} options={{cutout:'60%'}} style={{width:"15rem"}}/>
-            </Card>
-            <div className="token-card">
-                <TokenPanel />
-            </div>
+  return (
+    <div className="diskcard">
+      <Avatar className="avatar" image={user.avatar_url} shape="circle" size="xlarge" />
+      <h3 style={{margin:'4px'}}>{user.baidu_name}</h3>
+      <div className="diskspace">
+        <div className="total">
+          <div style={{width: barwidth(quota)}} className="used">
+          </div>
         </div>
-    )
+        <p>{toGB(quota.used)}GB/{toGB(quota.total)}GB {barwidth(quota)}</p>
+      </div>
+
+      <TokenPanel />
+    </div>
+  )
 }

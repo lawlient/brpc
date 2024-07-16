@@ -26,6 +26,8 @@ func (s *Store) getsetting(key string) string {
 
 func (s *Store) GetToken() string { return s.getsetting("AccessToken") }
 
+func (s *Store) GetExpiredAt() string { return s.getsetting("ExpiredAt") }
+
 func (s *Store) GetAppKey() string { return s.getsetting("AppKey") }
 
 func (s *Store) GetAppID() string { return s.getsetting("AppID") }

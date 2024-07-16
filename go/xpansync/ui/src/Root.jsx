@@ -2,9 +2,7 @@ import './Root.css';
 import 'primeicons/primeicons.css';
 import { Outlet } from 'react-router-dom'
 import { useEffect, useRef, useState } from 'react';
-import { Menu } from 'primereact/menu';
 import { useNavigate } from 'react-router-dom'
-import { Avatar } from 'primereact/avatar';
 
 
 export default function Root() {
@@ -12,25 +10,19 @@ export default function Root() {
   const nav = (p) => { n(import.meta.env.BASE_URL+p) }
 
   const [logo] = useState("")
+  const [dark, setDark] = useState(false)
 
   const layout = useRef()
   const sidebar = useRef()
   const content = useRef()
-  const navtemp = (e) => {
-    return focus === e.to ? 
-      <div className='menuitem' id={e.to}>
-        <a className="menuitem-content-selected menuitem-content" onClick={() => { nav(e.to) }}>
-          <i className={e.icon} ></i>
-          <span >{e.label}</span>
-        </a>
-      </div>
-      : 
-      <div className='menuitem' id={e.to}>
-        <a className="menuitem-content" onClick={() => { nav(e.to) }}>
-          <i className={e.icon} ></i>
-          <span >{e.label}</span>
-        </a>
-      </div>
+  const navtemp = (e, i) => {
+    return (
+      <a key={i} className={`${focus === e.to && "menuitem-selected"} menuitem`}
+        onClick={() => { nav(e.to) }}>
+        <i className={e.icon} ></i>
+        <span >{e.label}</span>
+      </a>
+    )
   }
 
   const navs = [
@@ -38,25 +30,21 @@ export default function Root() {
       label: '网盘',
       icon: 'pi pi-cloud',
       to: "disk",
-      template: navtemp,
     },
     {
       label: '任务',
       icon: 'pi pi-list',
       to: "tasks",
-      template: navtemp,
     },
     {
       label: '设置',
       icon: 'pi pi-cog',
       to: "setting",
-      template: navtemp,
     },
     {
       label: '管理员',
       icon: 'pi pi-user',
       to: "admin",
-      template: navtemp,
     },
   ]
   const [focus, setFocus] = useState(navs[0].to)
@@ -68,6 +56,7 @@ export default function Root() {
 
   const toggleScheme = () => {
     layout.current.classList.toggle('dark')
+    setDark(!dark)
   }
 
   useEffect(() => {
@@ -87,18 +76,23 @@ export default function Root() {
           <img src={logo || import.meta.env.BASE_URL+"logo.svg"} alt="logo" />
           <div>xpansync</div>
         </div>
-        <hr  style={{margin:'0 0 20px', borderTop:'1px solid black'}}/>
-        <Menu className="menu" model={navs} />
+        <nav className="menu">
+          {navs.map((n, i) => {
+            return navtemp(n, i)
+          })} 
+        </nav> 
       </div>
+
       <main className='content' ref={content}>
-        <div className='content-head'>
-          <button onClick={toggleSidebar} ><i className='pi pi-bars' ></i></button>
-          <button onClick={toggleScheme} ><i className='pi pi-moon' ></i></button>
-          <Avatar shape="circle" icon="pi pi-user" image={localStorage.getItem("__avatar__")} />
-        </div>
         <div>
           <Outlet />
         </div>
+        <button className="sidebar-button" onClick={toggleSidebar} >
+          <i className='pi pi-bars' ></i>
+        </button>
+        <button className="theme-button" onClick={toggleScheme} >
+          {dark ? <i className='pi pi-moon' ></i> : <i className='pi pi-sun' ></i> }
+        </button>
       </main>
     </div>
   )

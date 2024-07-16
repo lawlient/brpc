@@ -23,9 +23,9 @@ export function UserEditButton({lists, setLists, idx}) {
 
     return (
         <>
-        <button onClick={() => setVisib(true)}><i className="pi pi-pencil"></i></button>
-        <Dialog visible={visib} onHide={() => setVisib(false)}>
-            <form className="user-edit-dialog"  onSubmit={submit} >
+        <Button className="user-edit-button" onClick={() => setVisib(true)} icon="pi pi-pencil"></Button>
+        <Dialog className="user-edit-dialog" visible={visib} onHide={() => setVisib(false)}>
+            <form className="user-edit-dialog-form" onSubmit={submit} >
                 <Avatar image={user.avatar} />
                 <InputText type="text" value={user.avatar} onChange={(e) => setUser({...user, avatar:e.target.value})} />
                 <InputText value={user.username} onChange={(e) => setUser({...user, username:e.target.value})} />

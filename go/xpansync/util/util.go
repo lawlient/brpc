@@ -57,7 +57,7 @@ func TargzPackage(dsc, src string) error {
 const (
 	Issuer       = "xpansync"
 	AudienceName = "access-token"
-	TokenExpire  = 30 * time.Minute
+	TokenExpire  = 86400 * time.Second
 	Secret       = "xpansync is good assistant"
 )
 

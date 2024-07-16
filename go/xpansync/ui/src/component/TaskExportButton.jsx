@@ -71,6 +71,6 @@ export function TaskExportButton({tasks}) {
     ]
 
     return (
-        <Button icon='pi pi-file-export' />
+        <Button className="taskcard-toolbar-button" icon='pi pi-file-export' />
     )
 }
