@@ -5,6 +5,27 @@ networks:
 volumes:
   prometheus_data: {}
 services:
+  alloy:
+    container_name: alloy
+    image: grafana/alloy
+    restart: unless-stopped
+    volumes:
+      - /proc:/proc
+      - /var/lib/monitor/alloy/config:/etc/alloy/:ro
+      - /etc/localtime:/etc/localtime:ro
+      - /var/lib/monitor/alloy/data:/var/lib/alloy
+    ports:
+      - 12345:12345
+    networks:
+      - pro_net
+    tty: true
+    environment: []
+    entrypoint:
+      - alloy
+      - run
+      - --server.http.listen-addr=0.0.0.0:12345
+      - --storage.path=/var/lib/alloy/data
+      - /etc/alloy/config.alloy
   node-exporter:
     image: prom/node-exporter:latest
     container_name: node-exporter
@@ -13,6 +34,7 @@ services:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
       - /:/rootfs:ro
+      - /etc/localtime:/etc/localtime:ro
     command:
       - --path.procfs=/host/proc
       - --path.rootfs=/rootfs
@@ -29,7 +51,8 @@ services:
     container_name: alertmanager
     restart: unless-stopped
     volumes:
-      - /etc/alertmanager:/etc/alertmanager
+      - /var/lib/monitor/alertmanager/config:/etc/alertmanager
+      - /etc/localtime:/etc/localtime:ro
     ports:
       - 9093:9093
     expose:
@@ -54,8 +77,8 @@ services:
     user: 0:0
     restart: unless-stopped
     volumes:
-      - /etc/prometheus/:/etc/prometheus/
-      - prometheus_data:/prometheus
+      - /var/lib/monitor/prometheus/config:/etc/prometheus/
+      - /var/lib/monitor/prometheus/data:/prometheus
     command:
       - --config.file=/etc/prometheus/prometheus.yml
       - --storage.tsdb.path=/prometheus
@@ -69,3 +92,4 @@ services:
       - 9090
     networks:
       - pro_net
+    depends_on: []

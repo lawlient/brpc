@@ -9,6 +9,7 @@ services:
   zentao-mysql:
     image: mariadb:10.6
     container_name: zentao-mysql
+    restart: unless-stopped
     volumes:
       - '/var/lib/zentao/db:/var/lib/mysql'
     environment:
@@ -28,8 +29,9 @@ services:
   zentao:
     image: hub.zentao.net/app/zentao:latest
     container_name: zentao
+    restart: unless-stopped
     ports:
-      - '10100:80'
+      - '20100:80'
     volumes:
       - '/var/lib/zentao/data:/data'
     depends_on:

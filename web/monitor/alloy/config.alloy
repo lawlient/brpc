@@ -1,0 +1,37 @@
+// this is a alloy config sample 
+// https://grafana.com/docs/alloy/latest/reference/components/prometheus.exporter.process/#exported-fields
+
+logging {
+    level  = "info"
+    format = "logfmt"
+}
+
+
+// component
+prometheus.exporter.process "process" {
+    track_children = false
+
+    matcher {
+        name = "{{.ExeFull}}"
+        comm = ["node", "/usr/bin/docker-proxy", "bash", "npm"]
+    }
+}
+
+// component
+// Configure a prometheus.scrape component to collect process_exporter metrics.
+prometheus.scrape "process" {
+    targets    = prometheus.exporter.process.process.targets // in-memory address
+    forward_to = [prometheus.remote_write.process.receiver]
+}
+
+// component
+prometheus.remote_write "process" {
+    endpoint {
+        url = "https://prometheus-prod-18-prod-ap-southeast-0.grafana.net/api/prom/push"
+
+        basic_auth {
+            username = "your name"
+            password = "your password"
+        }
+    }
+}

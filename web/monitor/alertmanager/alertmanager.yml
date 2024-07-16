@@ -1,0 +1,29 @@
+# this is a alertmanager config sample file
+global:
+  resolve_timeout: 5m
+  smtp_from: 'your email address'
+  smtp_smarthost: 'mail server address'
+  smtp_auth_username: 'usename'
+  smtp_auth_password: 'password/authentication code'
+  smtp_require_tls: false
+  smtp_hello: '163.com'
+
+route:
+  group_by: ['alertname']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 5m
+  receiver: 'email'
+
+receivers:
+- name: 'email'
+  email_configs:
+    - to: 'target email address'
+      send_resolved: true
+
+inhibit_rules:
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'dev', 'instance']

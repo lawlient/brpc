@@ -20,6 +20,12 @@ scrape_configs:
     static_configs:
       - targets: ['localhost:8080']
 
+  - job_name: 'alloy'
+    metrics_path: /api/v0/component/prometheus.exporter.process.process/metrics
+    static_configs:
+      - targets: ['alloy:12345']
+
+
 remote_write:
   - url: 'https://prometheus-prod-18-prod-ap-southeast-0.grafana.net/api/prom/push'
     basic_auth:
