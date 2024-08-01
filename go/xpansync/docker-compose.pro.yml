@@ -2,16 +2,25 @@
 
 services:
   xpansync:
-    container_name: "xpansync"
+    container_name: xpansync
     build: .
     working_dir: /app
+    entrypoint: "/app/xpansync"
+    tty: true
     environment:
       GOPROXY: https://goproxy.cn
       GIN_MODE: release
+      # environment variable for reverse proxy
+      BASEURL: /xpansync
     ports:
         - "1425:1425"
     volumes:
       - "/etc/localtime:/etc/localtime:ro"
       - "/var/lib:/var/lib"
-    entrypoint: "/app/xpansync"
-    tty: true
+    networks:
+      - pro_net
+
+networks:
+  pro_net:
+    name: pro_net
+    external: true
