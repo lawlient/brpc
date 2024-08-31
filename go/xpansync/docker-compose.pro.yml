@@ -13,10 +13,12 @@ services:
       # environment variable for reverse proxy
       BASEURL: /xpansync
     ports:
-        - "1425:1425"
+      - "1425:1425"
     volumes:
-      - "/etc/localtime:/etc/localtime:ro"
-      - "/var/lib:/var/lib"
+      - /etc/localtime:/etc/localtime:ro
+      - /home:/home:ro
+      - /var:/var
+      - /data:/data:ro
     networks:
       - pro_net
 

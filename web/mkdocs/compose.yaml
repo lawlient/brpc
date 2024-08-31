@@ -1,0 +1,14 @@
+version: "3.8"
+services:
+  mkdocs:
+    image: squidfunk/mkdocs-material
+    container_name: mkdocs
+    restart: unless-stopped
+    ports: []
+    networks:
+      - pro_net
+    volumes:
+      - /var/lib/mkdocs/:/docs
+networks:
+  pro_net:
+    external: true

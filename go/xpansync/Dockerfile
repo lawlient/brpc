@@ -2,7 +2,7 @@ FROM node:18-alpine AS ui-builder
 WORKDIR /app
 COPY . . 
 RUN cd ui/ && npm config set registry https://registry.npmmirror.com \
-    && npm install && npm run build -- --base=__BASEURL__
+    && npm install && npm run build -- --base=/__BASEURL__/
 
 FROM golang:alpine AS server-builder
 WORKDIR /app

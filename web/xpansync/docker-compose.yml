@@ -1,5 +1,4 @@
 # xpansync
-version: "3"
 services:
   xpansync:
     container_name: xpansync
@@ -9,11 +8,13 @@ services:
     environment:
       GOPROXY: https://goproxy.cn
       GIN_MODE: release
-      BASEURL: /xpansync/
+      BASEURL: /xpansync
     ports:
       - 1425:1425
     volumes:
       - /etc/localtime:/etc/localtime:ro
+      - /data:/data:ro
+      - /home:/home:ro
       - /var/lib:/var/lib
     entrypoint: /app/xpansync
     tty: true
